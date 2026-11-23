@@ -6,6 +6,7 @@ import android.os.Build
 import android.os.UserManager
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
+import com.tomato.focus.data.FocusTimer
 import com.tomato.focus.data.TodoStore
 import okhttp3.Cache
 import okhttp3.OkHttpClient
@@ -38,6 +39,7 @@ class TemplateApplication : Application(), ViewModelStoreOwner {
         super.onCreate()
         templateApp = this
         TodoStore.init(this)
+        FocusTimer.init(this)
 
         if (!isUserUnlocked()) {
             return

@@ -60,6 +60,8 @@ fun StatsScreen(bottomPadding: Dp) {
     val all = TodoStore.summary(0L, Long.MAX_VALUE / 2)
     val daily = TodoStore.summary(from, to)
     val byTitle = TodoStore.secondsByTitle(from, to)
+    val hourly = remember(range, dayOffset) { TodoStore.hourlyMinutes(from, to) }
+    val last7 = remember { TodoStore.dailySeconds(7) }
     val totalSeconds = byTitle.sumOf { it.second }
 
     Column(
@@ -180,6 +182,66 @@ fun StatsScreen(bottomPadding: Dp) {
                     )
                 }
             }
+            Card(title = "专注时段分布") {
+                val maxVal = hourly.maxOrNull()?.coerceAtLeast(1) ?: 1
+                Row(
+                    modifier = Modifier.fillMaxWidth().height(120.dp),
+                    verticalAlignment = Alignment.Bottom,
+                    horizontalArrangement = Arrangement.spacedBy(2.dp),
+                ) {
+                    hourly.forEachIndexed { hour, minutes ->
+                        Column(
+                            modifier = Modifier.weight(1f),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Bottom,
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height((84 * minutes / maxVal).coerceAtLeast(if (minutes > 0) 3 else 0).dp)
+                                    .clip(RoundedCornerShape(3.dp))
+                                    .background(if (minutes > 0) TP.Coral else Color.Transparent),
+                            )
+                        }
+                    }
+                }
+                Spacer(Modifier.height(6.dp))
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    listOf("0", "6", "12", "18", "23").forEach {
+                        Text(it, fontSize = 10.sp, color = TP.TextGrey)
+                    }
+                }
+            }
+
+            Card(title = "最近七天") {
+                val maxVal = last7.maxOfOrNull { it.second }?.coerceAtLeast(1) ?: 1
+                Row(
+                    modifier = Modifier.fillMaxWidth().height(110.dp),
+                    verticalAlignment = Alignment.Bottom,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    last7.forEach { (day, sec) ->
+                        Column(
+                            modifier = Modifier.weight(1f),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Bottom,
+                        ) {
+                            Text("${sec / 60}", fontSize = 10.sp, color = TP.TextGrey)
+                            Spacer(Modifier.height(3.dp))
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height((70 * sec / maxVal).coerceAtLeast(if (sec > 0) 3 else 0).dp)
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .background(TP.Teal),
+                            )
+                            Spacer(Modifier.height(4.dp))
+                            Text("${day.dayOfMonth}", fontSize = 10.sp, color = TP.TextGrey)
+                        }
+                    }
+                }
+            }
+
             Spacer(Modifier.height(bottomPadding + 24.dp))
         }
     }
