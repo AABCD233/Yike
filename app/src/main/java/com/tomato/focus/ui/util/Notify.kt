@@ -30,6 +30,18 @@ object Notify {
         manager.createNotificationChannel(channel)
     }
 
+    fun leavingFocus(context: Context, title: String) {
+        ensureChannel(context)
+        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setContentTitle("你离开专注页了")
+            .setContentText("「$title」还在计时，回来继续")
+            .setAutoCancel(true)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .build()
+        runCatching { NotificationManagerCompat.from(context).notify(1002, notification) }
+    }
+
     fun focusDone(context: Context, title: String, seconds: Int) {
         ensureChannel(context)
         val intent = Intent(context, MainActivity::class.java).apply {

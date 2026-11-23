@@ -93,6 +93,18 @@ object FocusTimer {
         persist()
     }
 
+    fun startLock(minutes: Int) {
+        _state.value = State(
+            todoId = null,
+            title = "锁机",
+            mode = TimerMode.COUNTDOWN,
+            totalSeconds = minutes * 60,
+            startWall = System.currentTimeMillis(),
+            kind = "lock",
+        )
+        persist()
+    }
+
     fun startRest(minutes: Int) {
         _state.value = State(
             todoId = null,

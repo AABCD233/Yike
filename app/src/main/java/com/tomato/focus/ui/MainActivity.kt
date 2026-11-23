@@ -45,6 +45,9 @@ import androidx.core.content.ContextCompat
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigationevent.NavigationEventInfo
@@ -65,6 +68,7 @@ import com.tomato.focus.ui.screen.colorpalette.ColorPaletteScreen
 import com.tomato.focus.ui.screen.focus.FocusScreen
 import com.tomato.focus.ui.screen.history.HistoryScreen
 import com.tomato.focus.ui.screen.home.HomePager
+import com.tomato.focus.ui.screen.lock.LockActiveScreen
 import com.tomato.focus.ui.screen.lock.LockScreen
 import com.tomato.focus.ui.screen.me.MeScreen
 import com.tomato.focus.ui.screen.stats.StatsScreen
@@ -80,6 +84,8 @@ import com.tomato.focus.ui.theme.LocalEnableFloatingBottomBarBlur
 import com.tomato.focus.ui.util.rememberBlurBackdrop
 import com.tomato.focus.ui.util.rememberContentReady
 import com.tomato.focus.ui.viewmodel.MainActivityViewModel
+import com.tomato.focus.data.FocusTimer
+import com.tomato.focus.ui.util.Notify
 import com.tomato.focus.ui.viewmodel.MainPagerConfig
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.blur.layerBackdrop
@@ -104,6 +110,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             RequestNotificationPermission()
+            FocusLeavingReminder()
             val viewModel = viewModel<MainActivityViewModel>()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             val selectedMainPage by viewModel.selectedMainPage.collectAsStateWithLifecycle()
@@ -175,6 +182,7 @@ class MainActivity : ComponentActivity() {
                             entry<Route.Settings>(swipeDismiss = swipeDismiss) { SettingPager(navigator, androidx.compose.ui.unit.Dp(0f)) }
                             entry<Route.Focus>(swipeDismiss = NavSwipeDirection.None) { FocusScreen(navigator) }
                             entry<Route.History>(swipeDismiss = swipeDismiss) { HistoryScreen(navigator) }
+                            entry<Route.LockActive>(swipeDismiss = NavSwipeDirection.None) { LockActiveScreen(navigator) }
                         }
                     }
 
@@ -205,6 +213,25 @@ private fun RequestNotificationPermission() {
             context, Manifest.permission.POST_NOTIFICATIONS
         ) == PackageManager.PERMISSION_GRANTED
         if (!granted) launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
+    }
+}
+
+/** 学霸模式的「提醒模式」：计时中离开应用就推一条通知 */
+@Composable
+private fun FocusLeavingReminder() {
+    val context = LocalContext.current
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    DisposableEffect(lifecycle) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_STOP) {
+                val running = FocusTimer.state.value
+                if (running != null && running.kind == "focus" && !running.isPaused) {
+                    Notify.leavingFocus(context, running.title)
+                }
+            }
+        }
+        lifecycle.addObserver(observer)
+        onDispose { lifecycle.removeObserver(observer) }
     }
 }
 
@@ -281,7 +308,7 @@ fun MainScreen(
                     when (page) {
                         0 -> if (isCurrentPage || contentReady) TodoScreen(navController, bottomInnerPadding)
                         1 -> if (isCurrentPage || contentReady) TodoSetScreen(navController, bottomInnerPadding)
-                        2 -> if (isCurrentPage || contentReady) LockScreen(bottomInnerPadding)
+                        2 -> if (isCurrentPage || contentReady) LockScreen(navController, bottomInnerPadding)
                         3 -> if (isCurrentPage || contentReady) StatsScreen(navController, bottomInnerPadding)
                         4 -> if (isCurrentPage || contentReady) MeScreen(navController, bottomInnerPadding)
                     }

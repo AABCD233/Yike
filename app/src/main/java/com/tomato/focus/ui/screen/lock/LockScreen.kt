@@ -18,6 +18,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,11 +33,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.tomato.focus.data.FocusTimer
+import com.tomato.focus.ui.navigation3.Navigator
+import com.tomato.focus.ui.navigation3.Route
 import com.tomato.focus.ui.theme.TP
 
 @Composable
-fun LockScreen(bottomPadding: Dp) {
+fun LockScreen(navController: Navigator, bottomPadding: Dp) {
     var tip by remember { mutableStateOf<String?>(null) }
+    var pickDuration by remember { mutableStateOf(false) }
+    var customMinutes by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
@@ -74,7 +80,7 @@ fun LockScreen(bottomPadding: Dp) {
                 subtitle = "选择锁机时长，并立刻开始锁机",
                 brush = Brush.horizontalGradient(listOf(Color(0xFFFF7B6B), Color(0xFFFFA08F))),
                 height = 150.dp,
-                onClick = { tip = "快速锁机需要后台计时、悬浮窗和拦截页，先把番茄钟跑通再做这一块。" },
+                onClick = { pickDuration = true },
             )
             BannerCard(
                 title = "添加自定义锁机时间段",
@@ -105,6 +111,50 @@ fun LockScreen(bottomPadding: Dp) {
             }
             Spacer(Modifier.height(bottomPadding + 24.dp))
         }
+    }
+
+    if (pickDuration) {
+        AlertDialog(
+            onDismissRequest = { pickDuration = false },
+            title = { Text("锁机时长") },
+            text = {
+                Column {
+                    Text("锁机期间屏幕常亮，返回键不生效，到时间自动结束。", fontSize = 13.sp, color = TP.TextGrey)
+                    Spacer(Modifier.height(12.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        listOf(15, 25, 45, 60).forEach { min ->
+                            Pill("$min 分钟") {
+                                pickDuration = false
+                                FocusTimer.startLock(min)
+                                navController.push(Route.LockActive)
+                            }
+                        }
+                    }
+                    Spacer(Modifier.height(10.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        androidx.compose.material3.OutlinedTextField(
+                            value = customMinutes,
+                            onValueChange = { customMinutes = it.filter(Char::isDigit) },
+                            singleLine = true,
+                            placeholder = { Text("自定义分钟", color = TP.TextGrey) },
+                            modifier = Modifier.weight(1f),
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Pill("开始") {
+                            val min = customMinutes.toIntOrNull()
+                            if (min != null && min in 1..600) {
+                                pickDuration = false
+                                FocusTimer.startLock(min)
+                                navController.push(Route.LockActive)
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { pickDuration = false }) { Text("取消") }
+            },
+        )
     }
 
     tip?.let { text ->
