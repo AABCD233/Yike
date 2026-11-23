@@ -23,6 +23,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -37,6 +38,11 @@ import androidx.compose.ui.unit.sp
 import com.tomato.focus.ui.theme.tpTextSub
 import com.tomato.focus.ui.theme.tpCardBg
 import com.tomato.focus.ui.theme.tpPageBg
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.platform.LocalContext
+import com.tomato.focus.data.Backup
 import com.tomato.focus.data.TodoStore
 import com.tomato.focus.ui.screen.todo.defaultFocusMinutes
 import com.tomato.focus.ui.screen.todo.saveDefaultFocusMinutes
@@ -49,8 +55,39 @@ fun MeScreen(navController: Navigator, bottomPadding: Dp) {
     var tip by remember { mutableStateOf<String?>(null) }
     var showMinutes by remember { mutableStateOf(false) }
     var defaultMinutes by remember { mutableStateOf(defaultFocusMinutes()) }
-    val totalSeconds = remember { TodoStore.summary(0L, Long.MAX_VALUE / 2).seconds }
-    val totalDays = remember {
+    var backupTip by remember { mutableStateOf<String?>(null) }
+    val context = LocalContext.current
+
+    val exportLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("application/json")
+    ) { uri: Uri? ->
+        if (uri != null) {
+            runCatching {
+                context.contentResolver.openOutputStream(uri)?.use { out ->
+                    out.write(Backup.exportJson().toByteArray())
+                }
+            }.onSuccess { backupTip = "已导出，文件在你自己选的位置" }
+                .onFailure { backupTip = "导出失败：${it.message}" }
+        }
+    }
+
+    val importLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            runCatching {
+                val text = context.contentResolver.openInputStream(uri)?.bufferedReader()
+                    ?.use { it.readText() } ?: error("读不到文件")
+                Backup.importJson(text)
+            }.onSuccess { r ->
+                backupTip = "恢复完成：待办集 ${r.sets}，待办 ${r.todos}，记录 ${r.sessions}"
+                refreshKey++
+            }.onFailure { backupTip = "恢复失败：${it.message}" }
+        }
+    }
+    var refreshKey by remember { mutableIntStateOf(0) }
+    val totalSeconds = remember(refreshKey) { TodoStore.summary(0L, Long.MAX_VALUE / 2).seconds }
+    val totalDays = remember(refreshKey) {
         TodoStore.sessionsBetween(0L, Long.MAX_VALUE / 2)
             .map { java.time.LocalDate.ofEpochDay(it.startTs / 86_400_000L) }
             .distinct()
@@ -116,6 +153,12 @@ fun MeScreen(navController: Navigator, bottomPadding: Dp) {
                     .clip(RoundedCornerShape(14.dp))
                     .background(tpCardBg()),
             ) {
+                Item("⬆️", "备份到文件", "把待办和专注记录导出成 JSON") {
+                    exportLauncher.launch("tomatoplan-backup.json")
+                }
+                Item("⬇️", "从文件恢复", "从备份 JSON 里把数据导回来") {
+                    importLauncher.launch(arrayOf("application/json", "text/plain", "*/*"))
+                }
                 Item("⚙️", "设置", "主题、界面风格、缩放") { navController.push(Route.Settings) }
                 Item("ℹ️", "关于", "版本信息与开源许可") { navController.push(Route.About) }
                 Item("🛡", "权限", "通知、悬浮窗、电池优化") { navController.push(Route.Permissions) }
@@ -156,6 +199,14 @@ fun MeScreen(navController: Navigator, bottomPadding: Dp) {
                 }
             },
             confirmButton = { TextButton(onClick = { showMinutes = false }) { Text("关闭") } },
+        )
+    }
+
+    backupTip?.let { text ->
+        AlertDialog(
+            onDismissRequest = { backupTip = null },
+            confirmButton = { TextButton(onClick = { backupTip = null }) { Text("好") } },
+            text = { Text(text) },
         )
     }
 
