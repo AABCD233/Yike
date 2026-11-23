@@ -46,7 +46,7 @@ import com.tomato.focus.ui.theme.TP
 import java.time.LocalDate
 
 @Composable
-fun StatsScreen(bottomPadding: Dp) {
+fun StatsScreen(navController: com.tomato.focus.ui.navigation3.Navigator, bottomPadding: Dp) {
     var range by remember { mutableIntStateOf(0) } // 0 日 1 周 2 月
     var dayOffset by remember { mutableIntStateOf(0) }
 
@@ -240,6 +240,18 @@ fun StatsScreen(bottomPadding: Dp) {
                         }
                     }
                 }
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(TP.Teal.copy(alpha = 0.12f))
+                    .clickable { navController.push(com.tomato.focus.ui.navigation3.Route.History) }
+                    .padding(vertical = 12.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text("查看专注记录", fontSize = 14.sp, color = TP.Teal)
             }
 
             Spacer(Modifier.height(bottomPadding + 24.dp))

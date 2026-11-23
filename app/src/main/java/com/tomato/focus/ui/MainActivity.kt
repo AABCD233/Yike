@@ -282,7 +282,7 @@ fun MainScreen(
                         0 -> if (isCurrentPage || contentReady) TodoScreen(navController, bottomInnerPadding)
                         1 -> if (isCurrentPage || contentReady) TodoSetScreen(navController, bottomInnerPadding)
                         2 -> if (isCurrentPage || contentReady) LockScreen(bottomInnerPadding)
-                        3 -> if (isCurrentPage || contentReady) StatsScreen(bottomInnerPadding)
+                        3 -> if (isCurrentPage || contentReady) StatsScreen(navController, bottomInnerPadding)
                         4 -> if (isCurrentPage || contentReady) MeScreen(navController, bottomInnerPadding)
                     }
                 }

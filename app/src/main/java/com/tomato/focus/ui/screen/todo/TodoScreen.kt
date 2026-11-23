@@ -69,6 +69,22 @@ fun TodoScreen(
             onAdd = { showAdd = true },
             onHistory = { navController.push(Route.History) },
         )
+        focusState?.let { fs ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 8.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(TP.Teal.copy(alpha = 0.12f))
+                    .clickable { navController.push(Route.Focus) }
+                    .padding(horizontal = 14.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text("正在专注「${fs.title}」", fontSize = 13.sp, color = TP.Teal)
+                Spacer(Modifier.weight(1f))
+                Text(if (fs.isPaused) "已暂停 · 点击返回" else "点击返回", fontSize = 12.sp, color = TP.Teal)
+            }
+        }
         if (todos.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text("还没有待办，点右上角 + 新建一个", fontSize = 13.sp, color = TP.TextGrey)
