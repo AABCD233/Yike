@@ -62,7 +62,7 @@ fun TodoScreen(
     Column(modifier = Modifier.fillMaxSize().background(Color(0xFFF7F9FA))) {
         TodoHeader(
             onAdd = { showAdd = true },
-            onHistory = { navController.push(Route.Focus()) },
+            onHistory = { navController.push(Route.Focus) },
         )
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
