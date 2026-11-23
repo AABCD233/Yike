@@ -11,22 +11,24 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBack
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -38,13 +40,13 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tomato.focus.data.FocusTimer
 import com.tomato.focus.ui.navigation3.Navigator
-import com.tomato.focus.ui.theme.TP
+import com.tomato.focus.ui.util.Notify
 import kotlinx.coroutines.delay
 
 private val QUOTES = listOf(
@@ -58,6 +60,9 @@ private val QUOTES = listOf(
 fun FocusScreen(navController: Navigator) {
     val state by FocusTimer.state.collectAsState()
     var tick by remember { mutableIntStateOf(0) }
+    var finishedTitle by remember { mutableStateOf<String?>(null) }
+    var finishedSeconds by remember { mutableIntStateOf(0) }
+    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         while (true) {
@@ -67,12 +72,29 @@ fun FocusScreen(navController: Navigator) {
     }
 
     val s = state
+
     if (s == null) {
-        LaunchedEffect(Unit) { navController.pop() }
+        if (finishedTitle == null) {
+            LaunchedEffect(Unit) { navController.pop() }
+        } else {
+            AlertDialog(
+                onDismissRequest = { navController.pop() },
+                title = { Text("完成一个番茄") },
+                text = { Text("「$finishedTitle」专注 ${finishedSeconds / 60} 分钟，起来活动一下？") },
+                confirmButton = {
+                    TextButton(onClick = {
+                        finishedTitle = null
+                        FocusTimer.startRest(5)
+                    }) { Text("休息 5 分钟") }
+                },
+                dismissButton = {
+                    TextButton(onClick = { navController.pop() }) { Text("先不休息") }
+                },
+            )
+        }
         return
     }
 
-    // tick 每次变化都会重新计算时间
     val elapsed = remember(tick, s) { FocusTimer.elapsedSeconds(s) }
     val remaining = remember(tick, s) { FocusTimer.remainingSeconds(s) }
     val total = if (s.isCountdown) s.totalSeconds.coerceAtLeast(1) else 0
@@ -81,15 +103,30 @@ fun FocusScreen(navController: Navigator) {
     } else {
         ((elapsed % 3600).toFloat() / 3600f)
     }
-    val quote = remember(s.startWall) { QUOTES[(s.startWall % QUOTES.size).toInt()] }
+    val quote = remember(s.startWall) { QUOTES[(s.startWall / 1000 % QUOTES.size).toInt()] }
+    val isRest = s.kind == "relax"
+
+    // 倒计时归零：落库、发通知，然后停在完成提示
+    LaunchedEffect(s.isCountdown, remaining, s.isPaused) {
+        if (s.isCountdown && remaining == 0 && !s.isPaused) {
+            val done = FocusTimer.stop(abandoned = false)
+            if (!isRest) {
+                Notify.focusDone(context, s.title, done?.seconds ?: s.totalSeconds)
+            }
+            finishedTitle = if (isRest) "休息" else s.title
+            finishedSeconds = done?.seconds ?: (s.totalSeconds - 1)
+        }
+    }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(
-                Brush.verticalGradient(
-                    listOf(Color(0xFF3D5A80), Color(0xFF5C7FA8), Color(0xFF87A8C8))
-                )
+                if (isRest) {
+                    Brush.verticalGradient(listOf(Color(0xFF2F7D6B), Color(0xFF54A592), Color(0xFF8CC7B4)))
+                } else {
+                    Brush.verticalGradient(listOf(Color(0xFF3D5A80), Color(0xFF5C7FA8), Color(0xFF87A8C8)))
+                }
             ),
     ) {
         Column(
@@ -104,7 +141,7 @@ fun FocusScreen(navController: Navigator) {
                     Icon(Icons.Rounded.ArrowBack, contentDescription = "返回", tint = Color.White)
                 }
                 Text(
-                    quote,
+                    if (isRest) "休息一下，等会儿继续" else quote,
                     color = Color.White.copy(alpha = 0.92f),
                     fontSize = 15.sp,
                     lineHeight = 22.sp,
@@ -141,20 +178,18 @@ fun FocusScreen(navController: Navigator) {
                             style = Stroke(width = stroke, cap = StrokeCap.Round),
                         )
                     }
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            formatClock(if (s.isCountdown) remaining else elapsed),
-                            fontSize = 44.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = Color.White,
-                        )
-                    }
+                    Text(
+                        formatClock(if (s.isCountdown) remaining else elapsed),
+                        fontSize = 44.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = Color.White,
+                    )
                 }
                 Spacer(Modifier.height(18.dp))
                 Text(s.title, color = Color.White, fontSize = 17.sp)
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    if (s.isPaused) "已暂停" else "进行中",
+                    if (s.isPaused) "已暂停" else if (isRest) "休息中" else "进行中",
                     color = Color.White.copy(alpha = 0.75f),
                     fontSize = 13.sp,
                 )

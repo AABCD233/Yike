@@ -24,6 +24,7 @@ object FocusTimer {
         val startWall: Long,
         val pausedAtWall: Long? = null,
         val pausedAccumMs: Long = 0L,
+        val kind: String = "focus",
     ) {
         val isCountdown: Boolean get() = mode == TimerMode.COUNTDOWN
         val isPaused: Boolean get() = pausedAtWall != null
@@ -49,6 +50,7 @@ object FocusTimer {
                 startWall = o.getLong("startWall"),
                 pausedAtWall = if (o.isNull("pausedAt")) null else o.getLong("pausedAt"),
                 pausedAccumMs = o.optLong("pausedAccum", 0L),
+                kind = o.optString("kind", "focus"),
             )
             // 超过 12 小时的残留状态当作已结束，避免第二天打开还是昨天那个番茄
             if (System.currentTimeMillis() - s.startWall > 12 * 3600_000L) {
@@ -74,6 +76,7 @@ object FocusTimer {
             put("startWall", s.startWall)
             put("pausedAt", s.pausedAtWall ?: JSONObject.NULL)
             put("pausedAccum", s.pausedAccumMs)
+            put("kind", s.kind)
         }
         p.edit().putString(KEY, o.toString()).apply()
     }
@@ -86,6 +89,18 @@ object FocusTimer {
             mode = todo.timerMode,
             totalSeconds = if (todo.timerMode == TimerMode.COUNTDOWN) minutes * 60 else 0,
             startWall = System.currentTimeMillis(),
+        )
+        persist()
+    }
+
+    fun startRest(minutes: Int) {
+        _state.value = State(
+            todoId = null,
+            title = "休息",
+            mode = TimerMode.COUNTDOWN,
+            totalSeconds = minutes * 60,
+            startWall = System.currentTimeMillis(),
+            kind = "relax",
         )
         persist()
     }
@@ -147,7 +162,7 @@ object FocusTimer {
             startTs = s.startWall,
             endTs = System.currentTimeMillis(),
             seconds = used,
-            kind = "focus",
+            kind = s.kind,
             abandoned = abandoned,
         )
         TodoStore.insertSession(session)
