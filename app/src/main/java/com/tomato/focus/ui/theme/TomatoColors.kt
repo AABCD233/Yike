@@ -1,5 +1,6 @@
 package com.tomato.focus.ui.theme
 
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 
@@ -43,3 +44,13 @@ object TP {
         return cs[((index % cs.size) + cs.size) % cs.size]
     }
 }
+
+// 深色模式下的页面与卡片底色：只改这两处，渐变头部保持原来的浅色
+@Composable
+fun tpPageBg(): Color = if (isInDarkTheme()) Color(0xFF141719) else Color(0xFFF7F9FA)
+
+@Composable
+fun tpCardBg(): Color = if (isInDarkTheme()) Color(0xFF1E2226) else Color.White
+
+@Composable
+fun tpTextSub(): Color = if (isInDarkTheme()) Color(0xFF9AA3AC) else TP.TextGrey

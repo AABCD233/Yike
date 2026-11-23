@@ -44,6 +44,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.tomato.focus.ui.theme.tpTextSub
+import com.tomato.focus.ui.theme.tpCardBg
+import com.tomato.focus.ui.theme.tpPageBg
 import com.tomato.focus.data.TodoStore
 import com.tomato.focus.ui.navigation3.Navigator
 import com.tomato.focus.ui.navigation3.Route
@@ -62,7 +65,7 @@ fun TodoSetScreen(
     var newSetName by remember { mutableStateOf("") }
     var adding by remember { mutableStateOf(false) }
 
-    Column(modifier = Modifier.fillMaxSize().background(Color(0xFFF7F9FA))) {
+    Column(modifier = Modifier.fillMaxSize().background(tpPageBg())) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -93,7 +96,7 @@ fun TodoSetScreen(
                             .padding(horizontal = 12.dp, vertical = 10.dp),
                     ) {
                         if (newSetName.isEmpty()) {
-                            Text("待办集名称", fontSize = 13.sp, color = TP.TextGrey)
+                            Text("待办集名称", fontSize = 13.sp, color = tpTextSub())
                         }
                         androidx.compose.foundation.text.BasicTextField(
                             value = newSetName,
@@ -130,7 +133,7 @@ fun TodoSetScreen(
 
         if (sets.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("还没有待办集，点右上角 + 新建", fontSize = 13.sp, color = TP.TextGrey)
+                Text("还没有待办集，点右上角 + 新建", fontSize = 13.sp, color = tpTextSub())
             }
         } else {
             LazyColumn(
@@ -142,7 +145,7 @@ fun TodoSetScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(14.dp))
-                            .background(Color.White),
+                            .background(tpCardBg()),
                     ) {
                     Row(
                         modifier = Modifier
@@ -163,7 +166,7 @@ fun TodoSetScreen(
                             Text(
                                 "${TodoStore.countTodoInSet(set.id)} 个待办",
                                 fontSize = 12.sp,
-                                color = TP.TextGrey,
+                                color = tpTextSub(),
                             )
                         }
                         Box {
@@ -171,7 +174,7 @@ fun TodoSetScreen(
                                 Icon(
                                     Icons.Rounded.MoreVert,
                                     contentDescription = "更多操作",
-                                    tint = TP.TextGrey,
+                                    tint = tpTextSub(),
                                 )
                             }
                             DropdownMenu(
@@ -188,7 +191,7 @@ fun TodoSetScreen(
                                 )
                             }
                         }
-                        Icon(Icons.Rounded.ChevronRight, contentDescription = null, tint = TP.TextGrey)
+                        Icon(Icons.Rounded.ChevronRight, contentDescription = null, tint = tpTextSub())
                     }
                         if (expandedId == set.id) {
                             val setTodos = remember(set.id, expandedId) { TodoStore.todos(set.id) }
@@ -196,7 +199,7 @@ fun TodoSetScreen(
                                 Text(
                                     "这个待办集里还没有待办",
                                     fontSize = 12.sp,
-                                    color = TP.TextGrey,
+                                    color = tpTextSub(),
                                     modifier = Modifier.padding(start = 18.dp, bottom = 12.dp),
                                 )
                             } else {

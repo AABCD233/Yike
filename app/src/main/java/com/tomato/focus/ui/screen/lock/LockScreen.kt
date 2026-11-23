@@ -33,6 +33,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.tomato.focus.ui.theme.tpTextSub
+import com.tomato.focus.ui.theme.tpPageBg
 import com.tomato.focus.data.FocusTimer
 import com.tomato.focus.ui.navigation3.Navigator
 import com.tomato.focus.ui.navigation3.Route
@@ -47,7 +49,7 @@ fun LockScreen(navController: Navigator, bottomPadding: Dp) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF7F9FA)),
+            .background(tpPageBg()),
     ) {
         Row(
             modifier = Modifier
@@ -119,7 +121,7 @@ fun LockScreen(navController: Navigator, bottomPadding: Dp) {
             title = { Text("锁机时长") },
             text = {
                 Column {
-                    Text("锁机期间屏幕常亮，返回键不生效，到时间自动结束。", fontSize = 13.sp, color = TP.TextGrey)
+                    Text("锁机期间屏幕常亮，返回键不生效，到时间自动结束。", fontSize = 13.sp, color = tpTextSub())
                     Spacer(Modifier.height(12.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         listOf(15, 25, 45, 60).forEach { min ->
@@ -136,7 +138,7 @@ fun LockScreen(navController: Navigator, bottomPadding: Dp) {
                             value = customMinutes,
                             onValueChange = { customMinutes = it.filter(Char::isDigit) },
                             singleLine = true,
-                            placeholder = { Text("自定义分钟", color = TP.TextGrey) },
+                            placeholder = { Text("自定义分钟", color = tpTextSub()) },
                             modifier = Modifier.weight(1f),
                         )
                         Spacer(Modifier.width(8.dp))

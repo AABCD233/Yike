@@ -34,6 +34,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.tomato.focus.ui.theme.tpTextSub
+import com.tomato.focus.ui.theme.tpCardBg
+import com.tomato.focus.ui.theme.tpPageBg
 import com.tomato.focus.data.TodoStore
 import com.tomato.focus.ui.screen.todo.defaultFocusMinutes
 import com.tomato.focus.ui.screen.todo.saveDefaultFocusMinutes
@@ -54,7 +57,7 @@ fun MeScreen(navController: Navigator, bottomPadding: Dp) {
             .size
     }
 
-    Column(modifier = Modifier.fillMaxSize().background(Color(0xFFF7F9FA))) {
+    Column(modifier = Modifier.fillMaxSize().background(tpPageBg())) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -97,7 +100,7 @@ fun MeScreen(navController: Navigator, bottomPadding: Dp) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(14.dp))
-                    .background(Color.White),
+                    .background(tpCardBg()),
             ) {
                 Item("⏱", "专注记录", "每一次专注都会存档") { navController.push(Route.History) }
                 Item("🎨", "海报背景和外观", "待办与专注背景、深色模式") { navController.push(Route.Settings) }
@@ -111,7 +114,7 @@ fun MeScreen(navController: Navigator, bottomPadding: Dp) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(14.dp))
-                    .background(Color.White),
+                    .background(tpCardBg()),
             ) {
                 Item("⚙️", "设置", "主题、界面风格、缩放") { navController.push(Route.Settings) }
                 Item("ℹ️", "关于", "版本信息与开源许可") { navController.push(Route.About) }
@@ -127,7 +130,7 @@ fun MeScreen(navController: Navigator, bottomPadding: Dp) {
             title = { Text("默认番茄时长") },
             text = {
                 Column {
-                    Text("新建待办时用这个时长，也可以单条改。", fontSize = 13.sp, color = TP.TextGrey)
+                    Text("新建待办时用这个时长，也可以单条改。", fontSize = 13.sp, color = tpTextSub())
                     Spacer(Modifier.height(12.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         listOf(15, 25, 30, 45, 60).forEach { min ->
@@ -199,7 +202,7 @@ private fun Item(emoji: String, title: String, subtitle: String, onClick: () -> 
         Column {
             Text(title, fontSize = 15.sp, color = TP.TextDark)
             Spacer(Modifier.height(2.dp))
-            Text(subtitle, fontSize = 11.sp, color = TP.TextGrey)
+            Text(subtitle, fontSize = 11.sp, color = tpTextSub())
         }
     }
 }

@@ -32,6 +32,7 @@ import androidx.compose.ui.layout.FixedScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.tomato.focus.ui.theme.tpCardBg
 import com.tomato.focus.R
 import com.tomato.focus.ui.component.material.ExpressiveScaffold
 import com.tomato.focus.ui.component.material.SegmentedColumn
@@ -77,7 +78,7 @@ fun AboutScreenMaterial(
                         modifier = Modifier
                             .size(80.dp)
                             .clip(RoundedCornerShape(16.dp))
-                            .background(Color.White)
+                            .background(tpCardBg())
                     ) {
                         Image(
                             painter = painterResource(id = R.drawable.ic_launcher_foreground),

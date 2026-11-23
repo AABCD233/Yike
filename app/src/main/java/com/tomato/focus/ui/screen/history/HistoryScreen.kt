@@ -34,6 +34,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.tomato.focus.ui.theme.tpTextSub
+import com.tomato.focus.ui.theme.tpCardBg
+import com.tomato.focus.ui.theme.tpPageBg
 import com.tomato.focus.data.FocusSession
 import com.tomato.focus.data.TodoStore
 import com.tomato.focus.ui.navigation3.Navigator
@@ -54,7 +57,7 @@ fun HistoryScreen(navController: Navigator) {
         }
     }
 
-    Column(modifier = Modifier.fillMaxSize().background(Color(0xFFF7F9FA))) {
+    Column(modifier = Modifier.fillMaxSize().background(tpPageBg())) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -71,7 +74,7 @@ fun HistoryScreen(navController: Navigator) {
 
         if (sessions.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("还没有专注记录，去待办页开始第一个番茄", fontSize = 13.sp, color = TP.TextGrey)
+                Text("还没有专注记录，去待办页开始第一个番茄", fontSize = 13.sp, color = tpTextSub())
             }
         } else {
             LazyColumn(
@@ -100,7 +103,7 @@ private fun DayHeader(day: LocalDate, list: List<FocusSession>) {
     Text(
         "$day · ${list.count { !it.abandoned }} 次 · ${total / 60} 分钟",
         fontSize = 12.sp,
-        color = TP.TextGrey,
+        color = tpTextSub(),
         modifier = Modifier.padding(start = 4.dp, top = 6.dp),
     )
 }
@@ -113,7 +116,7 @@ private fun SessionRow(session: FocusSession, onDelete: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(14.dp))
-            .background(Color.White)
+            .background(tpCardBg())
             .padding(start = 14.dp, end = 6.dp, top = 12.dp, bottom = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -127,11 +130,11 @@ private fun SessionRow(session: FocusSession, onDelete: () -> Unit) {
                     if (session.abandoned) " · 已放弃" else "",
                 ),
                 fontSize = 12.sp,
-                color = if (session.abandoned) TP.Coral else TP.TextGrey,
+                color = if (session.abandoned) TP.Coral else tpTextSub(),
             )
         }
         IconButton(onClick = onDelete) {
-            Icon(Icons.Rounded.DeleteOutline, contentDescription = "删除记录", tint = TP.TextGrey)
+            Icon(Icons.Rounded.DeleteOutline, contentDescription = "删除记录", tint = tpTextSub())
         }
     }
 }

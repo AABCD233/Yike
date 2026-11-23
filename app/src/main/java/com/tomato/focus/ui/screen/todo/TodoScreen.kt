@@ -44,6 +44,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.tomato.focus.ui.theme.tpTextSub
+import com.tomato.focus.ui.theme.tpPageBg
 import com.tomato.focus.data.FocusTimer
 import com.tomato.focus.data.TimerMode
 import com.tomato.focus.data.Todo
@@ -64,7 +66,7 @@ fun TodoScreen(
     var deleting by remember { mutableStateOf<Todo?>(null) }
     val focusState by FocusTimer.state.collectAsState()
 
-    Column(modifier = Modifier.fillMaxSize().background(Color(0xFFF7F9FA))) {
+    Column(modifier = Modifier.fillMaxSize().background(tpPageBg())) {
         TodoHeader(
             onAdd = { showAdd = true },
             onHistory = { navController.push(Route.History) },
@@ -87,7 +89,7 @@ fun TodoScreen(
         }
         if (todos.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("还没有待办，点右上角 + 新建一个", fontSize = 13.sp, color = TP.TextGrey)
+                Text("还没有待办，点右上角 + 新建一个", fontSize = 13.sp, color = tpTextSub())
             }
         } else {
             LazyColumn(

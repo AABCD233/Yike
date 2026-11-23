@@ -41,6 +41,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.tomato.focus.ui.theme.tpTextSub
+import com.tomato.focus.ui.theme.tpCardBg
+import com.tomato.focus.ui.theme.tpPageBg
 import com.tomato.focus.data.TodoStore
 import com.tomato.focus.ui.theme.TP
 import java.time.LocalDate
@@ -68,7 +71,7 @@ fun StatsScreen(navController: com.tomato.focus.ui.navigation3.Navigator, bottom
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF7F9FA)),
+            .background(tpPageBg()),
     ) {
         Row(
             modifier = Modifier
@@ -104,14 +107,14 @@ fun StatsScreen(navController: com.tomato.focus.ui.navigation3.Navigator, bottom
                             onClick = { dayOffset++ },
                             modifier = Modifier.size(28.dp),
                         ) {
-                            Icon(Icons.Rounded.ChevronLeft, contentDescription = "前一天", tint = TP.TextGrey)
+                            Icon(Icons.Rounded.ChevronLeft, contentDescription = "前一天", tint = tpTextSub())
                         }
-                        Text(date.toString(), fontSize = 12.sp, color = TP.TextGrey)
+                        Text(date.toString(), fontSize = 12.sp, color = tpTextSub())
                         IconButton(
                             onClick = { if (dayOffset > 0) dayOffset-- },
                             modifier = Modifier.size(28.dp),
                         ) {
-                            Icon(Icons.Rounded.ChevronRight, contentDescription = "后一天", tint = TP.TextGrey)
+                            Icon(Icons.Rounded.ChevronRight, contentDescription = "后一天", tint = tpTextSub())
                         }
                     }
                 },
@@ -135,7 +138,7 @@ fun StatsScreen(navController: com.tomato.focus.ui.navigation3.Navigator, bottom
                         modifier = Modifier.fillMaxWidth().height(140.dp),
                         contentAlignment = Alignment.Center,
                     ) {
-                        Text("这段时间还没有专注记录", fontSize = 13.sp, color = TP.TextGrey)
+                        Text("这段时间还没有专注记录", fontSize = 13.sp, color = tpTextSub())
                     }
                 } else {
                     Row(
@@ -167,7 +170,7 @@ fun StatsScreen(navController: com.tomato.focus.ui.navigation3.Navigator, bottom
                                     Text(
                                         "${(sec * 100 / totalSeconds)}%",
                                         fontSize = 12.sp,
-                                        color = TP.TextGrey,
+                                        color = tpTextSub(),
                                     )
                                 }
                                 Spacer(Modifier.height(4.dp))
@@ -217,7 +220,7 @@ fun StatsScreen(navController: com.tomato.focus.ui.navigation3.Navigator, bottom
                 Spacer(Modifier.height(6.dp))
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     listOf("0", "6", "12", "18", "23").forEach {
-                        Text(it, fontSize = 10.sp, color = TP.TextGrey)
+                        Text(it, fontSize = 10.sp, color = tpTextSub())
                     }
                 }
             }
@@ -235,7 +238,7 @@ fun StatsScreen(navController: com.tomato.focus.ui.navigation3.Navigator, bottom
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Bottom,
                         ) {
-                            Text("${sec / 60}", fontSize = 10.sp, color = TP.TextGrey)
+                            Text("${sec / 60}", fontSize = 10.sp, color = tpTextSub())
                             Spacer(Modifier.height(3.dp))
                             Box(
                                 modifier = Modifier
@@ -245,7 +248,7 @@ fun StatsScreen(navController: com.tomato.focus.ui.navigation3.Navigator, bottom
                                     .background(TP.Teal),
                             )
                             Spacer(Modifier.height(4.dp))
-                            Text("${day.dayOfMonth}", fontSize = 10.sp, color = TP.TextGrey)
+                            Text("${day.dayOfMonth}", fontSize = 10.sp, color = tpTextSub())
                         }
                     }
                 }
@@ -278,7 +281,7 @@ private fun Card(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(14.dp))
-            .background(Color.White)
+            .background(tpCardBg())
             .padding(14.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -294,11 +297,11 @@ private fun Card(
 @Composable
 private fun Metric(label: String, value: String, unit: String) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(label, fontSize = 12.sp, color = TP.TextGrey)
+        Text(label, fontSize = 12.sp, color = tpTextSub())
         Row(verticalAlignment = Alignment.Bottom) {
             Text(value, fontSize = 24.sp, fontWeight = FontWeight.Medium, color = TP.TextDark)
             if (unit.isNotEmpty()) {
-                Text(unit, fontSize = 11.sp, color = TP.TextGrey, modifier = Modifier.padding(bottom = 3.dp))
+                Text(unit, fontSize = 11.sp, color = tpTextSub(), modifier = Modifier.padding(bottom = 3.dp))
             }
         }
     }
@@ -313,7 +316,7 @@ private fun TabPill(text: String, selected: Boolean, onClick: () -> Unit) {
             .clickable { onClick() }
             .padding(horizontal = 18.dp, vertical = 6.dp),
     ) {
-        Text(text, fontSize = 13.sp, color = if (selected) TP.Teal else TP.TextGrey)
+        Text(text, fontSize = 13.sp, color = if (selected) TP.Teal else tpTextSub())
     }
 }
 
