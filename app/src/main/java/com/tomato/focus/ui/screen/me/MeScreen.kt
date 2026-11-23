@@ -56,6 +56,7 @@ fun MeScreen(navController: Navigator, bottomPadding: Dp) {
     var showMinutes by remember { mutableStateOf(false) }
     var defaultMinutes by remember { mutableStateOf(defaultFocusMinutes()) }
     var backupTip by remember { mutableStateOf<String?>(null) }
+    var refreshKey by remember { mutableIntStateOf(0) }
     val context = LocalContext.current
 
     val exportLauncher = rememberLauncherForActivityResult(
@@ -85,7 +86,6 @@ fun MeScreen(navController: Navigator, bottomPadding: Dp) {
             }.onFailure { backupTip = "恢复失败：${it.message}" }
         }
     }
-    var refreshKey by remember { mutableIntStateOf(0) }
     val totalSeconds = remember(refreshKey) { TodoStore.summary(0L, Long.MAX_VALUE / 2).seconds }
     val totalDays = remember(refreshKey) {
         TodoStore.sessionsBetween(0L, Long.MAX_VALUE / 2)
