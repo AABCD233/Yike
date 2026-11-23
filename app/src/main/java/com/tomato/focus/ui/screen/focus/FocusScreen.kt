@@ -81,7 +81,7 @@ fun FocusScreen(navController: Navigator) {
     } else {
         ((elapsed % 3600).toFloat() / 3600f)
     }
-    val quote = remember(s.startedWall) { QUOTES[(s.startedWall % QUOTES.size).toInt()] }
+    val quote = remember(s.startWall) { QUOTES[(s.startWall % QUOTES.size).toInt()] }
 
     Box(
         modifier = Modifier
