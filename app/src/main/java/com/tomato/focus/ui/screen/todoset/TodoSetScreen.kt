@@ -209,8 +209,12 @@ fun TodoSetScreen(
                                             todo = todo,
                                             running = false,
                                             onStart = {
-                                                com.tomato.focus.data.FocusTimer.start(todo)
-                                                navController.push(Route.Focus)
+                                                if (com.tomato.focus.data.FocusTimer.state.value != null) {
+                                                    navController.push(Route.Focus)
+                                                } else {
+                                                    com.tomato.focus.data.FocusTimer.start(todo)
+                                                    navController.push(Route.Focus)
+                                                }
                                             },
                                         )
                                         Spacer(Modifier.height(8.dp))

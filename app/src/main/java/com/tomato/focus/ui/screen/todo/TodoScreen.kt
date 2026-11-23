@@ -102,8 +102,13 @@ fun TodoScreen(
                         todo = todo,
                         running = focusState?.todoId == todo.id,
                         onStart = {
-                            FocusTimer.start(todo)
-                            navController.push(Route.Focus)
+                            // 已经有在跑的计时就回去继续，不要静默覆盖掉上一次
+                            if (FocusTimer.state.value != null) {
+                                navController.push(Route.Focus)
+                            } else {
+                                FocusTimer.start(todo)
+                                navController.push(Route.Focus)
+                            }
                         },
                         onEdit = { editing = todo },
                         onDelete = { deleting = todo },

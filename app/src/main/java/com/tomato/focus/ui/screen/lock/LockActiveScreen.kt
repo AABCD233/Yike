@@ -63,7 +63,16 @@ fun LockActiveScreen(navController: Navigator) {
 
     val s = state
     if (s == null) {
-        LaunchedEffect(Unit) { navController.pop() }
+        if (done) {
+            AlertDialog(
+                onDismissRequest = { navController.pop() },
+                title = { Text("锁机结束") },
+                text = { Text("时间到了，可以拿起手机了。") },
+                confirmButton = { TextButton(onClick = { navController.pop() }) { Text("好") } },
+            )
+        } else {
+            LaunchedEffect(Unit) { navController.pop() }
+        }
         return
     }
 
@@ -137,14 +146,6 @@ fun LockActiveScreen(navController: Navigator) {
         )
     }
 
-    if (done) {
-        AlertDialog(
-            onDismissRequest = { navController.pop() },
-            title = { Text("锁机结束") },
-            text = { Text("你已经锁机 ${s.totalSeconds / 60} 分钟。") },
-            confirmButton = { TextButton(onClick = { navController.pop() }) { Text("好") } },
-        )
-    }
 }
 
 private fun formatClock(seconds: Int): String {
