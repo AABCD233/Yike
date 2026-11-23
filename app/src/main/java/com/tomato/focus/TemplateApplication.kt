@@ -6,6 +6,7 @@ import android.os.Build
 import android.os.UserManager
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
+import com.tomato.focus.data.TodoStore
 import okhttp3.Cache
 import okhttp3.OkHttpClient
 import org.lsposed.hiddenapibypass.HiddenApiBypass
@@ -36,6 +37,7 @@ class TemplateApplication : Application(), ViewModelStoreOwner {
     override fun onCreate() {
         super.onCreate()
         templateApp = this
+        TodoStore.init(this)
 
         if (!isUserUnlocked()) {
             return

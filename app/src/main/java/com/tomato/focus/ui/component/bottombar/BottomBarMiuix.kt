@@ -9,8 +9,11 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Cottage
-import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material.icons.rounded.Checklist
+import androidx.compose.material.icons.rounded.FolderCopy
+import androidx.compose.material.icons.rounded.Lock
+import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material.icons.rounded.PieChart
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -118,6 +121,9 @@ enum class BottomBarDestination(
     @get:StringRes val label: Int,
     val icon: ImageVector,
 ) {
-    Home(R.string.home, Icons.Rounded.Cottage),
-    Setting(R.string.settings, Icons.Rounded.Settings)
+    Todo(R.string.tab_todo, Icons.Rounded.Checklist),
+    TodoSet(R.string.tab_todoset, Icons.Rounded.FolderCopy),
+    Lock(R.string.tab_lock, Icons.Rounded.Lock),
+    Stats(R.string.tab_stats, Icons.Rounded.PieChart),
+    Me(R.string.tab_me, Icons.Rounded.Person)
 }

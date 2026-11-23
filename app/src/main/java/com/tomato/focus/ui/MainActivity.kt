@@ -55,7 +55,13 @@ import com.tomato.focus.ui.navigation3.Route
 import com.tomato.focus.ui.navigation3.rememberNavigator
 import com.tomato.focus.ui.screen.about.AboutScreen
 import com.tomato.focus.ui.screen.colorpalette.ColorPaletteScreen
+import com.tomato.focus.ui.screen.focus.FocusScreen
 import com.tomato.focus.ui.screen.home.HomePager
+import com.tomato.focus.ui.screen.lock.LockScreen
+import com.tomato.focus.ui.screen.me.MeScreen
+import com.tomato.focus.ui.screen.stats.StatsScreen
+import com.tomato.focus.ui.screen.todo.TodoScreen
+import com.tomato.focus.ui.screen.todoset.TodoSetScreen
 import com.tomato.focus.ui.screen.permission.PermissionScreen
 import com.tomato.focus.ui.screen.settings.SettingPager
 import com.tomato.focus.ui.theme.TemplateTheme
@@ -157,7 +163,8 @@ class MainActivity : ComponentActivity() {
                             entry<Route.ColorPalette>(swipeDismiss = swipeDismiss) { ColorPaletteScreen() }
                             entry<Route.Permissions>(swipeDismiss = swipeDismiss) { PermissionScreen() }
                             entry<Route.Home>(swipeDismiss = swipeDismiss) { mainScreenEntry() }
-                            entry<Route.Settings>(swipeDismiss = swipeDismiss) { mainScreenEntry() }
+                            entry<Route.Settings>(swipeDismiss = swipeDismiss) { SettingPager(navigator, androidx.compose.ui.unit.Dp(0f)) }
+                            entry<Route.Focus>(swipeDismiss = NavSwipeDirection.None) { FocusScreen(navigator) }
                         }
                     }
 
@@ -249,8 +256,11 @@ fun MainScreen(
                 ) { page ->
                     val isCurrentPage = page == settledPage
                     when (page) {
-                        0 -> if (isCurrentPage || contentReady) HomePager(navController, bottomInnerPadding, isCurrentPage)
-                        1 -> if (isCurrentPage || contentReady) SettingPager(navController, bottomInnerPadding)
+                        0 -> if (isCurrentPage || contentReady) TodoScreen(navController, bottomInnerPadding)
+                        1 -> if (isCurrentPage || contentReady) TodoSetScreen(navController, bottomInnerPadding)
+                        2 -> if (isCurrentPage || contentReady) LockScreen(bottomInnerPadding)
+                        3 -> if (isCurrentPage || contentReady) StatsScreen(bottomInnerPadding)
+                        4 -> if (isCurrentPage || contentReady) MeScreen(navController, bottomInnerPadding)
                     }
                 }
             }
