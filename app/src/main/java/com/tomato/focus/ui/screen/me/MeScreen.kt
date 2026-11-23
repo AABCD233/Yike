@@ -95,7 +95,7 @@ fun MeScreen(navController: Navigator, bottomPadding: Dp) {
                     .clip(RoundedCornerShape(14.dp))
                     .background(Color.White),
             ) {
-                Item("⏱", "专注记录", "每一次专注都会存档") { tip = "专注记录页还没做，下一步和统计页一起补齐。" }
+                Item("⏱", "专注记录", "每一次专注都会存档") { navController.push(Route.History) }
                 Item("🎨", "海报背景和外观", "待办与专注背景、深色模式") { navController.push(Route.Settings) }
                 Item("🎯", "专注计时核心设置", "铃声、震动、休息时长") { navController.push(Route.Settings) }
             }

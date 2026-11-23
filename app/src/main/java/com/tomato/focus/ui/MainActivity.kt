@@ -56,6 +56,7 @@ import com.tomato.focus.ui.navigation3.rememberNavigator
 import com.tomato.focus.ui.screen.about.AboutScreen
 import com.tomato.focus.ui.screen.colorpalette.ColorPaletteScreen
 import com.tomato.focus.ui.screen.focus.FocusScreen
+import com.tomato.focus.ui.screen.history.HistoryScreen
 import com.tomato.focus.ui.screen.home.HomePager
 import com.tomato.focus.ui.screen.lock.LockScreen
 import com.tomato.focus.ui.screen.me.MeScreen
@@ -165,6 +166,7 @@ class MainActivity : ComponentActivity() {
                             entry<Route.Home>(swipeDismiss = swipeDismiss) { mainScreenEntry() }
                             entry<Route.Settings>(swipeDismiss = swipeDismiss) { SettingPager(navigator, androidx.compose.ui.unit.Dp(0f)) }
                             entry<Route.Focus>(swipeDismiss = NavSwipeDirection.None) { FocusScreen(navigator) }
+                            entry<Route.History>(swipeDismiss = swipeDismiss) { HistoryScreen(navigator) }
                         }
                     }
 

@@ -38,4 +38,8 @@ sealed interface Route : NavKey, Parcelable {
     @Parcelize
     @Serializable
     data object Focus : Route
+
+    @Parcelize
+    @Serializable
+    data object History : Route
 }
