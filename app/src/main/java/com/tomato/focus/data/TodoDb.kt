@@ -198,6 +198,11 @@ object TodoStore {
         return db.insert("todo_set", null, values)
     }
 
+    fun renameTodoSet(id: Long, name: String) {
+        val values = ContentValues().apply { put("name", name) }
+        db.update("todo_set", values, "id = ?", arrayOf(id.toString()))
+    }
+
     fun deleteTodoSet(id: Long) {
         db.delete("todo_set", "id = ?", arrayOf(id.toString()))
         val values = ContentValues().apply { putNull("set_id") }
@@ -274,10 +279,10 @@ object TodoStore {
 
     data class Summary(val count: Int, val seconds: Int, val abandoned: Int)
 
-    fun summary(from: Long, to: Long): Summary {
+    fun summary(from: Long, to: Long, kind: String = "focus"): Summary {
         db.rawQuery(
-            "SELECT COUNT(*), COALESCE(SUM(seconds),0), COALESCE(SUM(abandoned),0) FROM session WHERE kind='focus' AND start_ts >= ? AND start_ts < ?",
-            arrayOf(from.toString(), to.toString())
+            "SELECT COUNT(*), COALESCE(SUM(seconds),0), COALESCE(SUM(abandoned),0) FROM session WHERE kind = ? AND start_ts >= ? AND start_ts < ?",
+            arrayOf(kind, from.toString(), to.toString())
         ).use { c ->
             return if (c.moveToFirst()) Summary(c.getInt(0), c.getInt(1), c.getInt(2))
             else Summary(0, 0, 0)

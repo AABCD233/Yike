@@ -58,6 +58,7 @@ fun StatsScreen(navController: com.tomato.focus.ui.navigation3.Navigator, bottom
     }
 
     val all = TodoStore.summary(0L, Long.MAX_VALUE / 2)
+    val lockSummary = remember(range, dayOffset) { TodoStore.summary(from, to, kind = "lock") }
     val daily = TodoStore.summary(from, to)
     val byTitle = TodoStore.secondsByTitle(from, to)
     val hourly = remember(range, dayOffset) { TodoStore.hourlyMinutes(from, to) }
@@ -182,6 +183,14 @@ fun StatsScreen(navController: com.tomato.focus.ui.navigation3.Navigator, bottom
                     )
                 }
             }
+            Card(title = "锁机") {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                    Metric("次数", lockSummary.count.toString(), "")
+                    Metric("时长", (lockSummary.seconds / 60).toString(), "分钟")
+                    Metric("提前结束", lockSummary.abandoned.toString(), "")
+                }
+            }
+
             Card(title = "专注时段分布") {
                 val maxVal = hourly.maxOrNull()?.coerceAtLeast(1) ?: 1
                 Row(

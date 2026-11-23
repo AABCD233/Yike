@@ -1,5 +1,6 @@
 package com.tomato.focus.ui.screen.todo
 
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -40,6 +41,7 @@ import androidx.compose.ui.window.Dialog
 import com.tomato.focus.data.TimerMode
 import com.tomato.focus.data.Todo
 import com.tomato.focus.data.TodoKind
+import com.tomato.focus.templateApp
 import com.tomato.focus.ui.theme.TP
 import java.time.LocalDate
 
@@ -51,7 +53,7 @@ fun AddTodoDialog(
     var title by remember { mutableStateOf("") }
     var kind by remember { mutableStateOf(TodoKind.NORMAL) }
     var mode by remember { mutableStateOf(TimerMode.COUNTDOWN) }
-    var minutes by remember { mutableStateOf(25) }
+    var minutes by remember { mutableStateOf(defaultFocusMinutes()) }
     var customOpen by remember { mutableStateOf(false) }
     var customText by remember { mutableStateOf("") }
     var hoursText by remember { mutableStateOf("") }
@@ -263,3 +265,14 @@ private fun Highlight(text: String, onClick: () -> Unit) {
 
 /** 只用日期字符串，避免在弹窗里引入日期选择器 */
 private fun TodoStore_today(): String = LocalDate.now().toString()
+
+/** 设置里的「默认番茄时长」，新建待办时用它当默认值 */
+internal fun defaultFocusMinutes(): Int {
+    val prefs = templateApp.getSharedPreferences("settings", Context.MODE_PRIVATE)
+    return prefs.getInt("default_focus_min", 25).coerceIn(1, 600)
+}
+
+internal fun saveDefaultFocusMinutes(minutes: Int) {
+    templateApp.getSharedPreferences("settings", Context.MODE_PRIVATE)
+        .edit().putInt("default_focus_min", minutes.coerceIn(1, 600)).apply()
+}

@@ -20,9 +20,17 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.ChevronRight
+import androidx.compose.material.icons.rounded.MoreVert
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,6 +56,9 @@ fun TodoSetScreen(
 ) {
     var sets by remember { mutableStateOf(TodoStore.todoSets()) }
     var expandedId by remember { mutableStateOf<Long?>(null) }
+    var menuFor by remember { mutableStateOf<Long?>(null) }
+    var renaming by remember { mutableStateOf<com.tomato.focus.data.TodoSet?>(null) }
+    var deleting by remember { mutableStateOf<com.tomato.focus.data.TodoSet?>(null) }
     var newSetName by remember { mutableStateOf("") }
     var adding by remember { mutableStateOf(false) }
 
@@ -155,6 +166,28 @@ fun TodoSetScreen(
                                 color = TP.TextGrey,
                             )
                         }
+                        Box {
+                            IconButton(onClick = { menuFor = set.id }) {
+                                Icon(
+                                    Icons.Rounded.MoreVert,
+                                    contentDescription = "更多操作",
+                                    tint = TP.TextGrey,
+                                )
+                            }
+                            DropdownMenu(
+                                expanded = menuFor == set.id,
+                                onDismissRequest = { menuFor = null },
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text("重命名") },
+                                    onClick = { menuFor = null; renaming = set },
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("删除") },
+                                    onClick = { menuFor = null; deleting = set },
+                                )
+                            }
+                        }
                         Icon(Icons.Rounded.ChevronRight, contentDescription = null, tint = TP.TextGrey)
                     }
                         if (expandedId == set.id) {
@@ -187,4 +220,46 @@ fun TodoSetScreen(
             }
         }
     }
+
+    renaming?.let { set ->
+        var text by remember(set.id) { mutableStateOf(set.name) }
+        AlertDialog(
+            onDismissRequest = { renaming = null },
+            title = { Text("重命名待办集") },
+            text = {
+                androidx.compose.material3.OutlinedTextField(
+                    value = text,
+                    onValueChange = { text = it },
+                    singleLine = true,
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    if (text.isNotBlank()) {
+                        TodoStore.renameTodoSet(set.id, text.trim())
+                        sets = TodoStore.todoSets()
+                        renaming = null
+                    }
+                }) { Text("保存") }
+            },
+            dismissButton = { TextButton(onClick = { renaming = null }) { Text("取消") } },
+        )
+    }
+
+    deleting?.let { set ->
+        AlertDialog(
+            onDismissRequest = { deleting = null },
+            title = { Text("删除待办集") },
+            text = { Text("删除「${set.name}」？里面的待办会保留，只是不再属于这个集合。") },
+            confirmButton = {
+                TextButton(onClick = {
+                    TodoStore.deleteTodoSet(set.id)
+                    sets = TodoStore.todoSets()
+                    deleting = null
+                }) { Text("删除") }
+            },
+            dismissButton = { TextButton(onClick = { deleting = null }) { Text("取消") } },
+        )
+    }
+
 }

@@ -35,6 +35,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tomato.focus.data.TodoStore
+import com.tomato.focus.ui.screen.todo.defaultFocusMinutes
+import com.tomato.focus.ui.screen.todo.saveDefaultFocusMinutes
 import com.tomato.focus.ui.navigation3.Navigator
 import com.tomato.focus.ui.navigation3.Route
 import com.tomato.focus.ui.theme.TP
@@ -42,6 +44,8 @@ import com.tomato.focus.ui.theme.TP
 @Composable
 fun MeScreen(navController: Navigator, bottomPadding: Dp) {
     var tip by remember { mutableStateOf<String?>(null) }
+    var showMinutes by remember { mutableStateOf(false) }
+    var defaultMinutes by remember { mutableStateOf(defaultFocusMinutes()) }
     val totalSeconds = remember { TodoStore.summary(0L, Long.MAX_VALUE / 2).seconds }
     val totalDays = remember {
         TodoStore.sessionsBetween(0L, Long.MAX_VALUE / 2)
@@ -97,7 +101,11 @@ fun MeScreen(navController: Navigator, bottomPadding: Dp) {
             ) {
                 Item("⏱", "专注记录", "每一次专注都会存档") { navController.push(Route.History) }
                 Item("🎨", "海报背景和外观", "待办与专注背景、深色模式") { navController.push(Route.Settings) }
-                Item("🎯", "专注计时核心设置", "铃声、震动、休息时长") { navController.push(Route.Settings) }
+                Item(
+                    "🎯",
+                    "默认番茄时长",
+                    "新建待办时默认 $defaultMinutes 分钟，点这里改",
+                ) { showMinutes = true }
             }
             Column(
                 modifier = Modifier
@@ -111,6 +119,41 @@ fun MeScreen(navController: Navigator, bottomPadding: Dp) {
             }
             Spacer(Modifier.height(bottomPadding + 24.dp))
         }
+    }
+
+    if (showMinutes) {
+        AlertDialog(
+            onDismissRequest = { showMinutes = false },
+            title = { Text("默认番茄时长") },
+            text = {
+                Column {
+                    Text("新建待办时用这个时长，也可以单条改。", fontSize = 13.sp, color = TP.TextGrey)
+                    Spacer(Modifier.height(12.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        listOf(15, 25, 30, 45, 60).forEach { min ->
+                            Box(
+                                modifier = Modifier
+                                    .clip(CircleShape)
+                                    .background(if (min == defaultMinutes) TP.Teal.copy(alpha = 0.18f) else Color(0xFFF2F5F7))
+                                    .clickable {
+                                        defaultMinutes = min
+                                        saveDefaultFocusMinutes(min)
+                                        showMinutes = false
+                                    }
+                                    .padding(horizontal = 12.dp, vertical = 7.dp),
+                            ) {
+                                Text(
+                                    "$min",
+                                    fontSize = 13.sp,
+                                    color = if (min == defaultMinutes) TP.Teal else TP.TextDark,
+                                )
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = { TextButton(onClick = { showMinutes = false }) { Text("关闭") } },
+        )
     }
 
     tip?.let {
