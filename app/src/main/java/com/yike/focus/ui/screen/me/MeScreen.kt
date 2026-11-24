@@ -1,10 +1,12 @@
 package com.yike.focus.ui.screen.me
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,13 +15,18 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Backup
+import androidx.compose.material.icons.rounded.DarkMode
+import androidx.compose.material.icons.rounded.History
+import androidx.compose.material.icons.rounded.Info
+import androidx.compose.material.icons.rounded.Restore
+import androidx.compose.material.icons.rounded.Security
+import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material.icons.rounded.Timer
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -30,25 +37,24 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.yike.focus.ui.theme.tpTextSub
-import com.yike.focus.ui.theme.tpCardBg
-import com.yike.focus.ui.theme.tpPageBg
-import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.ui.platform.LocalContext
 import com.yike.focus.data.Backup
 import com.yike.focus.data.TodoStore
-import com.yike.focus.ui.screen.todo.defaultFocusMinutes
-import com.yike.focus.ui.screen.todo.saveDefaultFocusMinutes
 import com.yike.focus.ui.navigation3.Navigator
 import com.yike.focus.ui.navigation3.Route
-import com.yike.focus.ui.theme.TP
+import com.yike.focus.ui.screen.todo.defaultFocusMinutes
+import com.yike.focus.ui.screen.todo.saveDefaultFocusMinutes
+import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.CardDefaults
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.preference.ArrowPreference
+import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 
 @Composable
 fun MeScreen(navController: Navigator, bottomPadding: Dp) {
@@ -59,6 +65,14 @@ fun MeScreen(navController: Navigator, bottomPadding: Dp) {
     var refreshKey by remember { mutableIntStateOf(0) }
     val context = LocalContext.current
 
+    val totalSeconds = remember(refreshKey) { TodoStore.summary(0L, Long.MAX_VALUE / 2).seconds }
+    val totalDays = remember(refreshKey) {
+        TodoStore.sessionsBetween(0L, Long.MAX_VALUE / 2)
+            .map { it.startTs / 86_400_000L }
+            .distinct()
+            .size
+    }
+
     val exportLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("application/json")
     ) { uri: Uri? ->
@@ -67,7 +81,7 @@ fun MeScreen(navController: Navigator, bottomPadding: Dp) {
                 context.contentResolver.openOutputStream(uri)?.use { out ->
                     out.write(Backup.exportJson().toByteArray())
                 }
-            }.onSuccess { backupTip = "已导出，文件在你自己选的位置" }
+            }.onSuccess { backupTip = "已导出到你选的位置" }
                 .onFailure { backupTip = "导出失败：${it.message}" }
         }
     }
@@ -86,174 +100,193 @@ fun MeScreen(navController: Navigator, bottomPadding: Dp) {
             }.onFailure { backupTip = "恢复失败：${it.message}" }
         }
     }
-    val totalSeconds = remember(refreshKey) { TodoStore.summary(0L, Long.MAX_VALUE / 2).seconds }
-    val totalDays = remember(refreshKey) {
-        TodoStore.sessionsBetween(0L, Long.MAX_VALUE / 2)
-            .map { java.time.LocalDate.ofEpochDay(it.startTs / 86_400_000L) }
-            .distinct()
-            .size
-    }
 
-    Column(modifier = Modifier.fillMaxSize().background(tpPageBg())) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(TP.headerBrush())
-                .statusBarsPadding()
-                .padding(horizontal = 18.dp, vertical = 14.dp),
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = bottomPadding + 24.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth().statusBarsPadding().padding(top = 8.dp, bottom = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
                 Box(
-                    modifier = Modifier
-                        .size(64.dp)
-                        .clip(CircleShape)
-                        .background(Color(0xFFFFF1E6)),
+                    modifier = Modifier.size(52.dp).clip(CircleShape),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text("🍅", fontSize = 30.sp)
+                    Card(modifier = Modifier.fillMaxSize(), colors = CardDefaults.defaultColors(color = colorScheme.secondaryContainer)) {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Icon(
+                                Icons.Rounded.Timer,
+                                contentDescription = null,
+                                tint = colorScheme.onSecondaryContainer,
+                                modifier = Modifier.size(26.dp),
+                            )
+                        }
+                    }
                 }
-                Spacer(Modifier.width(14.dp))
+                Spacer(Modifier.size(12.dp))
                 Column {
-                    Text("未登录", fontSize = 19.sp, fontWeight = FontWeight.Medium, color = TP.TextDark)
-                    Spacer(Modifier.height(3.dp))
-                    Text("点击默认头像登录（暂未接入账号）", fontSize = 12.sp, color = TP.TextDark.copy(alpha = 0.6f))
+                    Text("未登录", fontSize = 18.sp, fontWeight = FontWeight.Medium, color = colorScheme.onBackground)
+                    Text(
+                        "本地记录，不需要账号",
+                        fontSize = 12.sp,
+                        color = colorScheme.onSurfaceVariantSummary,
+                    )
                 }
-            }
-            Spacer(Modifier.height(12.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Chip("共专注 $totalDays 天")
-                Chip("累计 ${totalSeconds / 3600} 小时")
             }
         }
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(tpCardBg()),
-            ) {
-                Item("⏱", "专注记录", "每一次专注都会存档") { navController.push(Route.History) }
-                Item("🎨", "海报背景和外观", "待办与专注背景、深色模式") { navController.push(Route.Settings) }
-                Item(
-                    "🎯",
-                    "默认番茄时长",
-                    "新建待办时默认 $defaultMinutes 分钟，点这里改",
-                ) { showMinutes = true }
-            }
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(tpCardBg()),
-            ) {
-                Item("⬆️", "备份到文件", "把待办和专注记录导出成 JSON") {
-                    exportLauncher.launch("yike-backup.json")
+        item {
+            Card {
+                Row(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("累计专注", fontSize = 12.sp, color = colorScheme.onSurfaceVariantSummary)
+                        Text(
+                            "${totalSeconds / 3600} 小时",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = colorScheme.onSurface,
+                        )
+                    }
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("专注天数", fontSize = 12.sp, color = colorScheme.onSurfaceVariantSummary)
+                        Text(
+                            "$totalDays 天",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = colorScheme.onSurface,
+                        )
+                    }
                 }
-                Item("⬇️", "从文件恢复", "从备份 JSON 里把数据导回来") {
-                    importLauncher.launch(arrayOf("application/json", "text/plain", "*/*"))
-                }
-                Item("⚙️", "设置", "主题、界面风格、缩放") { navController.push(Route.Settings) }
-                Item("ℹ️", "关于", "版本信息与开源许可") { navController.push(Route.About) }
-                Item("🛡", "权限", "通知、悬浮窗、电池优化") { navController.push(Route.Permissions) }
             }
-            Spacer(Modifier.height(bottomPadding + 24.dp))
+        }
+
+        item {
+            Card {
+                ArrowPreference(
+                    title = "专注记录",
+                    summary = "每一次专注都会存档",
+                    startAction = { PrefIcon(Icons.Rounded.History) },
+                    onClick = { navController.push(Route.History) },
+                )
+                ArrowPreference(
+                    title = "默认番茄时长",
+                    summary = "新建待办时默认 $defaultMinutes 分钟",
+                    startAction = { PrefIcon(Icons.Rounded.Timer) },
+                    onClick = { showMinutes = true },
+                )
+                ArrowPreference(
+                    title = "外观",
+                    summary = "主题、界面风格、缩放",
+                    startAction = { PrefIcon(Icons.Rounded.DarkMode) },
+                    onClick = { navController.push(Route.Settings) },
+                )
+            }
+        }
+
+        item {
+            Card {
+                ArrowPreference(
+                    title = "备份到文件",
+                    summary = "导出待办和专注记录",
+                    startAction = { PrefIcon(Icons.Rounded.Backup) },
+                    onClick = { exportLauncher.launch("yike-backup.json") },
+                )
+                ArrowPreference(
+                    title = "从文件恢复",
+                    summary = "从备份 JSON 导回来",
+                    startAction = { PrefIcon(Icons.Rounded.Restore) },
+                    onClick = { importLauncher.launch(arrayOf("application/json", "text/plain", "*/*")) },
+                )
+            }
+        }
+
+        item {
+            Card {
+                ArrowPreference(
+                    title = "设置",
+                    summary = "界面、主题、更新检查",
+                    startAction = { PrefIcon(Icons.Rounded.Settings) },
+                    onClick = { navController.push(Route.Settings) },
+                )
+                ArrowPreference(
+                    title = "权限",
+                    summary = "通知、悬浮窗、电池优化",
+                    startAction = { PrefIcon(Icons.Rounded.Security) },
+                    onClick = { navController.push(Route.Permissions) },
+                )
+                ArrowPreference(
+                    title = "关于",
+                    summary = "版本信息与开源许可",
+                    startAction = { PrefIcon(Icons.Rounded.Info) },
+                    onClick = { navController.push(Route.About) },
+                )
+            }
         }
     }
 
     if (showMinutes) {
         AlertDialog(
             onDismissRequest = { showMinutes = false },
-            title = { Text("默认番茄时长") },
+            title = { androidx.compose.material3.Text("默认番茄时长") },
             text = {
                 Column {
-                    Text("新建待办时用这个时长，也可以单条改。", fontSize = 13.sp, color = tpTextSub())
+                    androidx.compose.material3.Text("新建待办时用这个时长，也可以单条改。")
                     Spacer(Modifier.height(12.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         listOf(15, 25, 30, 45, 60).forEach { min ->
-                            Box(
-                                modifier = Modifier
-                                    .clip(CircleShape)
-                                    .background(if (min == defaultMinutes) TP.Teal.copy(alpha = 0.18f) else Color(0xFFF2F5F7))
-                                    .clickable {
-                                        defaultMinutes = min
-                                        saveDefaultFocusMinutes(min)
-                                        showMinutes = false
-                                    }
-                                    .padding(horizontal = 12.dp, vertical = 7.dp),
+                            Card(
+                                onClick = {
+                                    defaultMinutes = min
+                                    saveDefaultFocusMinutes(min)
+                                    showMinutes = false
+                                },
+                                showIndication = true,
+                                colors = CardDefaults.defaultColors(
+                                    color = if (min == defaultMinutes) colorScheme.primaryContainer
+                                    else colorScheme.surfaceContainerHighest
+                                ),
                             ) {
-                                Text(
+                                androidx.compose.material3.Text(
                                     "$min",
-                                    fontSize = 13.sp,
-                                    color = if (min == defaultMinutes) TP.Teal else TP.TextDark,
+                                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
                                 )
                             }
                         }
                     }
                 }
             },
-            confirmButton = { TextButton(onClick = { showMinutes = false }) { Text("关闭") } },
+            confirmButton = {
+                TextButton(onClick = { showMinutes = false }) { androidx.compose.material3.Text("关闭") }
+            },
         )
     }
 
     backupTip?.let { text ->
         AlertDialog(
             onDismissRequest = { backupTip = null },
-            confirmButton = { TextButton(onClick = { backupTip = null }) { Text("好") } },
-            text = { Text(text) },
+            confirmButton = { TextButton(onClick = { backupTip = null }) { androidx.compose.material3.Text("好") } },
+            text = { androidx.compose.material3.Text(text) },
         )
     }
 
-    tip?.let {
+    tip?.let { text ->
         AlertDialog(
             onDismissRequest = { tip = null },
-            confirmButton = { TextButton(onClick = { tip = null }) { Text("知道了") } },
-            text = { Text(it) },
+            confirmButton = { TextButton(onClick = { tip = null }) { androidx.compose.material3.Text("知道了") } },
+            text = { androidx.compose.material3.Text(text) },
         )
     }
 }
 
 @Composable
-private fun Chip(text: String) {
-    Box(
-        modifier = Modifier
-            .clip(CircleShape)
-            .background(Color.White.copy(alpha = 0.75f))
-            .padding(horizontal = 10.dp, vertical = 4.dp),
-    ) {
-        Text(text, fontSize = 11.sp, color = TP.Coral)
-    }
-}
-
-@Composable
-private fun Item(emoji: String, title: String, subtitle: String, onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() }
-            .padding(horizontal = 14.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Box(
-            modifier = Modifier
-                .size(34.dp)
-                .clip(CircleShape)
-                .background(Color(0xFFF4F7F9)),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(emoji, fontSize = 16.sp)
-        }
-        Spacer(Modifier.width(12.dp))
-        Column {
-            Text(title, fontSize = 15.sp, color = TP.TextDark)
-            Spacer(Modifier.height(2.dp))
-            Text(subtitle, fontSize = 11.sp, color = tpTextSub())
-        }
-    }
+private fun PrefIcon(icon: ImageVector) {
+    Icon(
+        icon,
+        contentDescription = null,
+        tint = colorScheme.onSurface,
+        modifier = Modifier.padding(end = 6.dp).size(22.dp),
+    )
 }
