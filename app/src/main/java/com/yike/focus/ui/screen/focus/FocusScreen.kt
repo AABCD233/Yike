@@ -149,13 +149,15 @@ fun FocusScreen(navController: Navigator) {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
+                val ringColor = colorScheme.primary
+                val trackColor = colorScheme.outline
                 Box(contentAlignment = Alignment.Center) {
                     Canvas(modifier = Modifier.size(240.dp)) {
                         val stroke = 6.dp.toPx()
                         val inset = stroke / 2
                         val arcSize = Size(size.width - stroke, size.height - stroke)
                         drawArc(
-                            color = colorScheme.outline,
+                            color = trackColor,
                             startAngle = -90f,
                             sweepAngle = 360f,
                             useCenter = false,
@@ -164,7 +166,7 @@ fun FocusScreen(navController: Navigator) {
                             style = Stroke(width = stroke, cap = StrokeCap.Round),
                         )
                         drawArc(
-                            color = colorScheme.primary,
+                            color = ringColor,
                             startAngle = -90f,
                             sweepAngle = 360f * progress,
                             useCenter = false,
