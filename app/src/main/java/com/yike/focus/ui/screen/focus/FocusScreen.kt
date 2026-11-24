@@ -297,7 +297,12 @@ fun FocusScreen(navController: Navigator) {
                 Text(s.title, color = onBackground, fontSize = 17.sp)
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    if (s.isPaused) "已暂停" else if (isRest) "休息中" else "进行中",
+                    when {
+                        s.isPaused -> "已暂停"
+                        s.kind == "rest_long" -> "长休息"
+                        isRest -> "短休息"
+                        else -> "第 ${PomodoroSettings.roundIndex + 1} 个番茄"
+                    },
                     color = onBackground.copy(alpha = 0.65f),
                     fontSize = 13.sp,
                 )

@@ -58,4 +58,8 @@ sealed interface Route : NavKey, Parcelable {
     @Parcelize
     @Serializable
     data object Boost : Route
+
+    @Parcelize
+    @Serializable
+    data object Cycle : Route
 }

@@ -22,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Backup
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.Info
+import androidx.compose.material.icons.rounded.Repeat
 import androidx.compose.material.icons.rounded.Restore
 import androidx.compose.material.icons.rounded.Security
 import androidx.compose.material.icons.rounded.Settings
@@ -147,6 +148,12 @@ fun MeScreen(navController: Navigator, bottomPadding: Dp) {
                     summary = "每一次专注都会存档",
                     startAction = { PrefIcon(Icons.Rounded.History) },
                     onClick = { navController.push(Route.History) },
+                )
+                ArrowPreference(
+                    title = "番茄循环",
+                    summary = "短休息、长休息、几轮之后长休息",
+                    startAction = { PrefIcon(Icons.Rounded.Repeat) },
+                    onClick = { navController.push(Route.Cycle) },
                 )
                 ArrowPreference(
                     title = "默认番茄时长",
