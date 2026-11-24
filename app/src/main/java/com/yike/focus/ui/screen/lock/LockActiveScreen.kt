@@ -100,7 +100,7 @@ fun LockActiveScreen(navController: Navigator) {
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Spacer(Modifier.height(60.dp))
-            Text("静默中", fontSize = 16.sp, color = Color.White.copy(alpha = 0.6f))
+            Text("锁机中", fontSize = 16.sp, color = Color.White.copy(alpha = 0.6f))
             Spacer(Modifier.height(24.dp))
             Text(
                 formatClock(remaining),

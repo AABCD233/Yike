@@ -69,7 +69,7 @@ fun TodoScreen(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                "任务",
+                "待办",
                 fontSize = 28.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = colorScheme.onBackground,
@@ -114,7 +114,7 @@ fun TodoScreen(
 
         if (todos.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("还没有任务，点右上角 + 添加", fontSize = 14.sp, color = colorScheme.onSurfaceVariantSummary)
+                Text("还没有待办，点右上角 + 添加", fontSize = 14.sp, color = colorScheme.onSurfaceVariantSummary)
             }
         } else {
             LazyColumn(
@@ -168,7 +168,7 @@ fun TodoScreen(
     deleting?.let { todo ->
         AlertDialog(
             onDismissRequest = { deleting = null },
-            title = { Text("删除任务") },
+            title = { Text("删除待办") },
             text = { Text("删除「${todo.title}」？已经产生的专注记录会保留。") },
             confirmButton = {
                 TextButton(onClick = {
