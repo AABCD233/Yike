@@ -72,6 +72,7 @@ import com.yike.focus.ui.screen.home.HomePager
 import com.yike.focus.ui.screen.lock.LockActiveScreen
 import com.yike.focus.ui.screen.lock.LockScreen
 import com.yike.focus.ui.screen.me.MeScreen
+import com.yike.focus.ui.screen.music.MusicScreen
 import com.yike.focus.ui.screen.stats.StatsScreen
 import com.yike.focus.ui.screen.whitelist.WhitelistOpenScreen
 import com.yike.focus.ui.screen.whitelist.WhitelistScreen
@@ -207,6 +208,7 @@ class MainActivity : ComponentActivity() {
                             entry<Route.Whitelist>(swipeDismiss = swipeDismiss) { WhitelistScreen(navigator) }
                             entry<Route.WhitelistOpen>(swipeDismiss = swipeDismiss) { WhitelistOpenScreen(navigator) }
                             entry<Route.Boost>(swipeDismiss = swipeDismiss) { BoostScreen() }
+                            entry<Route.Music>(swipeDismiss = swipeDismiss) { MusicScreen(navigator) }
                         }
                     }
 

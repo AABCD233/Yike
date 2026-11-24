@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.BatterySaver
+import androidx.compose.material.icons.rounded.FolderOpen
 import androidx.compose.material.icons.rounded.Layers
 import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.PictureInPicture
@@ -115,6 +116,24 @@ fun PermissionScreen() {
                             .putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, context.packageName)
                             .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
                         runCatching { context.startActivity(intent) }
+                    },
+                )
+            }
+            item {
+                PermissionRow(
+                    icon = Icons.Rounded.FolderOpen,
+                    title = "所有文件访问",
+                    summary = "选音乐目录、读取本地音频要用",
+                    granted = android.os.Environment.isExternalStorageManager(),
+                    actionText = "去开启",
+                    onAction = {
+                        runCatching {
+                            context.startActivity(
+                                android.content.Intent(android.provider.Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
+                                    .setData(android.net.Uri.parse("package:${context.packageName}"))
+                                    .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                            )
+                        }
                     },
                 )
             }

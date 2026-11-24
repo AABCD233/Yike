@@ -286,7 +286,7 @@ fun FocusScreen(navController: Navigator) {
                 IconButton(onClick = { showBackground = true }) {
                     Icon(Icons.Rounded.Palette, contentDescription = "背景", tint = onBackground.copy(alpha = 0.9f))
                 }
-                IconButton(onClick = { showMusicPicker = true }) {
+                IconButton(onClick = { navController.push(com.yike.focus.ui.navigation3.Route.Music) }) {
                     Icon(Icons.Rounded.MusicNote, contentDescription = "背景音乐", tint = onBackground.copy(alpha = 0.9f))
                 }
                 IconButton(onClick = { navController.push(com.yike.focus.ui.navigation3.Route.WhitelistOpen) }) {

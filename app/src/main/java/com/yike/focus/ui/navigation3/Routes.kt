@@ -59,4 +59,8 @@ sealed interface Route : NavKey, Parcelable {
     @Serializable
     data object Boost : Route
 
+    @Parcelize
+    @Serializable
+    data object Music : Route
+
 }
