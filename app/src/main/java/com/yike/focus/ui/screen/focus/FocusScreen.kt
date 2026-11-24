@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.sp
 import com.yike.focus.data.FocusTimer
 import com.yike.focus.ui.navigation3.Navigator
 import com.yike.focus.ui.util.Notify
+import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import kotlinx.coroutines.delay
 
 private val QUOTES = listOf(
@@ -121,13 +122,7 @@ fun FocusScreen(navController: Navigator) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                if (isRest) {
-                    Brush.verticalGradient(listOf(Color(0xFF2F7D6B), Color(0xFF54A592), Color(0xFF8CC7B4)))
-                } else {
-                    Brush.verticalGradient(listOf(Color(0xFF3D5A80), Color(0xFF5C7FA8), Color(0xFF87A8C8)))
-                }
-            ),
+            .background(colorScheme.background),
     ) {
         Column(
             modifier = Modifier
@@ -138,11 +133,11 @@ fun FocusScreen(navController: Navigator) {
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = { navController.pop() }) {
-                    Icon(Icons.Rounded.ArrowBack, contentDescription = "返回", tint = Color.White)
+                    Icon(Icons.Rounded.ArrowBack, contentDescription = "返回", tint = colorScheme.onBackground)
                 }
                 Text(
                     if (isRest) "休息一下，等会儿继续" else quote,
-                    color = Color.White.copy(alpha = 0.92f),
+                    color = colorScheme.onSurfaceVariantSummary,
                     fontSize = 15.sp,
                     lineHeight = 22.sp,
                     modifier = Modifier.weight(1f),
@@ -160,7 +155,7 @@ fun FocusScreen(navController: Navigator) {
                         val inset = stroke / 2
                         val arcSize = Size(size.width - stroke, size.height - stroke)
                         drawArc(
-                            color = Color.White.copy(alpha = 0.25f),
+                            color = colorScheme.outline,
                             startAngle = -90f,
                             sweepAngle = 360f,
                             useCenter = false,
@@ -169,7 +164,7 @@ fun FocusScreen(navController: Navigator) {
                             style = Stroke(width = stroke, cap = StrokeCap.Round),
                         )
                         drawArc(
-                            color = Color.White,
+                            color = colorScheme.primary,
                             startAngle = -90f,
                             sweepAngle = 360f * progress,
                             useCenter = false,
@@ -182,15 +177,15 @@ fun FocusScreen(navController: Navigator) {
                         formatClock(if (s.isCountdown) remaining else elapsed),
                         fontSize = 44.sp,
                         fontWeight = FontWeight.Medium,
-                        color = Color.White,
+                        color = colorScheme.onBackground,
                     )
                 }
                 Spacer(Modifier.height(18.dp))
-                Text(s.title, color = Color.White, fontSize = 17.sp)
+                Text(s.title, color = colorScheme.onBackground, fontSize = 17.sp)
                 Spacer(Modifier.height(4.dp))
                 Text(
                     if (s.isPaused) "已暂停" else if (isRest) "休息中" else "进行中",
-                    color = Color.White.copy(alpha = 0.75f),
+                    color = colorScheme.onSurfaceVariantSummary,
                     fontSize = 13.sp,
                 )
             }
@@ -233,13 +228,13 @@ private fun ActionPill(text: String, primary: Boolean = false, onClick: () -> Un
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(24.dp))
-            .background(if (primary) Color.White else Color.White.copy(alpha = 0.18f))
+            .background(if (primary) colorScheme.primary else colorScheme.secondaryContainer)
             .clickable { onClick() }
             .padding(horizontal = 26.dp, vertical = 12.dp),
     ) {
         Text(
             text,
-            color = if (primary) Color(0xFF3D5A80) else Color.White,
+            color = if (primary) colorScheme.onPrimary else colorScheme.onSecondaryContainer,
             fontSize = 15.sp,
         )
     }
