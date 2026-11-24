@@ -82,6 +82,7 @@ object FocusTimer {
     }
 
     fun start(todo: Todo, overrideMinutes: Int? = null) {
+        PomodoroSettings.lastTodoId = todo.id
         val minutes = overrideMinutes ?: todo.durationMin
         _state.value = State(
             todoId = todo.id,
@@ -105,14 +106,14 @@ object FocusTimer {
         persist()
     }
 
-    fun startRest(minutes: Int) {
+    fun startRest(minutes: Int, long: Boolean = false) {
         _state.value = State(
             todoId = null,
             title = "休息",
             mode = TimerMode.COUNTDOWN,
             totalSeconds = minutes * 60,
             startWall = System.currentTimeMillis(),
-            kind = "relax",
+            kind = if (long) "rest_long" else "relax",
         )
         persist()
     }

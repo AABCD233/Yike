@@ -47,6 +47,8 @@ import androidx.compose.ui.unit.sp
 import com.yike.focus.data.BoostSettings
 import com.yike.focus.data.FocusLook
 import com.yike.focus.data.FocusTimer
+import com.yike.focus.data.PomodoroSettings
+import com.yike.focus.data.TodoStore
 import com.yike.focus.data.Quotes
 import com.yike.focus.ui.component.miuix.ConfirmDialog
 import com.yike.focus.ui.navigation3.Navigator
@@ -90,15 +92,30 @@ fun FocusScreen(navController: Navigator) {
         if (finishedTitle == null) {
             LaunchedEffect(Unit) { navController.pop() }
         } else {
+            val wasRest = finishedTitle == "休息"
             ConfirmDialog(
                 show = true,
-                title = "完成一个番茄",
-                summary = "「$finishedTitle」专注 ${finishedSeconds / 60} 分钟，起来活动一下？",
-                confirmText = "休息 5 分钟",
-                dismissText = "先不休息",
+                title = if (wasRest) "休息结束" else "完成一个番茄",
+                summary = if (wasRest) {
+                    "回来继续吧，今天已经完成 ${PomodoroSettings.roundIndex} 个番茄"
+                } else {
+                    "「$finishedTitle」专注 ${finishedSeconds / 60} 分钟，起来活动一下？"
+                },
+                confirmText = if (wasRest) "再来一个" else "休息 ${PomodoroSettings.breakMinutes} 分钟",
+                dismissText = "结束",
                 onConfirm = {
+                    val lastId = PomodoroSettings.lastTodoId
                     finishedTitle = null
-                    FocusTimer.startRest(5)
+                    if (wasRest) {
+                        val todo = TodoStore.todo(lastId)
+                        if (todo != null) {
+                            FocusTimer.start(todo)
+                        } else {
+                            navController.pop()
+                        }
+                    } else {
+                        FocusTimer.startRest(PomodoroSettings.breakMinutes)
+                    }
                 },
                 onDismiss = { navController.pop() },
             )
@@ -114,7 +131,7 @@ fun FocusScreen(navController: Navigator) {
     } else {
         ((elapsed % 3600).toFloat() / 3600f)
     }
-    val isRest = s.kind == "relax"
+    val isRest = s.kind == "relax" || s.kind == "rest_long"
     val strictMode = !isRest && BoostSettings.strict
 
     val presetColor = Color(FocusLook.backgroundColors[bgPreset.coerceIn(FocusLook.backgroundColors.indices)])
@@ -129,9 +146,21 @@ fun FocusScreen(navController: Navigator) {
             val done = FocusTimer.stop(abandoned = false)
             if (!isRest) {
                 Notify.focusDone(context, s.title, done?.seconds ?: s.totalSeconds)
+                PomodoroSettings.roundIndex = PomodoroSettings.roundIndex + 1
+                finishedTitle = s.title
+                finishedSeconds = done?.seconds ?: (s.totalSeconds - 1)
+                if (PomodoroSettings.autoBreak) {
+                    val long = PomodoroSettings.nextIsLongBreak
+                    FocusTimer.startRest(
+                        if (long) PomodoroSettings.longBreakMinutes else PomodoroSettings.breakMinutes,
+                        long = long,
+                    )
+                    finishedTitle = null
+                }
+            } else {
+                finishedTitle = "休息"
+                finishedSeconds = done?.seconds ?: (s.totalSeconds - 1)
             }
-            finishedTitle = if (isRest) "休息" else s.title
-            finishedSeconds = done?.seconds ?: (s.totalSeconds - 1)
         }
     }
 
