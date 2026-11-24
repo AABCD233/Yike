@@ -31,6 +31,10 @@ data class Todo(
     val createdAt: Long = System.currentTimeMillis(),
     /** 卡片背景图，存在 filesDir 下的绝对路径 */
     val bgPath: String? = null,
+    /** 这个待办自己的循环参数 */
+    val breakMin: Int = 5,
+    val longBreakMin: Int = 15,
+    val rounds: Int = 4,
 )
 
 data class FocusSession(

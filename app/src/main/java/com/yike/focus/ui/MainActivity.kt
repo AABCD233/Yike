@@ -66,7 +66,6 @@ import com.yike.focus.ui.navigation3.rememberNavigator
 import com.yike.focus.ui.screen.about.AboutScreen
 import com.yike.focus.ui.screen.colorpalette.ColorPaletteScreen
 import com.yike.focus.ui.screen.boost.BoostScreen
-import com.yike.focus.ui.screen.cycle.CycleScreen
 import com.yike.focus.ui.screen.focus.FocusScreen
 import com.yike.focus.ui.screen.history.HistoryScreen
 import com.yike.focus.ui.screen.home.HomePager
@@ -208,7 +207,6 @@ class MainActivity : ComponentActivity() {
                             entry<Route.Whitelist>(swipeDismiss = swipeDismiss) { WhitelistScreen(navigator) }
                             entry<Route.WhitelistOpen>(swipeDismiss = swipeDismiss) { WhitelistOpenScreen(navigator) }
                             entry<Route.Boost>(swipeDismiss = swipeDismiss) { BoostScreen() }
-                            entry<Route.Cycle>(swipeDismiss = swipeDismiss) { CycleScreen() }
                         }
                     }
 

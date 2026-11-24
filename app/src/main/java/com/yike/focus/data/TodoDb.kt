@@ -10,7 +10,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 private const val DB_NAME = "yike.db"
-private const val DB_VERSION = 2
+private const val DB_VERSION = 3
 private val DAY_FMT: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
 class TodoDb(context: Context) : SQLiteOpenHelper(context, DB_NAME, null, DB_VERSION) {
@@ -42,7 +42,10 @@ class TodoDb(context: Context) : SQLiteOpenHelper(context, DB_NAME, null, DB_VER
                 note TEXT NOT NULL DEFAULT '',
                 sort_order INTEGER NOT NULL DEFAULT 0,
                 created_at INTEGER NOT NULL DEFAULT 0,
-                bg_path TEXT
+                bg_path TEXT,
+                break_min INTEGER NOT NULL DEFAULT 5,
+                long_break_min INTEGER NOT NULL DEFAULT 15,
+                rounds INTEGER NOT NULL DEFAULT 4
             )
             """.trimIndent()
         )
@@ -68,6 +71,11 @@ class TodoDb(context: Context) : SQLiteOpenHelper(context, DB_NAME, null, DB_VER
         // 只做加列，不重建表：重建会把用户已有的待办和记录全清掉
         if (oldVersion < 2) {
             runCatching { db.execSQL("ALTER TABLE todo ADD COLUMN bg_path TEXT") }
+        }
+        if (oldVersion < 3) {
+            runCatching { db.execSQL("ALTER TABLE todo ADD COLUMN break_min INTEGER NOT NULL DEFAULT 5") }
+            runCatching { db.execSQL("ALTER TABLE todo ADD COLUMN long_break_min INTEGER NOT NULL DEFAULT 15") }
+            runCatching { db.execSQL("ALTER TABLE todo ADD COLUMN rounds INTEGER NOT NULL DEFAULT 4") }
         }
     }
 }
@@ -126,6 +134,9 @@ object TodoStore {
                     createdAt = c.getLong(c.getColumnIndexOrThrow("created_at")),
                     bgPath = if (c.isNull(c.getColumnIndexOrThrow("bg_path"))) null
                     else c.getString(c.getColumnIndexOrThrow("bg_path")),
+                    breakMin = c.getInt(c.getColumnIndexOrThrow("break_min")),
+                    longBreakMin = c.getInt(c.getColumnIndexOrThrow("long_break_min")),
+                    rounds = c.getInt(c.getColumnIndexOrThrow("rounds")),
                 )
             }
         }
@@ -149,6 +160,9 @@ object TodoStore {
             put("sort_order", todo.sortOrder)
             put("created_at", todo.createdAt)
             if (todo.bgPath != null) put("bg_path", todo.bgPath) else putNull("bg_path")
+            put("break_min", todo.breakMin)
+            put("long_break_min", todo.longBreakMin)
+            put("rounds", todo.rounds)
         }
         return db.insert("todo", null, values)
     }
@@ -167,6 +181,9 @@ object TodoStore {
             put("note", todo.note)
             put("sort_order", todo.sortOrder)
             if (todo.bgPath != null) put("bg_path", todo.bgPath) else putNull("bg_path")
+            put("break_min", todo.breakMin)
+            put("long_break_min", todo.longBreakMin)
+            put("rounds", todo.rounds)
         }
         db.update("todo", values, "id = ?", arrayOf(todo.id.toString()))
     }

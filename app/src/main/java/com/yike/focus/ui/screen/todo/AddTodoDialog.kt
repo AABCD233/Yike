@@ -1,6 +1,5 @@
 package com.yike.focus.ui.screen.todo
 
-import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -10,20 +9,18 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Check
-import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material3.Icon
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Remove
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,18 +29,19 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import com.yike.focus.data.TimerMode
 import com.yike.focus.data.Todo
 import com.yike.focus.data.TodoKind
-import com.yike.focus.templateApp
-import com.yike.focus.ui.theme.TP
-import java.time.LocalDate
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.TextButton
+import top.yukonga.miuix.kmp.basic.TextField
+import top.yukonga.miuix.kmp.overlay.OverlayDialog
+import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 
 @Composable
 fun AddTodoDialog(
@@ -54,228 +52,219 @@ fun AddTodoDialog(
     var title by remember { mutableStateOf(initial?.title ?: "") }
     var kind by remember { mutableStateOf(initial?.kind ?: TodoKind.NORMAL) }
     var mode by remember { mutableStateOf(initial?.timerMode ?: TimerMode.COUNTDOWN) }
-    var minutes by remember { mutableStateOf(initial?.durationMin ?: defaultFocusMinutes()) }
-    var customOpen by remember { mutableStateOf(initial != null && initial.durationMin != 25 && initial.durationMin != 35) }
-    var customText by remember { mutableStateOf(initial?.durationMin?.toString() ?: "") }
+    var minutes by remember { mutableStateOf(initial?.durationMin ?: 25) }
     var hoursText by remember { mutableStateOf(initial?.targetHours?.takeIf { it > 0f }?.toString() ?: "") }
     var dailyText by remember { mutableStateOf(initial?.dailyMin?.takeIf { it > 0 }?.toString() ?: "") }
-    var advanced by remember { mutableStateOf(false) }
     var note by remember { mutableStateOf(initial?.note ?: "") }
+    var breakMin by remember { mutableStateOf(initial?.breakMin ?: 5) }
+    var longBreakMin by remember { mutableStateOf(initial?.longBreakMin ?: 15) }
+    var rounds by remember { mutableStateOf(initial?.rounds ?: 4) }
+    var advanced by remember { mutableStateOf(false) }
 
-    Dialog(onDismissRequest = onDismiss) {
-        Surface(
-            shape = RoundedCornerShape(24.dp),
-            color = androidx.compose.material3.MaterialTheme.colorScheme.surface,
-            modifier = Modifier.fillMaxWidth(),
+    OverlayDialog(
+        show = true,
+        title = if (initial == null) "添加待办" else "编辑待办",
+        onDismissRequest = onDismiss,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(max = 460.dp)
+                .verticalScroll(rememberScrollState()),
         ) {
-            Column(modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(onClick = onDismiss) {
-                        Icon(Icons.Rounded.Close, contentDescription = "关闭", tint = androidx.compose.material3.MaterialTheme.colorScheme.onSurface)
-                    }
-                    Text(
-                        if (initial == null) "添加待办" else "编辑待办",
-                        modifier = Modifier.weight(1f),
-                        textAlign = TextAlign.Center,
-                        fontSize = 17.sp,
-                        color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface,
-                    )
-                    IconButton(
-                        onClick = {
-                            if (title.isNotBlank()) {
-                                onCreate(
-                                    Todo(
-                                        id = initial?.id ?: 0L,
-                                        title = title.trim(),
-                                        kind = kind,
-                                        timerMode = mode,
-                                        durationMin = minutes,
-                                        targetHours = hoursText.toFloatOrNull() ?: 0f,
-                                        startDate = if (kind == TodoKind.GOAL) TodoStore_today() else null,
-                                        endDate = if (kind == TodoKind.GOAL) LocalDate.now().plusDays(30).toString() else null,
-                                        dailyMin = dailyText.toIntOrNull() ?: 0,
-                                        note = note,
-                                        createdAt = initial?.createdAt ?: System.currentTimeMillis(),
-                                    )
-                                )
-                            }
-                        },
-                    ) {
-                        Icon(Icons.Rounded.Check, contentDescription = "确定", tint = androidx.compose.material3.MaterialTheme.colorScheme.onSurface)
-                    }
-                }
+            TextField(
+                value = title,
+                onValueChange = { title = it },
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                when (kind) {
+                    TodoKind.NORMAL -> "待办名称"
+                    TodoKind.GOAL -> "目标名称"
+                    TodoKind.HABIT -> "习惯名称"
+                },
+                fontSize = 11.sp,
+                color = colorScheme.onSurfaceVariantSummary,
+            )
+            Spacer(Modifier.height(12.dp))
 
-                Spacer(Modifier.height(4.dp))
-                OutlinedTextField(
-                    value = title,
-                    onValueChange = { title = it },
-                    placeholder = { Text(placeholderFor(kind), color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant) },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                Spacer(Modifier.height(10.dp))
-
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Pill("普通番茄钟", kind == TodoKind.NORMAL) { kind = TodoKind.NORMAL }
-                    Pill("定目标", kind == TodoKind.GOAL) { kind = TodoKind.GOAL }
-                    Pill("养习惯", kind == TodoKind.HABIT) { kind = TodoKind.HABIT }
-                }
-
-                if (kind == TodoKind.GOAL) {
-                    Spacer(Modifier.height(12.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("我想在", fontSize = 14.sp, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface)
-                        Highlight("设定目标日期") { }
-                        Text("之前，一共完成", fontSize = 14.sp, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface)
-                    }
-                    Spacer(Modifier.height(8.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        OutlinedTextField(
-                            value = hoursText,
-                            onValueChange = { hoursText = it.filter(Char::isDigit) },
-                            singleLine = true,
-                            placeholder = { Text("小时", color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant) },
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            modifier = Modifier.width(120.dp),
-                        )
-                        Text("  小时", fontSize = 14.sp, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface)
-                    }
-                }
-
-                if (kind == TodoKind.HABIT) {
-                    Spacer(Modifier.height(12.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("我想", fontSize = 14.sp, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface)
-                        Highlight("每天") { }
-                        Text("完成", fontSize = 14.sp, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface)
-                    }
-                    Spacer(Modifier.height(8.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        OutlinedTextField(
-                            value = dailyText,
-                            onValueChange = { dailyText = it.filter(Char::isDigit) },
-                            singleLine = true,
-                            placeholder = { Text("分钟", color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant) },
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            modifier = Modifier.width(120.dp),
-                        )
-                        Text("  分钟", fontSize = 14.sp, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface)
-                    }
-                }
-
-                Spacer(Modifier.height(14.dp))
-                Text("最后一步，设置单次专注的时长：", fontSize = 13.sp, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant)
-                Spacer(Modifier.height(8.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Pill("倒计时", mode == TimerMode.COUNTDOWN) { mode = TimerMode.COUNTDOWN }
-                    Pill("正向计时", mode == TimerMode.COUNTUP) { mode = TimerMode.COUNTUP }
-                    Pill("不计时", mode == TimerMode.NONE) { mode = TimerMode.NONE }
-                }
-                if (mode == TimerMode.COUNTDOWN) {
-                    Spacer(Modifier.height(8.dp))
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Pill("25 分钟", !customOpen && minutes == 25) { minutes = 25; customOpen = false }
-                        Pill("35 分钟", !customOpen && minutes == 35) { minutes = 35; customOpen = false }
-                        Pill("自定义", customOpen) { customOpen = true }
-                    }
-                    if (customOpen) {
-                        Spacer(Modifier.height(8.dp))
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            OutlinedTextField(
-                                value = customText,
-                                onValueChange = {
-                                    customText = it.filter(Char::isDigit)
-                                    customText.toIntOrNull()?.let { v -> minutes = v.coerceIn(1, 600) }
-                                },
-                                singleLine = true,
-                                placeholder = { Text("分钟", color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant) },
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                                modifier = Modifier.width(120.dp),
-                            )
-                            Text("  分钟（1-600）", fontSize = 13.sp, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant)
-                        }
-                    }
-                }
-
-                Spacer(Modifier.height(10.dp))
-                Text(
-                    "· 倒计时 25 分钟即标准番茄时间",
-                    fontSize = 12.sp,
-                    color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center,
-                )
-                Spacer(Modifier.height(10.dp))
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(CircleShape)
-                        .clickable { advanced = !advanced }
-                        .padding(vertical = 6.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        if (advanced) "收起高级设置" else "展开更多高级设置",
-                        fontSize = 13.sp,
-                        color = androidx.compose.material3.MaterialTheme.colorScheme.primary,
-                    )
-                }
-                if (advanced) {
-                    OutlinedTextField(
-                        value = note,
-                        onValueChange = { note = it },
-                        placeholder = { Text("备注（可选）", color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant) },
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                }
-                Spacer(Modifier.height(6.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Chip("普通番茄钟", kind == TodoKind.NORMAL) { kind = TodoKind.NORMAL }
+                Chip("定目标", kind == TodoKind.GOAL) { kind = TodoKind.GOAL }
+                Chip("养习惯", kind == TodoKind.HABIT) { kind = TodoKind.HABIT }
             }
+
+            if (kind == TodoKind.GOAL) {
+                Spacer(Modifier.height(10.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("目标总时长", fontSize = 13.sp, color = colorScheme.onSurface)
+                    Spacer(Modifier.width(10.dp))
+                    TextField(
+                        value = hoursText,
+                        onValueChange = { hoursText = it.filter(Char::isDigit) },
+                        modifier = Modifier.width(110.dp),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    )
+                    Text(" 小时", fontSize = 13.sp, color = colorScheme.onSurfaceVariantSummary)
+                }
+            }
+
+            if (kind == TodoKind.HABIT) {
+                Spacer(Modifier.height(10.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("每天目标", fontSize = 13.sp, color = colorScheme.onSurface)
+                    Spacer(Modifier.width(10.dp))
+                    TextField(
+                        value = dailyText,
+                        onValueChange = { dailyText = it.filter(Char::isDigit) },
+                        modifier = Modifier.width(110.dp),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    )
+                    Text(" 分钟", fontSize = 13.sp, color = colorScheme.onSurfaceVariantSummary)
+                }
+            }
+
+            Spacer(Modifier.height(14.dp))
+            Text("计时方式", fontSize = 13.sp, color = colorScheme.onSurfaceVariantSummary)
+            Spacer(Modifier.height(6.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Chip("倒计时", mode == TimerMode.COUNTDOWN) { mode = TimerMode.COUNTDOWN }
+                Chip("正向计时", mode == TimerMode.COUNTUP) { mode = TimerMode.COUNTUP }
+                Chip("不计时", mode == TimerMode.NONE) { mode = TimerMode.NONE }
+            }
+
+            if (mode == TimerMode.COUNTDOWN) {
+                Spacer(Modifier.height(14.dp))
+                Text("单次专注时长", fontSize = 13.sp, color = colorScheme.onSurfaceVariantSummary)
+                Spacer(Modifier.height(6.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    listOf(15, 25, 35, 45, 60).forEach { value ->
+                        Chip("$value", minutes == value) { minutes = value }
+                    }
+                }
+                Spacer(Modifier.height(8.dp))
+                Stepper(
+                    title = "更精确的分钟数",
+                    value = "$minutes 分钟",
+                    onMinus = { minutes = (minutes - 1).coerceAtLeast(1) },
+                    onPlus = { minutes = (minutes + 1).coerceAtMost(600) },
+                )
+            }
+
+            Spacer(Modifier.height(12.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(10.dp))
+                    .clickable { advanced = !advanced }
+                    .padding(vertical = 8.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    if (advanced) "收起高级设置" else "展开更多高级设置",
+                    fontSize = 13.sp,
+                    color = colorScheme.primary,
+                )
+            }
+
+            if (advanced) {
+                Stepper(
+                    title = "休息时长",
+                    value = "$breakMin 分钟",
+                    onMinus = { breakMin = (breakMin - 1).coerceAtLeast(1) },
+                    onPlus = { breakMin = (breakMin + 1).coerceAtMost(60) },
+                )
+                Stepper(
+                    title = "长休息时长",
+                    value = "$longBreakMin 分钟",
+                    onMinus = { longBreakMin = (longBreakMin - 5).coerceAtLeast(5) },
+                    onPlus = { longBreakMin = (longBreakMin + 5).coerceAtMost(120) },
+                )
+                Stepper(
+                    title = "几轮后长休息",
+                    value = "$rounds 个",
+                    onMinus = { rounds = (rounds - 1).coerceAtLeast(1) },
+                    onPlus = { rounds = (rounds + 1).coerceAtMost(12) },
+                )
+                Spacer(Modifier.height(6.dp))
+                TextField(
+                    value = note,
+                    onValueChange = { note = it },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Text("备注", fontSize = 11.sp, color = colorScheme.onSurfaceVariantSummary)
+            }
+        }
+
+        Spacer(Modifier.height(12.dp))
+        Row(modifier = Modifier.fillMaxWidth()) {
+            TextButton(
+                text = "取消",
+                onClick = onDismiss,
+                modifier = Modifier.weight(1f),
+            )
+            Spacer(Modifier.width(16.dp))
+            TextButton(
+                text = if (initial == null) "添加" else "保存",
+                onClick = {
+                    if (title.isNotBlank()) {
+                        onCreate(
+                            Todo(
+                                id = initial?.id ?: 0L,
+                                title = title.trim(),
+                                kind = kind,
+                                timerMode = mode,
+                                durationMin = minutes,
+                                targetHours = hoursText.toFloatOrNull() ?: 0f,
+                                dailyMin = dailyText.toIntOrNull() ?: 0,
+                                note = note,
+                                createdAt = initial?.createdAt ?: System.currentTimeMillis(),
+                                bgPath = initial?.bgPath,
+                                breakMin = breakMin,
+                                longBreakMin = longBreakMin,
+                                rounds = rounds,
+                            )
+                        )
+                    }
+                },
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.textButtonColorsPrimary(),
+            )
         }
     }
 }
 
-private fun placeholderFor(kind: TodoKind) = when (kind) {
-    TodoKind.NORMAL -> "请输入待办名称"
-    TodoKind.GOAL -> "请输入目标名称"
-    TodoKind.HABIT -> "请输入习惯名称"
-}
-
 @Composable
-private fun Pill(text: String, selected: Boolean, onClick: () -> Unit) {
+private fun Chip(text: String, selected: Boolean, onClick: () -> Unit) {
     Box(
         modifier = Modifier
-            .clip(CircleShape)
-            .background(if (selected) androidx.compose.material3.MaterialTheme.colorScheme.primary.copy(alpha = 0.15f) else androidx.compose.material3.MaterialTheme.colorScheme.surfaceVariant)
+            .clip(RoundedCornerShape(20.dp))
+            .background(if (selected) colorScheme.primaryContainer else colorScheme.surfaceContainerHighest)
             .clickable { onClick() }
             .padding(horizontal = 14.dp, vertical = 7.dp),
     ) {
-        Text(text, fontSize = 13.sp, color = if (selected) androidx.compose.material3.MaterialTheme.colorScheme.primary else androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(
+            text,
+            fontSize = 13.sp,
+            color = if (selected) colorScheme.onPrimaryContainer else colorScheme.onSurfaceVariantSummary,
+        )
     }
 }
 
 @Composable
-private fun Highlight(text: String, onClick: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .clip(CircleShape)
-            .background(androidx.compose.material3.MaterialTheme.colorScheme.primary.copy(alpha = 0.10f))
-            .clickable { onClick() }
-            .padding(horizontal = 8.dp, vertical = 4.dp),
+private fun Stepper(title: String, value: String, onMinus: () -> Unit, onPlus: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(text, fontSize = 13.sp, color = androidx.compose.material3.MaterialTheme.colorScheme.primary)
+        Text(title, fontSize = 13.sp, color = colorScheme.onSurface, modifier = Modifier.weight(1f))
+        IconButton(onClick = onMinus, modifier = Modifier.size(32.dp)) {
+            Icon(Icons.Rounded.Remove, contentDescription = "减少", tint = colorScheme.onSurfaceVariantSummary)
+        }
+        Text(value, fontSize = 13.sp, color = colorScheme.onSurface, modifier = Modifier.padding(horizontal = 8.dp))
+        IconButton(onClick = onPlus, modifier = Modifier.size(32.dp)) {
+            Icon(Icons.Rounded.Add, contentDescription = "增加", tint = colorScheme.onSurfaceVariantSummary)
+        }
     }
-}
-
-/** 只用日期字符串，避免在弹窗里引入日期选择器 */
-private fun TodoStore_today(): String = LocalDate.now().toString()
-
-/** 设置里的「默认番茄时长」，新建待办时用它当默认值 */
-internal fun defaultFocusMinutes(): Int {
-    val prefs = templateApp.getSharedPreferences("settings", Context.MODE_PRIVATE)
-    return prefs.getInt("default_focus_min", 25).coerceIn(1, 600)
-}
-
-internal fun saveDefaultFocusMinutes(minutes: Int) {
-    templateApp.getSharedPreferences("settings", Context.MODE_PRIVATE)
-        .edit().putInt("default_focus_min", minutes.coerceIn(1, 600)).apply()
 }

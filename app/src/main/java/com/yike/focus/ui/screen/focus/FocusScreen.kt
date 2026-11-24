@@ -128,7 +128,7 @@ fun FocusScreen(navController: Navigator) {
                 } else {
                     "「$finishedTitle」专注 ${finishedSeconds / 60} 分钟，起来活动一下？"
                 },
-                confirmText = if (wasRest) "再来一个" else "休息 ${PomodoroSettings.breakMinutes} 分钟",
+                confirmText = if (wasRest) "再来一个" else "休息一下",
                 dismissText = "结束",
                 onConfirm = {
                     val lastId = PomodoroSettings.lastTodoId
@@ -141,7 +141,14 @@ fun FocusScreen(navController: Navigator) {
                             navController.pop()
                         }
                     } else {
-                        FocusTimer.startRest(PomodoroSettings.breakMinutes)
+                        val active = TodoStore.todo(lastId)
+                        val rounds = active?.rounds ?: PomodoroSettings.roundsBeforeLong
+                        val long = rounds > 0 && PomodoroSettings.roundIndex % rounds == 0
+                        FocusTimer.startRest(
+                            if (long) (active?.longBreakMin ?: PomodoroSettings.longBreakMinutes)
+                            else (active?.breakMin ?: PomodoroSettings.breakMinutes),
+                            long = long,
+                        )
                     }
                 },
                 onDismiss = { navController.pop() },
@@ -184,11 +191,15 @@ fun FocusScreen(navController: Navigator) {
                 finishedTitle = s.title
                 finishedSeconds = done?.seconds ?: (s.totalSeconds - 1)
                 if (PomodoroSettings.autoBreak) {
-                    val long = PomodoroSettings.nextIsLongBreak
-                    FocusTimer.startRest(
-                        if (long) PomodoroSettings.longBreakMinutes else PomodoroSettings.breakMinutes,
-                        long = long,
-                    )
+                    val active = TodoStore.todo(PomodoroSettings.lastTodoId)
+                    val rounds = active?.rounds ?: PomodoroSettings.roundsBeforeLong
+                    val long = rounds > 0 && PomodoroSettings.roundIndex % rounds == 0
+                    val breakMin = if (long) {
+                        active?.longBreakMin ?: PomodoroSettings.longBreakMinutes
+                    } else {
+                        active?.breakMin ?: PomodoroSettings.breakMinutes
+                    }
+                    FocusTimer.startRest(breakMin, long = long)
                     finishedTitle = null
                 }
             } else {
@@ -349,7 +360,7 @@ fun FocusScreen(navController: Navigator) {
         OverlayDialog(
             show = true,
             title = "背景",
-            summary = "纯色就行，不做花里胡哨的渐变",
+
             onDismissRequest = { showBackground = false },
         ) {
             Column {

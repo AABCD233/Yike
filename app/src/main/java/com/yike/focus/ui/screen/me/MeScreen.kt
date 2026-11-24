@@ -149,18 +149,6 @@ fun MeScreen(navController: Navigator, bottomPadding: Dp) {
                     startAction = { PrefIcon(Icons.Rounded.History) },
                     onClick = { navController.push(Route.History) },
                 )
-                ArrowPreference(
-                    title = "番茄循环",
-                    summary = "短休息、长休息、几轮之后长休息",
-                    startAction = { PrefIcon(Icons.Rounded.Repeat) },
-                    onClick = { navController.push(Route.Cycle) },
-                )
-                ArrowPreference(
-                    title = "默认番茄时长",
-                    summary = "新建待办时默认 $defaultMinutes 分钟",
-                    startAction = { PrefIcon(Icons.Rounded.Timer) },
-                    onClick = { showMinutes = true },
-                )
             }
         }
 
