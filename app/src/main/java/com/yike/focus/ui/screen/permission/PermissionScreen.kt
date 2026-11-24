@@ -1,460 +1,183 @@
 package com.yike.focus.ui.screen.permission
 
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
+import android.content.Context
+import android.os.PowerManager
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.add
-import androidx.compose.foundation.layout.displayCutout
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.OpenInNew
-import androidx.compose.material.icons.filled.BatterySaver
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.ErrorOutline
-import androidx.compose.material.icons.filled.Folder
-import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.WebAsset
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
+import androidx.compose.material.icons.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.BatterySaver
+import androidx.compose.material.icons.rounded.Layers
+import androidx.compose.material.icons.rounded.Notifications
+import androidx.compose.material.icons.rounded.PictureInPicture
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LargeFlexibleTopAppBar
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.LayoutDirection
-import androidx.lifecycle.compose.LifecycleResumeEffect
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.compose.dropUnlessResumed
-import com.yike.focus.R
-import com.yike.focus.permission.PermissionManager
-import com.yike.focus.permission.PermissionState
-import com.yike.focus.ui.LocalUiMode
-import com.yike.focus.ui.UiMode
+import androidx.compose.ui.unit.sp
+import androidx.core.app.NotificationManagerCompat
+import com.yike.focus.data.AppGuard
 import com.yike.focus.ui.navigation3.LocalNavigator
-import com.yike.focus.ui.theme.LocalEnableBlur
-import com.yike.focus.ui.util.BlurredBar
-import com.yike.focus.ui.util.rememberBlurBackdrop
-import top.yukonga.miuix.kmp.blur.layerBackdrop
-import top.yukonga.miuix.kmp.basic.BasicComponent
-import top.yukonga.miuix.kmp.basic.Card as MiuixCard
-import top.yukonga.miuix.kmp.basic.Icon as MiuixIcon
-import top.yukonga.miuix.kmp.basic.IconButton as MiuixIconButton
-import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
-import top.yukonga.miuix.kmp.basic.Scaffold as MiuixScaffold
-import top.yukonga.miuix.kmp.basic.Text as MiuixText
-import top.yukonga.miuix.kmp.basic.TopAppBar as MiuixTopAppBar
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Back
-import top.yukonga.miuix.kmp.preference.ArrowPreference
-import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.utils.overScrollVertical
-import top.yukonga.miuix.kmp.utils.scrollEndHaptic
+import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
+import kotlinx.coroutines.delay
 
+/** 权限页：只放这个 App 真正用到的四项 */
 @Composable
 fun PermissionScreen() {
     val navigator = LocalNavigator.current
     val context = LocalContext.current
-    val manager = remember(context) { PermissionManager(context) }
-    val state by manager.state.collectAsStateWithLifecycle()
-    val settingsLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { manager.refresh() }
-    val permissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { manager.refresh() }
+    var tick by remember { mutableIntStateOf(0) }
 
-    LifecycleResumeEffect(manager) {
-        manager.refresh()
-        onPauseOrDispose { }
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(1200)
+            tick++
+        }
     }
 
-    val actions = PermissionActions(
-        onStorage = { settingsLauncher.launch(manager.storageSettingsIntent()) },
-        onNotification = {
-            manager.notificationRuntimePermission()?.let(permissionLauncher::launch)
-                ?: settingsLauncher.launch(manager.notificationSettingsIntent())
-        },
-        onMicrophone = { permissionLauncher.launch(manager.microphonePermission()) },
-        onBattery = { settingsLauncher.launch(manager.batteryWhitelistIntent()) },
-        onOverlay = { settingsLauncher.launch(manager.overlaySettingsIntent()) },
-    )
-    val onBack = dropUnlessResumed { navigator.pop() }
-
-    when (LocalUiMode.current) {
-        UiMode.Miuix -> PermissionScreenMiuix(state, actions, onBack)
-        UiMode.Material -> PermissionScreenMaterial(state, actions, onBack)
+    val appList = remember(tick) { AppGuard.hasUsageAccess() }
+    val overlay = remember(tick) { AppGuard.hasOverlayAccess() }
+    val notification = remember(tick) {
+        NotificationManagerCompat.from(context).areNotificationsEnabled()
     }
-}
+    val battery = remember(tick) {
+        (context.getSystemService(Context.POWER_SERVICE) as PowerManager)
+            .isIgnoringBatteryOptimizations(context.packageName)
+    }
 
-private data class PermissionActions(
-    val onStorage: () -> Unit,
-    val onNotification: () -> Unit,
-    val onMicrophone: () -> Unit,
-    val onBattery: () -> Unit,
-    val onOverlay: () -> Unit,
-)
+    Column(modifier = Modifier.fillMaxSize().background(colorScheme.background)) {
+        Row(
+            modifier = Modifier.fillMaxWidth().statusBarsPadding().padding(start = 6.dp, end = 16.dp, top = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            IconButton(onClick = { navigator.pop() }) {
+                Icon(Icons.Rounded.ArrowBack, contentDescription = "返回", tint = colorScheme.onBackground)
+            }
+            Text("权限", fontSize = 22.sp, fontWeight = FontWeight.SemiBold, color = colorScheme.onBackground)
+        }
 
-@Composable
-private fun PermissionScreenMiuix(
-    state: PermissionState,
-    actions: PermissionActions,
-    onBack: () -> Unit,
-) {
-    val scrollBehavior = MiuixScrollBehavior()
-    val backdrop = rememberBlurBackdrop(LocalEnableBlur.current)
-    val barColor = if (backdrop != null) Color.Transparent else MiuixTheme.colorScheme.surface
-    MiuixScaffold(
-        topBar = {
-            BlurredBar(backdrop) {
-                MiuixTopAppBar(
-                    color = barColor,
-                    title = stringResource(R.string.permission_section),
-                    navigationIcon = {
-                        MiuixIconButton(onClick = onBack) {
-                            val layoutDirection = LocalLayoutDirection.current
-                            MiuixIcon(
-                                imageVector = MiuixIcons.Back,
-                                contentDescription = null,
-                                modifier = Modifier.graphicsLayer {
-                                    if (layoutDirection == LayoutDirection.Rtl) scaleX = -1f
-                                },
-                                tint = MiuixTheme.colorScheme.onBackground,
+        LazyColumn(
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 32.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            item {
+                PermissionRow(
+                    icon = Icons.Rounded.Layers,
+                    title = "应用列表",
+                    summary = "读取「正在使用哪个 App」，硬核模式靠它判断要不要拦",
+                    granted = appList,
+                    actionText = "去开启",
+                    onAction = { AppGuard.openUsageAccessSettings(context) },
+                )
+            }
+            item {
+                PermissionRow(
+                    icon = Icons.Rounded.PictureInPicture,
+                    title = "显示在其他应用上层",
+                    summary = "拦截页要盖在其他应用之上",
+                    granted = overlay,
+                    actionText = "去开启",
+                    onAction = { AppGuard.openOverlaySettings(context) },
+                )
+            }
+            item {
+                PermissionRow(
+                    icon = Icons.Rounded.Notifications,
+                    title = "通知",
+                    summary = "番茄结束、离开计时页的提醒",
+                    granted = notification,
+                    actionText = "去开启",
+                    onAction = {
+                        val intent = android.content.Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                            .putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, context.packageName)
+                            .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                        runCatching { context.startActivity(intent) }
+                    },
+                )
+            }
+            item {
+                PermissionRow(
+                    icon = Icons.Rounded.BatterySaver,
+                    title = "忽略电池优化",
+                    summary = "后台计时和守护不被系统清理",
+                    granted = battery,
+                    actionText = "去设置",
+                    onAction = {
+                        runCatching {
+                            context.startActivity(
+                                android.content.Intent(android.provider.Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
+                                    .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
                             )
                         }
                     },
-                    scrollBehavior = scrollBehavior,
                 )
             }
-        },
-        popupHost = { },
-        contentWindowInsets =
-            WindowInsets.systemBars.add(WindowInsets.displayCutout).only(WindowInsetsSides.Horizontal),
-    ) { innerPadding ->
-        Box(modifier = if (backdrop != null) Modifier.layerBackdrop(backdrop) else Modifier) {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .scrollEndHaptic()
-                    .overScrollVertical()
-                    .nestedScroll(scrollBehavior.nestedScrollConnection)
-                    .padding(horizontal = 12.dp),
-                contentPadding = innerPadding,
-                overscrollEffect = null,
-            ) {
-                item { Spacer(Modifier.height(8.dp)) }
-                item {
-                    MiuixCard(modifier = Modifier.fillMaxWidth()) {
-                        BasicComponent(
-                            title = if (state.requiredGranted) {
-                                stringResource(R.string.permission_status_ready_title)
-                            } else {
-                                stringResource(R.string.permission_status_missing_title)
-                            },
-                            summary = if (state.requiredGranted) {
-                                stringResource(R.string.permission_ready)
-                            } else {
-                                stringResource(R.string.permission_missing)
-                            },
-                            endActions = {
-                                MiuixIcon(
-                                    imageVector =
-                                        if (state.requiredGranted) Icons.Default.CheckCircle
-                                        else Icons.Default.ErrorOutline,
-                                    tint =
-                                        if (state.requiredGranted) MiuixTheme.colorScheme.primary
-                                        else MiuixTheme.colorScheme.error,
-                                    contentDescription = null,
-                                )
-                            },
-                        )
-                    }
-                }
-                item {
-                    MiuixCard(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 12.dp)
-                    ) {
-                        PermissionRowMiuix(
-                            stringResource(R.string.permission_storage),
-                            state.storage,
-                            true,
-                            Icons.Default.Folder,
-                            actions.onStorage,
-                        )
-                        PermissionRowMiuix(
-                            stringResource(R.string.permission_notification),
-                            state.notification,
-                            true,
-                            Icons.Default.Notifications,
-                            actions.onNotification,
-                        )
-                        PermissionRowMiuix(
-                            stringResource(R.string.permission_microphone),
-                            state.microphone,
-                            true,
-                            Icons.Default.Mic,
-                            actions.onMicrophone,
-                        )
-                        PermissionRowMiuix(
-                            stringResource(R.string.permission_battery),
-                            state.batteryWhitelist,
-                            true,
-                            Icons.Default.BatterySaver,
-                            actions.onBattery,
-                        )
-                        PermissionRowMiuix(
-                            stringResource(R.string.permission_overlay),
-                            state.overlay,
-                            false,
-                            Icons.Default.WebAsset,
-                            actions.onOverlay,
-                        )
-                    }
-                }
-                item { Spacer(Modifier.height(24.dp)) }
-            }
         }
     }
 }
 
 @Composable
-private fun PermissionRowMiuix(
-    title: String,
-    granted: Boolean,
-    required: Boolean,
+private fun PermissionRow(
     icon: ImageVector,
-    onClick: () -> Unit,
+    title: String,
+    summary: String,
+    granted: Boolean,
+    actionText: String,
+    onAction: () -> Unit,
 ) {
-    ArrowPreference(
-        title = title,
-        summary = when {
-            granted -> stringResource(R.string.permission_granted)
-            required -> stringResource(R.string.permission_required)
-            else -> stringResource(R.string.permission_optional)
-        },
-        startAction = {
-            MiuixIcon(
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
                 imageVector = icon,
                 contentDescription = null,
-                modifier = Modifier.padding(end = 8.dp),
+                tint = colorScheme.onSurfaceVariantSummary,
+                modifier = Modifier.padding(end = 12.dp),
             )
-        },
-        endActions = {
-            MiuixText(
-                text =
-                    if (granted) {
-                        stringResource(R.string.permission_granted)
-                    } else {
-                        stringResource(R.string.permission_grant_action)
-                    },
-                color =
-                    if (granted) MiuixTheme.colorScheme.primary
-                    else MiuixTheme.colorScheme.onSurfaceVariantSummary,
-                fontWeight = FontWeight.Medium,
-            )
-        },
-        onClick = onClick,
-        holdDownState = false,
-        enabled = true,
-    )
-}
-
-@Composable
-private fun PermissionScreenMaterial(
-    state: PermissionState,
-    actions: PermissionActions,
-    onBack: () -> Unit,
-) {
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
-    LaunchedEffect(Unit) {
-        scrollBehavior.state.heightOffset = scrollBehavior.state.heightOffsetLimit
-    }
-
-    Scaffold(
-        topBar = {
-            LargeFlexibleTopAppBar(
-                title = { Text(stringResource(R.string.permission_section)) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    scrolledContainerColor = MaterialTheme.colorScheme.surface,
-                ),
-                windowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal),
-                scrollBehavior = scrollBehavior,
-            )
-        }
-    ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .nestedScroll(scrollBehavior.nestedScrollConnection),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            item {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor =
-                            if (state.requiredGranted) MaterialTheme.colorScheme.secondaryContainer
-                            else MaterialTheme.colorScheme.errorContainer
-                    ),
-                ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        Text(
-                            text =
-                                if (state.requiredGranted) {
-                                    stringResource(R.string.permission_status_ready_title)
-                                } else {
-                                    stringResource(R.string.permission_status_missing_title)
-                                },
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold,
-                        )
-                        Text(
-                            text =
-                                if (state.requiredGranted) {
-                                    stringResource(R.string.permission_ready)
-                                } else {
-                                    stringResource(R.string.permission_missing)
-                                },
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
+            Column(modifier = Modifier.weight(1f)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(title, fontSize = 15.sp, color = colorScheme.onSurface)
+                    Spacer(Modifier.padding(start = 6.dp))
+                    Text(
+                        if (granted) "已开启" else "未开启",
+                        fontSize = 11.sp,
+                        color = if (granted) colorScheme.primary else colorScheme.onSurfaceVariantSummary,
+                    )
+                }
+                Spacer(Modifier.height(2.dp))
+                Text(summary, fontSize = 12.sp, color = colorScheme.onSurfaceVariantSummary)
+            }
+            if (!granted) {
+                Card(onClick = onAction, showIndication = true) {
+                    Box(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
+                        Text(actionText, fontSize = 13.sp, color = colorScheme.primary)
                     }
                 }
-            }
-            item {
-                Card(modifier = Modifier.fillMaxWidth()) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                    ) {
-                        PermissionRowMaterial(
-                            stringResource(R.string.permission_storage),
-                            state.storage,
-                            true,
-                            Icons.Default.Folder,
-                            actions.onStorage,
-                        )
-                        PermissionRowMaterial(
-                            stringResource(R.string.permission_notification),
-                            state.notification,
-                            true,
-                            Icons.Default.Notifications,
-                            actions.onNotification,
-                        )
-                        PermissionRowMaterial(
-                            stringResource(R.string.permission_microphone),
-                            state.microphone,
-                            true,
-                            Icons.Default.Mic,
-                            actions.onMicrophone,
-                        )
-                        PermissionRowMaterial(
-                            stringResource(R.string.permission_battery),
-                            state.batteryWhitelist,
-                            true,
-                            Icons.Default.BatterySaver,
-                            actions.onBattery,
-                        )
-                        PermissionRowMaterial(
-                            stringResource(R.string.permission_overlay),
-                            state.overlay,
-                            false,
-                            Icons.Default.WebAsset,
-                            actions.onOverlay,
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun PermissionRowMaterial(
-    title: String,
-    granted: Boolean,
-    required: Boolean,
-    icon: ImageVector,
-    onClick: () -> Unit,
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(icon, contentDescription = null)
-        Column(modifier = Modifier.weight(1f)) {
-            Text(text = title, style = MaterialTheme.typography.bodyMedium)
-            Text(
-                text = when {
-                    granted -> stringResource(R.string.permission_granted)
-                    required -> stringResource(R.string.permission_required)
-                    else -> stringResource(R.string.permission_optional)
-                },
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-        if (granted) {
-            AssistChip(
-                onClick = { },
-                label = { Text(stringResource(R.string.permission_granted)) },
-                leadingIcon = {
-                    Icon(Icons.Default.CheckCircle, contentDescription = null)
-                },
-            )
-        } else {
-            OutlinedButton(onClick = onClick) {
-                Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = null)
-                Text(stringResource(R.string.permission_grant_action))
             }
         }
     }

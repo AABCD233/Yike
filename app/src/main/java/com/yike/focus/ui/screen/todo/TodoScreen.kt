@@ -1,6 +1,7 @@
 package com.yike.focus.ui.screen.todo
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -219,8 +220,12 @@ internal fun TodoCard(
     var menu by remember { mutableStateOf(false) }
 
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        onClick = onStart,
+        modifier = Modifier
+            .fillMaxWidth()
+            .combinedClickable(
+                onClick = onStart,
+                onLongClick = { if (onEdit != null || onDelete != null) menu = true },
+            ),
         showIndication = true,
     ) {
         Row(

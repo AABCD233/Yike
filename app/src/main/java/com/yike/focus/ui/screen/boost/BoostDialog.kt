@@ -46,7 +46,7 @@ fun BoostDialog(onDismiss: () -> Unit, onOpenWhitelist: () -> Unit = {}) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(max = 420.dp)
+                    .heightIn(max = 360.dp)
                     .verticalScroll(rememberScrollState()),
             ) {
             BoostSwitch(
@@ -92,7 +92,7 @@ fun BoostDialog(onDismiss: () -> Unit, onOpenWhitelist: () -> Unit = {}) {
             TextButton(
                 text = "完成",
                 onClick = onDismiss,
-                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp).padding(top = 8.dp),
                 colors = ButtonDefaults.textButtonColorsPrimary(),
             )
         }
