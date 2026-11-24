@@ -1,7 +1,15 @@
 package com.yike.focus.ui.screen.focus
 
 import androidx.activity.compose.BackHandler
+import android.graphics.BitmapFactory
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -68,6 +76,25 @@ fun FocusScreen(navController: Navigator) {
     var showBackground by remember { mutableStateOf(false) }
     var showWhitelistTip by remember { mutableStateOf(false) }
     var bgPreset by remember { mutableStateOf(FocusLook.backgroundPreset) }
+    var bgImage by remember { mutableStateOf(FocusLook.backgroundImage) }
+    val bgBitmap = remember(bgImage) {
+        bgImage?.let { path -> runCatching {
+            BitmapFactory.decodeFile(path, BitmapFactory.Options().apply { inSampleSize = 2 })
+        }.getOrNull()?.asImageBitmap() }
+    }
+    val pickBg = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->
+        if (uri != null) {
+            runCatching {
+                val file = java.io.File(context.filesDir, "focus_bg.jpg")
+                context.contentResolver.openInputStream(uri)?.use { input ->
+                    file.outputStream().use { out -> input.copyTo(out) }
+                }
+                FocusLook.backgroundImage = file.absolutePath
+                bgImage = file.absolutePath
+                bgPreset = -1
+            }
+        }
+    }
     var quote by remember { mutableStateOf(Quotes.cached()) }
     var quoteFrom by remember { mutableStateOf(Quotes.cachedFrom()) }
     val context = LocalContext.current
@@ -134,9 +161,16 @@ fun FocusScreen(navController: Navigator) {
     val isRest = s.kind == "relax" || s.kind == "rest_long"
     val strictMode = !isRest && BoostSettings.strict
 
-    val presetColor = Color(FocusLook.backgroundColors[bgPreset.coerceIn(FocusLook.backgroundColors.indices)])
-    val background = if (presetColor.alpha == 0f) colorScheme.background else presetColor
-    val onBackground = if (background.luminance() > 0.55f) Color(0xFF1B1F24) else Color.White
+    val presetColor = if (bgPreset in FocusLook.backgroundColors.indices) {
+        Color(FocusLook.backgroundColors[bgPreset])
+    } else Color.Transparent
+    val background = when {
+        bgBitmap != null -> Color.Black
+        presetColor.alpha == 0f -> colorScheme.background
+        else -> presetColor
+    }
+    val onBackground = if (bgBitmap != null) Color.White
+    else if (background.luminance() > 0.55f) Color(0xFF1B1F24) else Color.White
 
     // 严格模式：返回手势也不能退出
     BackHandler(enabled = strictMode) { }
@@ -169,6 +203,21 @@ fun FocusScreen(navController: Navigator) {
             .fillMaxSize()
             .background(background),
     ) {
+        bgBitmap?.let { bmp ->
+            Image(
+                bitmap = bmp,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.matchParentSize(),
+            )
+            Box(
+                modifier = Modifier.matchParentSize().background(
+                    androidx.compose.ui.graphics.Brush.verticalGradient(
+                        listOf(Color.Black.copy(alpha = 0.20f), Color.Black.copy(alpha = 0.55f))
+                    )
+                ),
+            )
+        }
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -293,6 +342,19 @@ fun FocusScreen(navController: Navigator) {
             onDismissRequest = { showBackground = false },
         ) {
             Column {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(if (bgBitmap != null) colorScheme.primaryContainer else Color.Transparent)
+                        .clickable {
+                            pickBg.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                        }
+                        .padding(horizontal = 12.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text("从相册选一张图", fontSize = 14.sp, color = colorScheme.onSurface)
+                }
                 FocusLook.backgroundNames.forEachIndexed { index, name ->
                     val color = Color(FocusLook.backgroundColors[index])
                     Row(
@@ -303,6 +365,8 @@ fun FocusScreen(navController: Navigator) {
                             .clickable {
                                 bgPreset = index
                                 FocusLook.backgroundPreset = index
+                                FocusLook.backgroundImage = null
+                                bgImage = null
                             }
                             .padding(horizontal = 12.dp, vertical = 10.dp),
                         verticalAlignment = Alignment.CenterVertically,
