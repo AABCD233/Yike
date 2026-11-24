@@ -1,4 +1,4 @@
-package com.tomato.focus.resources
+package com.yike.focus.resources
 
 import java.io.File
 import javax.xml.parsers.DocumentBuilderFactory

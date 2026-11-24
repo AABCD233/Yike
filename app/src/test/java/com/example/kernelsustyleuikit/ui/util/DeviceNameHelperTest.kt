@@ -1,4 +1,4 @@
-package com.tomato.focus.ui.util
+package com.yike.focus.ui.util
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull

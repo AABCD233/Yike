@@ -1,6 +1,6 @@
-package com.tomato.focus.ui.screen.home
+package com.yike.focus.ui.screen.home
 
-import com.tomato.focus.ui.util.LatestVersionInfo
+import com.yike.focus.ui.util.LatestVersionInfo
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test

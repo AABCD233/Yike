@@ -1,7 +1,7 @@
-package com.tomato.focus.ui.viewmodel
+package com.yike.focus.ui.viewmodel
 
-import com.tomato.focus.data.repository.SettingsRepository
-import com.tomato.focus.ui.screen.settings.SettingsUiState
+import com.yike.focus.data.repository.SettingsRepository
+import com.yike.focus.ui.screen.settings.SettingsUiState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher

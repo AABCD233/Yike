@@ -18,7 +18,7 @@ val managerVersionCode = rootProject.extra["managerVersionCode"] as Int
 val managerVersionName = rootProject.extra["managerVersionName"] as String
 
 android {
-    namespace = "com.tomato.focus"
+    namespace = "com.yike.focus"
 
     // 固定签名：仓库内证书，debug/release 共用，避免每次构建指纹不同导致覆盖安装失败
     signingConfigs {
@@ -80,7 +80,7 @@ android {
     buildToolsVersion = androidBuildToolsVersion
 
     defaultConfig {
-        applicationId = "com.tomato.focus"
+        applicationId = "com.yike.focus"
         minSdk = androidMinSdkVersion
         targetSdk = androidTargetSdkVersion
         versionCode = managerVersionCode
@@ -118,7 +118,7 @@ androidComponents {
 
 base {
     archivesName.set(
-        "TomatoPlan_v${managerVersionName}_${managerVersionCode}"
+        "Yike_v${managerVersionName}_${managerVersionCode}"
     )
 }
 
