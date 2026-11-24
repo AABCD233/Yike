@@ -192,8 +192,14 @@ fun FocusScreen(navController: Navigator) {
                     finishedTitle = null
                 }
             } else {
-                finishedTitle = "休息"
-                finishedSeconds = done?.seconds ?: (s.totalSeconds - 1)
+                // 休息结束：开了「自动开始下一个」就直接接着上一个任务
+                val lastTodo = TodoStore.todo(PomodoroSettings.lastTodoId)
+                if (PomodoroSettings.autoNext && lastTodo != null) {
+                    FocusTimer.start(lastTodo)
+                } else {
+                    finishedTitle = "休息"
+                    finishedSeconds = done?.seconds ?: (s.totalSeconds - 1)
+                }
             }
         }
     }
