@@ -20,7 +20,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Backup
-import androidx.compose.material.icons.rounded.DarkMode
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Restore
@@ -154,12 +153,6 @@ fun MeScreen(navController: Navigator, bottomPadding: Dp) {
                     summary = "新建待办时默认 $defaultMinutes 分钟",
                     startAction = { PrefIcon(Icons.Rounded.Timer) },
                     onClick = { showMinutes = true },
-                )
-                ArrowPreference(
-                    title = "外观",
-                    summary = "主题、界面风格、缩放",
-                    startAction = { PrefIcon(Icons.Rounded.DarkMode) },
-                    onClick = { navController.push(Route.Settings) },
                 )
             }
         }

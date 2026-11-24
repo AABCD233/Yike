@@ -156,7 +156,13 @@ fun TodoScreen(
     }
 
     if (showBoost) {
-        BoostDialog(onDismiss = { showBoost = false })
+        BoostDialog(
+            onDismiss = { showBoost = false },
+            onOpenWhitelist = {
+                showBoost = false
+                navController.push(Route.Whitelist)
+            },
+        )
     }
 
     if (showAdd) {

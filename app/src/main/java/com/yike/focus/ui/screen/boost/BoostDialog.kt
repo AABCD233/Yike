@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.yike.focus.data.AppGuard
 import com.yike.focus.data.BoostSettings
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.TextButton
@@ -29,7 +30,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import top.yukonga.miuix.kmp.basic.Icon
 
 @Composable
-fun BoostDialog(onDismiss: () -> Unit) {
+fun BoostDialog(onDismiss: () -> Unit, onOpenWhitelist: () -> Unit = {}) {
     var hardcore by remember { mutableStateOf(BoostSettings.hardcore) }
     var strict by remember { mutableStateOf(BoostSettings.strict) }
     var blockNotify by remember { mutableStateOf(BoostSettings.blockNotify) }
@@ -53,7 +54,14 @@ fun BoostDialog(onDismiss: () -> Unit) {
                 title = "硬核模式",
                 summary = "计时期间阻止其他应用打开（需要额外授权，后续版本生效）",
                 checked = hardcore,
-            ) { hardcore = it; BoostSettings.hardcore = it }
+            ) {
+                hardcore = it
+                BoostSettings.hardcore = it
+                if (it && (!AppGuard.hasUsageAccess() || !AppGuard.hasOverlayAccess())) {
+                    onDismiss()
+                    onOpenWhitelist()
+                }
+            }
             BoostSwitch(
                 icon = Icons.Rounded.Lock,
                 title = "严格模式",
@@ -71,7 +79,14 @@ fun BoostDialog(onDismiss: () -> Unit) {
                 title = "白名单",
                 summary = "允许在计时期间使用的应用",
                 checked = whitelist,
-            ) { whitelist = it; BoostSettings.whitelistEnabled = it }
+            ) {
+                whitelist = it
+                BoostSettings.whitelistEnabled = it
+                if (it) {
+                    onDismiss()
+                    onOpenWhitelist()
+                }
+            }
             }
 
             TextButton(
