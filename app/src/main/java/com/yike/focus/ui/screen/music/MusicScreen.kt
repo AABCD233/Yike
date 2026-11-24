@@ -104,7 +104,7 @@ fun MusicScreen(navController: Navigator) {
                         val selected = MusicPlaylist.mode == m
                         Card(
                             modifier = Modifier.padding(horizontal = 4.dp),
-                            onClick = { MusicPlaylist.setMode(m) },
+                            onClick = { MusicPlaylist.changeMode(m) },
                             showIndication = true,
                         ) {
                             Row(

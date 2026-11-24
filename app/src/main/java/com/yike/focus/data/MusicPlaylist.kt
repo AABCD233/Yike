@@ -100,7 +100,7 @@ object MusicPlaylist {
         playAt((index - 1 + tracks.size) % tracks.size)
     }
 
-    fun setMode(m: Mode) {
+    fun changeMode(m: Mode) {
         mode = m
         prefs().edit().putString("music_mode", m.name).apply()
     }
