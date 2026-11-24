@@ -108,10 +108,12 @@ fun LockScreen(navController: Navigator, bottomPadding: Dp) {
     }
 
     if (pickDuration) {
-        AlertDialog(
+        top.yukonga.miuix.kmp.overlay.OverlayDialog(
+            show = true,
+            title = "锁机时长",
+            summary = "锁机期间屏幕常亮，返回键不生效，到时间自动结束。",
             onDismissRequest = { pickDuration = false },
-            title = { androidx.compose.material3.Text("锁机时长") },
-            text = {
+        ) {
                 Column {
                     androidx.compose.material3.Text(
                         "锁机期间屏幕常亮，返回键不生效，到时间自动结束。",
@@ -165,20 +167,18 @@ fun LockScreen(navController: Navigator, bottomPadding: Dp) {
                         }
                     }
                 }
-            },
-            confirmButton = {
-                TextButton(onClick = { pickDuration = false }) { androidx.compose.material3.Text("取消") }
-            },
-        )
+        }
     }
 
     tip?.let { text ->
-        AlertDialog(
-            onDismissRequest = { tip = null },
-            confirmButton = {
-                TextButton(onClick = { tip = null }) { androidx.compose.material3.Text("知道了") }
-            },
-            text = { androidx.compose.material3.Text(text) },
+        com.yike.focus.ui.component.miuix.ConfirmDialog(
+            show = true,
+            title = "提示",
+            summary = text,
+            confirmText = "知道了",
+            dismissText = null,
+            onConfirm = { tip = null },
+            onDismiss = { tip = null },
         )
     }
 }

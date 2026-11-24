@@ -60,6 +60,9 @@ fun AddTodoDialog(
     var longBreakMin by remember { mutableStateOf(initial?.longBreakMin ?: 15) }
     var rounds by remember { mutableStateOf(initial?.rounds ?: 4) }
     var advanced by remember { mutableStateOf(false) }
+    var reminder by remember { mutableStateOf(initial?.reminderEnabled ?: false) }
+    var reminderHour by remember { mutableStateOf(initial?.reminderHour ?: 8) }
+    var reminderMinute by remember { mutableStateOf(initial?.reminderMinute ?: 0) }
 
     OverlayDialog(
         show = true,
@@ -69,7 +72,7 @@ fun AddTodoDialog(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .heightIn(max = 460.dp)
+                .heightIn(max = 320.dp)
                 .verticalScroll(rememberScrollState()),
         ) {
             TextField(
@@ -187,6 +190,27 @@ fun AddTodoDialog(
                     onMinus = { rounds = (rounds - 1).coerceAtLeast(1) },
                     onPlus = { rounds = (rounds + 1).coerceAtMost(12) },
                 )
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text("每日定时提醒", fontSize = 13.sp, color = colorScheme.onSurface, modifier = Modifier.weight(1f))
+                    androidx.compose.material3.Switch(checked = reminder, onCheckedChange = { reminder = it })
+                }
+                if (reminder) {
+                    Stepper(
+                        title = "提醒时间（小时）",
+                        value = "%02d".format(reminderHour),
+                        onMinus = { reminderHour = (reminderHour - 1 + 24) % 24 },
+                        onPlus = { reminderHour = (reminderHour + 1) % 24 },
+                    )
+                    Stepper(
+                        title = "提醒时间（分钟）",
+                        value = "%02d".format(reminderMinute),
+                        onMinus = { reminderMinute = (reminderMinute - 5 + 60) % 60 },
+                        onPlus = { reminderMinute = (reminderMinute + 5) % 60 },
+                    )
+                }
                 Spacer(Modifier.height(6.dp))
                 TextField(
                     value = note,
@@ -224,6 +248,9 @@ fun AddTodoDialog(
                                 breakMin = breakMin,
                                 longBreakMin = longBreakMin,
                                 rounds = rounds,
+                                reminderEnabled = reminder,
+                                reminderHour = reminderHour,
+                                reminderMinute = reminderMinute,
                             )
                         )
                     }

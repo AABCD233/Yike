@@ -62,6 +62,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yike.focus.data.FocusTimer
+import com.yike.focus.data.Reminders
 import com.yike.focus.data.TimerMode
 import com.yike.focus.data.Todo
 import com.yike.focus.data.TodoKind
@@ -181,7 +182,8 @@ fun TodoScreen(
         AddTodoDialog(
             onDismiss = { showAdd = false },
             onCreate = { todo ->
-                TodoStore.insertTodo(todo)
+                val id = TodoStore.insertTodo(todo)
+                TodoStore.todos().firstOrNull { it.id == id }?.let { Reminders.schedule(context, it) }
                 todos = TodoStore.todos()
                 showAdd = false
             },
@@ -194,6 +196,7 @@ fun TodoScreen(
             initial = todo,
             onCreate = { updated ->
                 TodoStore.updateTodo(updated)
+                Reminders.schedule(context, updated)
                 todos = TodoStore.todos()
                 editing = null
             },
@@ -233,6 +236,7 @@ fun TodoScreen(
             text = { androidx.compose.material3.Text("删除「${todo.title}」？已经产生的专注记录会保留。") },
             confirmButton = {
                 TextButton(onClick = {
+                    Reminders.cancel(context, todo)
                     TodoStore.deleteTodo(todo.id)
                     todos = TodoStore.todos()
                     deleting = null

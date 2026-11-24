@@ -35,6 +35,10 @@ data class Todo(
     val breakMin: Int = 5,
     val longBreakMin: Int = 15,
     val rounds: Int = 4,
+    /** 每日定时提醒 */
+    val reminderEnabled: Boolean = false,
+    val reminderHour: Int = 8,
+    val reminderMinute: Int = 0,
 )
 
 data class FocusSession(

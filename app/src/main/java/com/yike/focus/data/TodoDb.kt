@@ -10,7 +10,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 private const val DB_NAME = "yike.db"
-private const val DB_VERSION = 3
+private const val DB_VERSION = 4
 private val DAY_FMT: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
 class TodoDb(context: Context) : SQLiteOpenHelper(context, DB_NAME, null, DB_VERSION) {
@@ -45,7 +45,10 @@ class TodoDb(context: Context) : SQLiteOpenHelper(context, DB_NAME, null, DB_VER
                 bg_path TEXT,
                 break_min INTEGER NOT NULL DEFAULT 5,
                 long_break_min INTEGER NOT NULL DEFAULT 15,
-                rounds INTEGER NOT NULL DEFAULT 4
+                rounds INTEGER NOT NULL DEFAULT 4,
+                reminder_enabled INTEGER NOT NULL DEFAULT 0,
+                reminder_hour INTEGER NOT NULL DEFAULT 8,
+                reminder_minute INTEGER NOT NULL DEFAULT 0
             )
             """.trimIndent()
         )
@@ -76,6 +79,11 @@ class TodoDb(context: Context) : SQLiteOpenHelper(context, DB_NAME, null, DB_VER
             runCatching { db.execSQL("ALTER TABLE todo ADD COLUMN break_min INTEGER NOT NULL DEFAULT 5") }
             runCatching { db.execSQL("ALTER TABLE todo ADD COLUMN long_break_min INTEGER NOT NULL DEFAULT 15") }
             runCatching { db.execSQL("ALTER TABLE todo ADD COLUMN rounds INTEGER NOT NULL DEFAULT 4") }
+        }
+        if (oldVersion < 4) {
+            runCatching { db.execSQL("ALTER TABLE todo ADD COLUMN reminder_enabled INTEGER NOT NULL DEFAULT 0") }
+            runCatching { db.execSQL("ALTER TABLE todo ADD COLUMN reminder_hour INTEGER NOT NULL DEFAULT 8") }
+            runCatching { db.execSQL("ALTER TABLE todo ADD COLUMN reminder_minute INTEGER NOT NULL DEFAULT 0") }
         }
     }
 }
@@ -137,6 +145,9 @@ object TodoStore {
                     breakMin = c.getInt(c.getColumnIndexOrThrow("break_min")),
                     longBreakMin = c.getInt(c.getColumnIndexOrThrow("long_break_min")),
                     rounds = c.getInt(c.getColumnIndexOrThrow("rounds")),
+                    reminderEnabled = c.getInt(c.getColumnIndexOrThrow("reminder_enabled")) != 0,
+                    reminderHour = c.getInt(c.getColumnIndexOrThrow("reminder_hour")),
+                    reminderMinute = c.getInt(c.getColumnIndexOrThrow("reminder_minute")),
                 )
             }
         }
@@ -163,6 +174,9 @@ object TodoStore {
             put("break_min", todo.breakMin)
             put("long_break_min", todo.longBreakMin)
             put("rounds", todo.rounds)
+            put("reminder_enabled", if (todo.reminderEnabled) 1 else 0)
+            put("reminder_hour", todo.reminderHour)
+            put("reminder_minute", todo.reminderMinute)
         }
         return db.insert("todo", null, values)
     }
@@ -184,6 +198,9 @@ object TodoStore {
             put("break_min", todo.breakMin)
             put("long_break_min", todo.longBreakMin)
             put("rounds", todo.rounds)
+            put("reminder_enabled", if (todo.reminderEnabled) 1 else 0)
+            put("reminder_hour", todo.reminderHour)
+            put("reminder_minute", todo.reminderMinute)
         }
         db.update("todo", values, "id = ?", arrayOf(todo.id.toString()))
     }
