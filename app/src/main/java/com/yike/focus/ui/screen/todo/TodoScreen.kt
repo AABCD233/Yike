@@ -1,5 +1,6 @@
 package com.yike.focus.ui.screen.todo
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,6 +17,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Bolt
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.AlertDialog
@@ -41,6 +43,7 @@ import com.yike.focus.data.Todo
 import com.yike.focus.data.TodoKind
 import com.yike.focus.data.TodoStore
 import com.yike.focus.ui.navigation3.Navigator
+import com.yike.focus.ui.screen.boost.BoostDialog
 import com.yike.focus.ui.navigation3.Route
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
@@ -56,11 +59,12 @@ fun TodoScreen(
 ) {
     var todos by remember { mutableStateOf(TodoStore.todos()) }
     var showAdd by remember { mutableStateOf(false) }
+    var showBoost by remember { mutableStateOf(false) }
     var editing by remember { mutableStateOf<Todo?>(null) }
     var deleting by remember { mutableStateOf<Todo?>(null) }
     val focusState by FocusTimer.state.collectAsState()
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(modifier = Modifier.fillMaxSize().background(colorScheme.background)) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -79,6 +83,13 @@ fun TodoScreen(
                 Icon(
                     Icons.Rounded.History,
                     contentDescription = "专注记录",
+                    tint = colorScheme.onBackground,
+                )
+            }
+            IconButton(onClick = { showBoost = true }) {
+                Icon(
+                    Icons.Rounded.Bolt,
+                    contentDescription = "功能增强",
                     tint = colorScheme.onBackground,
                 )
             }
@@ -140,6 +151,10 @@ fun TodoScreen(
                 }
             }
         }
+    }
+
+    if (showBoost) {
+        BoostDialog(onDismiss = { showBoost = false })
     }
 
     if (showAdd) {

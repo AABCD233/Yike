@@ -106,6 +106,7 @@ fun FocusScreen(navController: Navigator) {
     }
     val quote = remember(s.startWall) { QUOTES[(s.startWall / 1000 % QUOTES.size).toInt()] }
     val isRest = s.kind == "relax"
+    val strictMode = !isRest && com.yike.focus.data.BoostSettings.strict
 
     // 倒计时归零：落库、发通知，然后停在完成提示
     LaunchedEffect(s.isCountdown, remaining, s.isPaused) {
@@ -198,23 +199,26 @@ fun FocusScreen(navController: Navigator) {
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
+                if (!strictMode) {
+                    ActionPill(
+                        text = if (s.isPaused) "继续" else "暂停",
+                        onClick = { if (s.isPaused) FocusTimer.resume() else FocusTimer.pause() },
+                    )
+                    Spacer(Modifier.size(12.dp))
+                    ActionPill(
+                        text = "放弃",
+                        onClick = {
+                            FocusTimer.stop(abandoned = true)
+                            navController.pop()
+                        },
+                    )
+                    Spacer(Modifier.size(12.dp))
+                }
                 ActionPill(
-                    text = if (s.isPaused) "继续" else "暂停",
-                    onClick = { if (s.isPaused) FocusTimer.resume() else FocusTimer.pause() },
-                )
-                Spacer(Modifier.size(12.dp))
-                ActionPill(
-                    text = "放弃",
-                    onClick = {
-                        FocusTimer.stop(abandoned = true)
-                        navController.pop()
-                    },
-                )
-                Spacer(Modifier.size(12.dp))
-                ActionPill(
-                    text = "结束",
+                    text = if (strictMode) "停止（严格模式不可提前结束）" else "结束",
                     primary = true,
                     onClick = {
+                        if (remaining > 0 && strictMode) return@ActionPill
                         FocusTimer.stop(abandoned = false)
                         navController.pop()
                     },

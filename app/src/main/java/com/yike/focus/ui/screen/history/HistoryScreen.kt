@@ -1,5 +1,6 @@
 package com.yike.focus.ui.screen.history
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -49,7 +50,7 @@ fun HistoryScreen(navController: Navigator) {
         sessions.groupBy { Instant.ofEpochMilli(it.startTs).atZone(ZoneId.systemDefault()).toLocalDate() }
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(modifier = Modifier.fillMaxSize().background(colorScheme.background)) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()

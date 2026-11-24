@@ -1,5 +1,6 @@
 package com.yike.focus.ui.screen.todoset
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -57,7 +58,7 @@ fun TodoSetScreen(navController: Navigator, bottomPadding: Dp) {
     var renaming by remember { mutableStateOf<TodoSet?>(null) }
     var deleting by remember { mutableStateOf<TodoSet?>(null) }
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(modifier = Modifier.fillMaxSize().background(colorScheme.background)) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()

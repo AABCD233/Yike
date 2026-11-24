@@ -64,20 +64,20 @@ fun AddTodoDialog(
     Dialog(onDismissRequest = onDismiss) {
         Surface(
             shape = RoundedCornerShape(24.dp),
-            color = Color.White,
+            color = androidx.compose.material3.MaterialTheme.colorScheme.surface,
             modifier = Modifier.fillMaxWidth(),
         ) {
             Column(modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     IconButton(onClick = onDismiss) {
-                        Icon(Icons.Rounded.Close, contentDescription = "关闭", tint = TP.TextDark)
+                        Icon(Icons.Rounded.Close, contentDescription = "关闭", tint = androidx.compose.material3.MaterialTheme.colorScheme.onSurface)
                     }
                     Text(
                         "添加待办",
                         modifier = Modifier.weight(1f),
                         textAlign = TextAlign.Center,
                         fontSize = 17.sp,
-                        color = TP.TextDark,
+                        color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface,
                     )
                     IconButton(
                         onClick = {
@@ -98,7 +98,7 @@ fun AddTodoDialog(
                             }
                         },
                     ) {
-                        Icon(Icons.Rounded.Check, contentDescription = "确定", tint = TP.TextDark)
+                        Icon(Icons.Rounded.Check, contentDescription = "确定", tint = androidx.compose.material3.MaterialTheme.colorScheme.onSurface)
                     }
                 }
 
@@ -106,7 +106,7 @@ fun AddTodoDialog(
                 OutlinedTextField(
                     value = title,
                     onValueChange = { title = it },
-                    placeholder = { Text(placeholderFor(kind), color = TP.TextGrey) },
+                    placeholder = { Text(placeholderFor(kind), color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -121,9 +121,9 @@ fun AddTodoDialog(
                 if (kind == TodoKind.GOAL) {
                     Spacer(Modifier.height(12.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("我想在", fontSize = 14.sp, color = TP.TextDark)
+                        Text("我想在", fontSize = 14.sp, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface)
                         Highlight("设定目标日期") { }
-                        Text("之前，一共完成", fontSize = 14.sp, color = TP.TextDark)
+                        Text("之前，一共完成", fontSize = 14.sp, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface)
                     }
                     Spacer(Modifier.height(8.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -131,20 +131,20 @@ fun AddTodoDialog(
                             value = hoursText,
                             onValueChange = { hoursText = it.filter(Char::isDigit) },
                             singleLine = true,
-                            placeholder = { Text("小时", color = TP.TextGrey) },
+                            placeholder = { Text("小时", color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant) },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             modifier = Modifier.width(120.dp),
                         )
-                        Text("  小时", fontSize = 14.sp, color = TP.TextDark)
+                        Text("  小时", fontSize = 14.sp, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface)
                     }
                 }
 
                 if (kind == TodoKind.HABIT) {
                     Spacer(Modifier.height(12.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("我想", fontSize = 14.sp, color = TP.TextDark)
+                        Text("我想", fontSize = 14.sp, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface)
                         Highlight("每天") { }
-                        Text("完成", fontSize = 14.sp, color = TP.TextDark)
+                        Text("完成", fontSize = 14.sp, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface)
                     }
                     Spacer(Modifier.height(8.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -152,16 +152,16 @@ fun AddTodoDialog(
                             value = dailyText,
                             onValueChange = { dailyText = it.filter(Char::isDigit) },
                             singleLine = true,
-                            placeholder = { Text("分钟", color = TP.TextGrey) },
+                            placeholder = { Text("分钟", color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant) },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             modifier = Modifier.width(120.dp),
                         )
-                        Text("  分钟", fontSize = 14.sp, color = TP.TextDark)
+                        Text("  分钟", fontSize = 14.sp, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface)
                     }
                 }
 
                 Spacer(Modifier.height(14.dp))
-                Text("最后一步，设置单次专注的时长：", fontSize = 13.sp, color = TP.TextGrey)
+                Text("最后一步，设置单次专注的时长：", fontSize = 13.sp, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant)
                 Spacer(Modifier.height(8.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Pill("倒计时", mode == TimerMode.COUNTDOWN) { mode = TimerMode.COUNTDOWN }
@@ -185,11 +185,11 @@ fun AddTodoDialog(
                                     customText.toIntOrNull()?.let { v -> minutes = v.coerceIn(1, 600) }
                                 },
                                 singleLine = true,
-                                placeholder = { Text("分钟", color = TP.TextGrey) },
+                                placeholder = { Text("分钟", color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant) },
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                 modifier = Modifier.width(120.dp),
                             )
-                            Text("  分钟（1-600）", fontSize = 13.sp, color = TP.TextGrey)
+                            Text("  分钟（1-600）", fontSize = 13.sp, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
                 }
@@ -198,7 +198,7 @@ fun AddTodoDialog(
                 Text(
                     "· 倒计时 25 分钟即标准番茄时间",
                     fontSize = 12.sp,
-                    color = TP.TextGrey,
+                    color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Center,
                 )
@@ -214,14 +214,14 @@ fun AddTodoDialog(
                     Text(
                         if (advanced) "收起高级设置" else "展开更多高级设置",
                         fontSize = 13.sp,
-                        color = TP.Teal,
+                        color = androidx.compose.material3.MaterialTheme.colorScheme.primary,
                     )
                 }
                 if (advanced) {
                     OutlinedTextField(
                         value = note,
                         onValueChange = { note = it },
-                        placeholder = { Text("备注（可选）", color = TP.TextGrey) },
+                        placeholder = { Text("备注（可选）", color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant) },
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
@@ -242,11 +242,11 @@ private fun Pill(text: String, selected: Boolean, onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .clip(CircleShape)
-            .background(if (selected) TP.Teal.copy(alpha = 0.15f) else Color(0xFFF2F5F7))
+            .background(if (selected) androidx.compose.material3.MaterialTheme.colorScheme.primary.copy(alpha = 0.15f) else androidx.compose.material3.MaterialTheme.colorScheme.surfaceVariant)
             .clickable { onClick() }
             .padding(horizontal = 14.dp, vertical = 7.dp),
     ) {
-        Text(text, fontSize = 13.sp, color = if (selected) TP.Teal else TP.TextDark.copy(alpha = 0.75f))
+        Text(text, fontSize = 13.sp, color = if (selected) androidx.compose.material3.MaterialTheme.colorScheme.primary else androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
@@ -255,11 +255,11 @@ private fun Highlight(text: String, onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .clip(CircleShape)
-            .background(TP.Coral.copy(alpha = 0.12f))
+            .background(androidx.compose.material3.MaterialTheme.colorScheme.primary.copy(alpha = 0.10f))
             .clickable { onClick() }
             .padding(horizontal = 8.dp, vertical = 4.dp),
     ) {
-        Text(text, fontSize = 13.sp, color = TP.Coral)
+        Text(text, fontSize = 13.sp, color = androidx.compose.material3.MaterialTheme.colorScheme.primary)
     }
 }
 

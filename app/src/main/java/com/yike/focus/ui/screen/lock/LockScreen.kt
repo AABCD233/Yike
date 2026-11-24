@@ -1,5 +1,6 @@
 package com.yike.focus.ui.screen.lock
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -42,7 +43,7 @@ fun LockScreen(navController: Navigator, bottomPadding: Dp) {
     var pickDuration by remember { mutableStateOf(false) }
     var customMinutes by remember { mutableStateOf("") }
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(modifier = Modifier.fillMaxSize().background(colorScheme.background)) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()

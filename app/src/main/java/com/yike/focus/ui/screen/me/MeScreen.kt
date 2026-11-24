@@ -108,33 +108,10 @@ fun MeScreen(navController: Navigator, bottomPadding: Dp) {
     ) {
         item {
             Row(
-                modifier = Modifier.fillMaxWidth().statusBarsPadding().padding(top = 8.dp, bottom = 4.dp),
+                modifier = Modifier.fillMaxWidth().statusBarsPadding().padding(top = 12.dp, bottom = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Box(
-                    modifier = Modifier.size(52.dp).clip(CircleShape),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Card(modifier = Modifier.fillMaxSize(), colors = CardDefaults.defaultColors(color = colorScheme.secondaryContainer)) {
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Icon(
-                                Icons.Rounded.Timer,
-                                contentDescription = null,
-                                tint = colorScheme.onSecondaryContainer,
-                                modifier = Modifier.size(26.dp),
-                            )
-                        }
-                    }
-                }
-                Spacer(Modifier.size(12.dp))
-                Column {
-                    Text("未登录", fontSize = 18.sp, fontWeight = FontWeight.Medium, color = colorScheme.onBackground)
-                    Text(
-                        "本地记录，不需要账号",
-                        fontSize = 12.sp,
-                        color = colorScheme.onSurfaceVariantSummary,
-                    )
-                }
+                Text("我的", fontSize = 28.sp, fontWeight = FontWeight.SemiBold, color = colorScheme.onBackground)
             }
         }
 
