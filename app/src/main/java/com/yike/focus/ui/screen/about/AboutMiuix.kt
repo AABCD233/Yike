@@ -309,8 +309,7 @@ private fun AboutContent(
                                 )
                             } else Modifier
                         ),
-                    painter = painterResource(id = R.drawable.ic_app_badge),
-                    colorFilter = ColorFilter.tint(colorScheme.onBackground),
+                    painter = painterResource(id = R.drawable.ic_app_badge_vector),
                     contentDescription = null,
                 )
             }
