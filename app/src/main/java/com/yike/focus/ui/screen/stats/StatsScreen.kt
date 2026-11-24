@@ -58,13 +58,23 @@ fun StatsScreen(navController: Navigator, bottomPadding: Dp) {
         else -> TodoStore.dayStartMillis(date.withDayOfMonth(1)) to TodoStore.dayEndMillis(date)
     }
 
-    val all = TodoStore.summary(0L, Long.MAX_VALUE / 2)
-    val daily = TodoStore.summary(from, to)
-    val lockSummary = remember(range, dayOffset) { TodoStore.summary(from, to, kind = "lock") }
-    val byTitle = TodoStore.secondsByTitle(from, to)
+    val data = remember(range, dayOffset) {
+        StatsData(
+            all = TodoStore.summary(0L, Long.MAX_VALUE / 2),
+            daily = TodoStore.summary(from, to),
+            lock = TodoStore.summary(from, to, kind = "lock"),
+            byTitle = TodoStore.secondsByTitle(from, to),
+            hourly = TodoStore.hourlyMinutes(from, to),
+            last7 = TodoStore.dailySeconds(7),
+        )
+    }
+    val all = data.all
+    val daily = data.daily
+    val lockSummary = data.lock
+    val byTitle = data.byTitle
     val totalSeconds = byTitle.sumOf { it.second }
-    val hourly = remember(range, dayOffset) { TodoStore.hourlyMinutes(from, to) }
-    val last7 = remember { TodoStore.dailySeconds(7) }
+    val hourly = data.hourly
+    val last7 = data.last7
 
     LazyColumn(
         modifier = Modifier.fillMaxSize().background(colorScheme.background),
@@ -265,6 +275,15 @@ fun StatsScreen(navController: Navigator, bottomPadding: Dp) {
         }
     }
 }
+
+private data class StatsData(
+    val all: TodoStore.Summary,
+    val daily: TodoStore.Summary,
+    val lock: TodoStore.Summary,
+    val byTitle: List<Pair<String, Int>>,
+    val hourly: IntArray,
+    val last7: List<Pair<LocalDate, Int>>,
+)
 
 @Composable
 private fun Metric(label: String, value: String, unit: String) {

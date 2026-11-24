@@ -1,5 +1,6 @@
 package com.yike.focus.ui.screen.focus
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -17,15 +18,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Apps
-import androidx.compose.material.icons.rounded.MusicNote
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -38,50 +36,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.yike.focus.audio.NoisePlayer
 import com.yike.focus.data.BoostSettings
 import com.yike.focus.data.FocusLook
 import com.yike.focus.data.FocusTimer
+import com.yike.focus.data.Quotes
 import com.yike.focus.ui.component.miuix.ConfirmDialog
 import com.yike.focus.ui.navigation3.Navigator
 import com.yike.focus.ui.util.Notify
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import top.yukonga.miuix.kmp.overlay.OverlayDialog
+import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import kotlinx.coroutines.delay
-
-private val QUOTES = listOf(
-    "珍惜一切的好办法是意识到你可能会失去它。",
-    "每一个不曾起舞的日子，都是对生命的辜负。",
-    "把注意力放在你能控制的事情上。",
-    "今天的专注，是明天的底气。",
-    "臣书刷字墨淋漓，舒卷烟云势最奇。",
-)
-
-private val GRADIENTS = listOf(
-    listOf(Color(0xFF8AC5F2), Color(0xFFB9A6F0)), // 晨雾
-    listOf(Color(0xFF5C7FA8), Color(0xFF3D5A80)), // 暮色
-    listOf(Color(0xFF7FC8A9), Color(0xFF3E8C6A)), // 林间
-    listOf(Color(0xFF6FC6DA), Color(0xFF3F8FB0)), // 海边
-    listOf(Color(0xFF2B3245), Color(0xFF141A26)), // 夜灯
-    listOf(Color(0xFFE8EDF2), Color(0xFFCBD6DF)), // 素白
-)
-
-private val NOISE_OPTIONS = listOf(
-    "none" to "不放声音",
-    "white" to "白噪音",
-    "pink" to "粉噪音（低频更厚）",
-    "brown" to "棕噪音（更闷）",
-)
 
 @Composable
 fun FocusScreen(navController: Navigator) {
@@ -90,10 +64,10 @@ fun FocusScreen(navController: Navigator) {
     var finishedTitle by remember { mutableStateOf<String?>(null) }
     var finishedSeconds by remember { mutableIntStateOf(0) }
     var showBackground by remember { mutableStateOf(false) }
-    var showMusic by remember { mutableStateOf(false) }
     var showWhitelistTip by remember { mutableStateOf(false) }
     var bgPreset by remember { mutableStateOf(FocusLook.backgroundPreset) }
-    var noiseKind by remember { mutableStateOf(FocusLook.noiseKind) }
+    var quote by remember { mutableStateOf(Quotes.cached()) }
+    var quoteFrom by remember { mutableStateOf(Quotes.cachedFrom()) }
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
@@ -103,9 +77,11 @@ fun FocusScreen(navController: Navigator) {
         }
     }
 
-    // 离开页面就把噪音停掉
-    DisposableEffect(Unit) {
-        onDispose { NoisePlayer.stop() }
+    LaunchedEffect(Unit) {
+        Quotes.fetch()?.let { (text, from) ->
+            quote = text
+            quoteFrom = from
+        }
     }
 
     val s = state
@@ -138,15 +114,19 @@ fun FocusScreen(navController: Navigator) {
     } else {
         ((elapsed % 3600).toFloat() / 3600f)
     }
-    val quote = remember(s.startWall) { QUOTES[(s.startWall / 1000 % QUOTES.size).toInt()] }
     val isRest = s.kind == "relax"
     val strictMode = !isRest && BoostSettings.strict
-    val gradient = GRADIENTS[bgPreset.coerceIn(GRADIENTS.indices)]
+
+    val presetColor = Color(FocusLook.backgroundColors[bgPreset.coerceIn(FocusLook.backgroundColors.indices)])
+    val background = if (presetColor.alpha == 0f) colorScheme.background else presetColor
+    val onBackground = if (background.luminance() > 0.55f) Color(0xFF1B1F24) else Color.White
+
+    // 严格模式：返回手势也不能退出
+    BackHandler(enabled = strictMode) { }
 
     LaunchedEffect(s.isCountdown, remaining, s.isPaused) {
         if (s.isCountdown && remaining == 0 && !s.isPaused) {
             val done = FocusTimer.stop(abandoned = false)
-            NoisePlayer.stop()
             if (!isRest) {
                 Notify.focusDone(context, s.title, done?.seconds ?: s.totalSeconds)
             }
@@ -158,7 +138,7 @@ fun FocusScreen(navController: Navigator) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Brush.verticalGradient(gradient)),
+            .background(background),
     ) {
         Column(
             modifier = Modifier
@@ -170,15 +150,32 @@ fun FocusScreen(navController: Navigator) {
             Row(verticalAlignment = Alignment.Top) {
                 Column(modifier = Modifier.weight(1f).padding(top = 6.dp)) {
                     Text(
+                        "“",
+                        color = onBackground.copy(alpha = 0.5f),
+                        fontSize = 26.sp,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                    Text(
                         quote,
-                        color = Color.White.copy(alpha = 0.92f),
+                        color = onBackground.copy(alpha = 0.9f),
                         fontSize = 15.sp,
                         lineHeight = 22.sp,
                     )
+                    quoteFrom?.takeIf { it.isNotBlank() }?.let {
+                        Text(
+                            "—— $it",
+                            color = onBackground.copy(alpha = 0.55f),
+                            fontSize = 12.sp,
+                            modifier = Modifier.padding(top = 4.dp),
+                        )
+                    }
                 }
-                FocusIconButton(Icons.Rounded.Palette, "背景") { showBackground = true }
-                FocusIconButton(Icons.Rounded.MusicNote, "音乐") { showMusic = true }
-                FocusIconButton(Icons.Rounded.Apps, "白名单") { showWhitelistTip = true }
+                IconButton(onClick = { showBackground = true }) {
+                    Icon(Icons.Rounded.Palette, contentDescription = "背景", tint = onBackground.copy(alpha = 0.9f))
+                }
+                IconButton(onClick = { showWhitelistTip = true }) {
+                    Icon(Icons.Rounded.Apps, contentDescription = "白名单", tint = onBackground.copy(alpha = 0.9f))
+                }
             }
 
             Spacer(Modifier.weight(1f))
@@ -186,13 +183,12 @@ fun FocusScreen(navController: Navigator) {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                val ringColor = Color.White
-                val trackColor = Color.White.copy(alpha = 0.28f)
                 Box(contentAlignment = Alignment.Center) {
                     Canvas(modifier = Modifier.size(240.dp)) {
                         val stroke = 6.dp.toPx()
                         val inset = stroke / 2
                         val arcSize = Size(size.width - stroke, size.height - stroke)
+                        val trackColor = onBackground.copy(alpha = 0.22f)
                         drawArc(
                             color = trackColor,
                             startAngle = -90f,
@@ -203,7 +199,7 @@ fun FocusScreen(navController: Navigator) {
                             style = Stroke(width = stroke, cap = StrokeCap.Round),
                         )
                         drawArc(
-                            color = ringColor,
+                            color = onBackground,
                             startAngle = -90f,
                             sweepAngle = 360f * progress,
                             useCenter = false,
@@ -216,15 +212,15 @@ fun FocusScreen(navController: Navigator) {
                         formatClock(if (s.isCountdown) remaining else elapsed),
                         fontSize = 44.sp,
                         fontWeight = FontWeight.Medium,
-                        color = Color.White,
+                        color = onBackground,
                     )
                 }
                 Spacer(Modifier.height(18.dp))
-                Text(s.title, color = Color.White, fontSize = 17.sp)
+                Text(s.title, color = onBackground, fontSize = 17.sp)
                 Spacer(Modifier.height(4.dp))
                 Text(
                     if (s.isPaused) "已暂停" else if (isRest) "休息中" else "进行中",
-                    color = Color.White.copy(alpha = 0.75f),
+                    color = onBackground.copy(alpha = 0.65f),
                     fontSize = 13.sp,
                 )
             }
@@ -238,18 +234,19 @@ fun FocusScreen(navController: Navigator) {
                 if (!strictMode) {
                     ActionPill(
                         text = if (s.isPaused) "继续" else "暂停",
+                        onBackground = onBackground,
                         onClick = { if (s.isPaused) FocusTimer.resume() else FocusTimer.pause() },
                     )
                     Spacer(Modifier.size(12.dp))
-                    ActionPill(text = "重开") { FocusTimer.restart() }
+                    ActionPill(text = "重开", onBackground = onBackground) { FocusTimer.restart() }
                     Spacer(Modifier.size(12.dp))
                 }
                 ActionPill(
-                    text = if (strictMode && remaining > 0) "严格模式" else "停止",
+                    text = if (strictMode && remaining > 0) "严格模式中" else "停止",
+                    onBackground = onBackground,
                     primary = true,
                     onClick = {
                         if (strictMode && remaining > 0) return@ActionPill
-                        NoisePlayer.stop()
                         FocusTimer.stop(abandoned = false)
                         navController.pop()
                     },
@@ -263,33 +260,38 @@ fun FocusScreen(navController: Navigator) {
         OverlayDialog(
             show = true,
             title = "背景",
-            summary = "选一个专注时看的底色",
+            summary = "纯色就行，不做花里胡哨的渐变",
             onDismissRequest = { showBackground = false },
         ) {
             Column {
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    GRADIENTS.forEachIndexed { index, colors ->
+                FocusLook.backgroundNames.forEachIndexed { index, name ->
+                    val color = Color(FocusLook.backgroundColors[index])
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(if (index == bgPreset) colorScheme.primaryContainer else Color.Transparent)
+                            .clickable {
+                                bgPreset = index
+                                FocusLook.backgroundPreset = index
+                            }
+                            .padding(horizontal = 12.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
                         Box(
                             modifier = Modifier
-                                .size(48.dp)
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(Brush.verticalGradient(colors))
-                                .then(
-                                    if (index == bgPreset) Modifier.border(2.dp, colorScheme.primary, RoundedCornerShape(12.dp))
-                                    else Modifier
-                                )
-                                .clickable {
-                                    bgPreset = index
-                                    FocusLook.backgroundPreset = index
-                                },
+                                .size(22.dp)
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(if (color.alpha == 0f) colorScheme.surfaceVariant else color)
+                                .border(1.dp, colorScheme.outline.copy(alpha = 0.4f), RoundedCornerShape(6.dp)),
                         )
+                        Spacer(Modifier.width(12.dp))
+                        Text(name, fontSize = 14.sp, color = colorScheme.onSurface)
                     }
                 }
                 Spacer(Modifier.height(8.dp))
-                Text(FocusLook.backgroundNames.getOrElse(bgPreset) { "" }, fontSize = 12.sp, color = colorScheme.onSurfaceVariantSummary)
-                Spacer(Modifier.height(12.dp))
                 Row(modifier = Modifier.fillMaxWidth()) {
-                    ActionPill(text = "关闭", onClick = { showBackground = false })
+                    ActionPill(text = "关闭", onBackground = colorScheme.onSurface) { showBackground = false }
                 }
             }
         }
@@ -299,71 +301,33 @@ fun FocusScreen(navController: Navigator) {
         ConfirmDialog(
             show = true,
             title = "白名单",
-            summary = "白名单应用管理还没做，等硬核模式接好一起放出来。",
+            summary = "白名单管理还没做，等硬核模式的拦截页接好一起放出来。",
             confirmText = "知道了",
             dismissText = null,
             onConfirm = { showWhitelistTip = false },
             onDismiss = { showWhitelistTip = false },
         )
     }
-
-    if (showMusic) {
-        OverlayDialog(
-            show = true,
-            title = "背景音",
-            summary = "实时生成的噪音，不占安装包体积",
-            onDismissRequest = { showMusic = false },
-        ) {
-            Column {
-                NOISE_OPTIONS.forEach { (kind, label) ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(if (kind == noiseKind) colorScheme.primaryContainer else Color.Transparent)
-                            .clickable {
-                                noiseKind = kind
-                                FocusLook.noiseKind = kind
-                                if (kind == "none") NoisePlayer.stop() else NoisePlayer.start(kind)
-                            }
-                            .padding(horizontal = 12.dp, vertical = 10.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(label, fontSize = 14.sp, color = colorScheme.onSurface)
-                    }
-                }
-                Spacer(Modifier.height(8.dp))
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    ActionPill(text = "关闭", onClick = { showMusic = false })
-                }
-            }
-        }
-    }
 }
 
 @Composable
-private fun FocusIconButton(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    description: String,
+private fun ActionPill(
+    text: String,
+    onBackground: Color,
+    primary: Boolean = false,
     onClick: () -> Unit,
 ) {
-    IconButton(onClick = onClick) {
-        Icon(icon, contentDescription = description, tint = Color.White.copy(alpha = 0.9f))
-    }
-}
-
-@Composable
-private fun ActionPill(text: String, primary: Boolean = false, onClick: () -> Unit) {
+    val light = onBackground.luminance() < 0.5f
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(24.dp))
-            .background(if (primary) Color.White else Color.White.copy(alpha = 0.18f))
+            .background(if (primary) onBackground else onBackground.copy(alpha = 0.14f))
             .clickable { onClick() }
             .padding(horizontal = 22.dp, vertical = 12.dp),
     ) {
         Text(
             text,
-            color = if (primary) Color(0xFF2A3244) else Color.White,
+            color = if (primary) (if (light) Color.White else Color(0xFF1B1F24)) else onBackground,
             fontSize = 15.sp,
         )
     }

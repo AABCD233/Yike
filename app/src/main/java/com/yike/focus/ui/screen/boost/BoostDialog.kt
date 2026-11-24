@@ -2,6 +2,9 @@ package com.yike.focus.ui.screen.boost
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Apps
@@ -39,6 +42,12 @@ fun BoostDialog(onDismiss: () -> Unit) {
         onDismissRequest = onDismiss,
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 420.dp)
+                    .verticalScroll(rememberScrollState()),
+            ) {
             BoostSwitch(
                 icon = Icons.Rounded.Block,
                 title = "硬核模式",
@@ -63,6 +72,7 @@ fun BoostDialog(onDismiss: () -> Unit) {
                 summary = "允许在计时期间使用的应用",
                 checked = whitelist,
             ) { whitelist = it; BoostSettings.whitelistEnabled = it }
+            }
 
             TextButton(
                 text = "完成",

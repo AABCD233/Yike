@@ -4,17 +4,14 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- 计时环 -->
+    <!-- 四分之三的弧：时间在走，但不画成钟 -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="9"
+        android:strokeLineCap="round"
+        android:pathData="M54,26 A28,28 0 1,1 34,72" />
+    <!-- 弧口上的一个小点：这一刻 -->
     <path
         android:fillColor="#FFFFFF"
-        android:fillType="evenOdd"
-        android:pathData="M54,30 A24,24 0 1,1 54,78 A24,24 0 1,1 54,30 Z M54,37.5 A16.5,16.5 0 1,0 54,70.5 A16.5,16.5 0 1,0 54,37.5 Z" />
-    <!-- 指针 -->
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M51.6,41 L56.4,41 L56.4,55 L51.6,55 Z" />
-    <!-- 中心点 -->
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M54,54 m-3,0 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0 Z" />
+        android:pathData="M70,34 m-7,0 a7,7 0 1,0 14,0 a7,7 0 1,0 -14,0 Z" />
 </vector>
