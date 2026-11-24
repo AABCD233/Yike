@@ -10,7 +10,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 private const val DB_NAME = "yike.db"
-private const val DB_VERSION = 1
+private const val DB_VERSION = 2
 private val DAY_FMT: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
 class TodoDb(context: Context) : SQLiteOpenHelper(context, DB_NAME, null, DB_VERSION) {
@@ -41,7 +41,8 @@ class TodoDb(context: Context) : SQLiteOpenHelper(context, DB_NAME, null, DB_VER
                 daily_min INTEGER NOT NULL DEFAULT 0,
                 note TEXT NOT NULL DEFAULT '',
                 sort_order INTEGER NOT NULL DEFAULT 0,
-                created_at INTEGER NOT NULL DEFAULT 0
+                created_at INTEGER NOT NULL DEFAULT 0,
+                bg_path TEXT
             )
             """.trimIndent()
         )
@@ -64,11 +65,10 @@ class TodoDb(context: Context) : SQLiteOpenHelper(context, DB_NAME, null, DB_VER
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        // 结构变化时直接重建：本地数据量小，宁可简单也不要写迁移脚本写错
-        db.execSQL("DROP TABLE IF EXISTS session")
-        db.execSQL("DROP TABLE IF EXISTS todo")
-        db.execSQL("DROP TABLE IF EXISTS todo_set")
-        onCreate(db)
+        // 只做加列，不重建表：重建会把用户已有的待办和记录全清掉
+        if (oldVersion < 2) {
+            runCatching { db.execSQL("ALTER TABLE todo ADD COLUMN bg_path TEXT") }
+        }
     }
 }
 
@@ -124,6 +124,8 @@ object TodoStore {
                     note = c.getString(c.getColumnIndexOrThrow("note")),
                     sortOrder = c.getInt(c.getColumnIndexOrThrow("sort_order")),
                     createdAt = c.getLong(c.getColumnIndexOrThrow("created_at")),
+                    bgPath = if (c.isNull(c.getColumnIndexOrThrow("bg_path"))) null
+                    else c.getString(c.getColumnIndexOrThrow("bg_path")),
                 )
             }
         }
@@ -146,6 +148,7 @@ object TodoStore {
             put("note", todo.note)
             put("sort_order", todo.sortOrder)
             put("created_at", todo.createdAt)
+            if (todo.bgPath != null) put("bg_path", todo.bgPath) else putNull("bg_path")
         }
         return db.insert("todo", null, values)
     }
@@ -163,8 +166,29 @@ object TodoStore {
             put("daily_min", todo.dailyMin)
             put("note", todo.note)
             put("sort_order", todo.sortOrder)
+            if (todo.bgPath != null) put("bg_path", todo.bgPath) else putNull("bg_path")
         }
         db.update("todo", values, "id = ?", arrayOf(todo.id.toString()))
+    }
+
+    fun moveTodo(todo: Todo, up: Boolean) {
+        val list = todos()
+        val index = list.indexOfFirst { it.id == todo.id }
+        if (index < 0) return
+        val target = if (up) index - 1 else index + 1
+        if (target !in list.indices) return
+        val a = list[index]
+        val b = list[target]
+        updateOrder(a.id, b.sortOrder.let { if (it == 0) target else it })
+        updateOrder(b.id, a.sortOrder.let { if (it == 0) index else it })
+        // 两条 sort_order 相同的兜底：直接写入下标
+        updateOrder(a.id, target)
+        updateOrder(b.id, index)
+    }
+
+    private fun updateOrder(id: Long, order: Int) {
+        val values = ContentValues().apply { put("sort_order", order) }
+        db.update("todo", values, "id = ?", arrayOf(id.toString()))
     }
 
     fun deleteTodo(id: Long) {

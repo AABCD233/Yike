@@ -29,6 +29,8 @@ data class Todo(
     val note: String = "",
     val sortOrder: Int = 0,
     val createdAt: Long = System.currentTimeMillis(),
+    /** 卡片背景图，存在 filesDir 下的绝对路径 */
+    val bgPath: String? = null,
 )
 
 data class FocusSession(
