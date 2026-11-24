@@ -48,8 +48,6 @@ import com.yike.focus.data.Backup
 import com.yike.focus.data.TodoStore
 import com.yike.focus.ui.navigation3.Navigator
 import com.yike.focus.ui.navigation3.Route
-import com.yike.focus.ui.screen.todo.defaultFocusMinutes
-import com.yike.focus.ui.screen.todo.saveDefaultFocusMinutes
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.Icon
@@ -60,8 +58,6 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 @Composable
 fun MeScreen(navController: Navigator, bottomPadding: Dp) {
     var tip by remember { mutableStateOf<String?>(null) }
-    var showMinutes by remember { mutableStateOf(false) }
-    var defaultMinutes by remember { mutableStateOf(defaultFocusMinutes()) }
     var backupTip by remember { mutableStateOf<String?>(null) }
     var refreshKey by remember { mutableIntStateOf(0) }
     val context = LocalContext.current
@@ -191,43 +187,6 @@ fun MeScreen(navController: Navigator, bottomPadding: Dp) {
                 )
             }
         }
-    }
-
-    if (showMinutes) {
-        AlertDialog(
-            onDismissRequest = { showMinutes = false },
-            title = { androidx.compose.material3.Text("默认番茄时长") },
-            text = {
-                Column {
-                    androidx.compose.material3.Text("新建待办时用这个时长，也可以单条改。")
-                    Spacer(Modifier.height(12.dp))
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        listOf(15, 25, 30, 45, 60).forEach { min ->
-                            Card(
-                                onClick = {
-                                    defaultMinutes = min
-                                    saveDefaultFocusMinutes(min)
-                                    showMinutes = false
-                                },
-                                showIndication = true,
-                                colors = CardDefaults.defaultColors(
-                                    color = if (min == defaultMinutes) colorScheme.primaryContainer
-                                    else colorScheme.surfaceContainerHighest
-                                ),
-                            ) {
-                                androidx.compose.material3.Text(
-                                    "$min",
-                                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
-                                )
-                            }
-                        }
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { showMinutes = false }) { androidx.compose.material3.Text("关闭") }
-            },
-        )
     }
 
     backupTip?.let { text ->
