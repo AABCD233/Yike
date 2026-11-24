@@ -128,6 +128,17 @@ object FocusTimer {
         persist()
     }
 
+    /** 重开：从当前这一轮重新计时 */
+    fun restart() {
+        val s = _state.value ?: return
+        _state.value = s.copy(
+            startWall = System.currentTimeMillis(),
+            pausedAtWall = null,
+            pausedAccumMs = 0L,
+        )
+        persist()
+    }
+
     fun pause() {
         val s = _state.value ?: return
         if (s.isPaused) return
