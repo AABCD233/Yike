@@ -13,6 +13,11 @@ object FocusLook {
         get() = prefs().getInt("focus_bg", 4)
         set(value) = prefs().edit().putInt("focus_bg", value.coerceIn(0, 4)).apply()
 
+    /** 自选背景音乐路径 */
+    var musicPath: String?
+        get() = prefs().getString("focus_music", null)
+        set(value) = prefs().edit().putString("focus_music", value).apply()
+
     /** 自选背景图（filesDir 下的路径），有图时优先用图 */
     var backgroundImage: String?
         get() = prefs().getString("focus_bg_image", null)

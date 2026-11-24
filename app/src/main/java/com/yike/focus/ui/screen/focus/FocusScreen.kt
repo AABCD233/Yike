@@ -13,6 +13,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,6 +30,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Apps
+import androidx.compose.material.icons.rounded.MusicNote
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
@@ -55,9 +57,11 @@ import androidx.compose.ui.unit.sp
 import com.yike.focus.data.BoostSettings
 import com.yike.focus.data.FocusLook
 import com.yike.focus.data.FocusTimer
+import com.yike.focus.data.MusicPlayer
 import com.yike.focus.data.PomodoroSettings
 import com.yike.focus.data.TodoStore
 import com.yike.focus.data.Quotes
+import com.yike.focus.ui.component.FilePickerDialog
 import com.yike.focus.ui.component.miuix.ConfirmDialog
 import com.yike.focus.ui.navigation3.Navigator
 import com.yike.focus.ui.util.Notify
@@ -75,6 +79,10 @@ fun FocusScreen(navController: Navigator) {
     var finishedSeconds by remember { mutableIntStateOf(0) }
     var showBackground by remember { mutableStateOf(false) }
     var showWhitelistTip by remember { mutableStateOf(false) }
+    var showMusicPicker by remember { mutableStateOf(false) }
+    var musicPath by remember { mutableStateOf(FocusLook.musicPath) }
+    var aodMode by remember { mutableStateOf(false) }
+    var aodOffset by remember { mutableStateOf(androidx.compose.ui.unit.IntOffset(0, 0)) }
     var bgPreset by remember { mutableStateOf(FocusLook.backgroundPreset) }
     var bgImage by remember { mutableStateOf(FocusLook.backgroundImage) }
     val bgBitmap = remember(bgImage) {
@@ -110,6 +118,15 @@ fun FocusScreen(navController: Navigator) {
         Quotes.fetch()?.let { (text, from) ->
             quote = text
             quoteFrom = from
+        }
+    }
+
+    LaunchedEffect(aodMode) {
+        while (aodMode) {
+            delay(40_000)
+            val x = (-20..20).random()
+            val y = (-32..32).random()
+            aodOffset = androidx.compose.ui.unit.IntOffset(x, y)
         }
     }
 
@@ -185,6 +202,7 @@ fun FocusScreen(navController: Navigator) {
     LaunchedEffect(s.isCountdown, remaining, s.isPaused) {
         if (s.isCountdown && remaining == 0 && !s.isPaused) {
             val done = FocusTimer.stop(abandoned = false)
+            MusicPlayer.stop()
             if (!isRest) {
                 Notify.focusDone(context, s.title, done?.seconds ?: s.totalSeconds)
                 PomodoroSettings.roundIndex = PomodoroSettings.roundIndex + 1
@@ -268,6 +286,9 @@ fun FocusScreen(navController: Navigator) {
                 IconButton(onClick = { showBackground = true }) {
                     Icon(Icons.Rounded.Palette, contentDescription = "背景", tint = onBackground.copy(alpha = 0.9f))
                 }
+                IconButton(onClick = { showMusicPicker = true }) {
+                    Icon(Icons.Rounded.MusicNote, contentDescription = "背景音乐", tint = onBackground.copy(alpha = 0.9f))
+                }
                 IconButton(onClick = { navController.push(com.yike.focus.ui.navigation3.Route.WhitelistOpen) }) {
                     Icon(Icons.Rounded.Apps, contentDescription = "白名单", tint = onBackground.copy(alpha = 0.9f))
                 }
@@ -308,6 +329,10 @@ fun FocusScreen(navController: Navigator) {
                         fontSize = 44.sp,
                         fontWeight = FontWeight.Medium,
                         color = onBackground,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .clickable { aodMode = true }
+                            .padding(8.dp),
                     )
                 }
                 Spacer(Modifier.height(18.dp))
@@ -347,6 +372,7 @@ fun FocusScreen(navController: Navigator) {
                     primary = true,
                     onClick = {
                         if (strictMode && remaining > 0) return@ActionPill
+                        MusicPlayer.stop()
                         FocusTimer.stop(abandoned = false)
                         navController.pop()
                     },
@@ -354,6 +380,37 @@ fun FocusScreen(navController: Navigator) {
             }
             Spacer(Modifier.height(28.dp))
         }
+    }
+
+    if (aodMode) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black)
+                .clickable { aodMode = false },
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                formatClock(if (s.isCountdown) remaining else elapsed),
+                color = Color.White.copy(alpha = 0.9f),
+                fontSize = 96.sp,
+                fontWeight = FontWeight.Light,
+                modifier = Modifier.offset { aodOffset },
+            )
+        }
+    }
+
+    if (showMusicPicker) {
+        FilePickerDialog(
+            title = "背景音乐",
+            onPick = { path ->
+                musicPath = path
+                FocusLook.musicPath = path
+                MusicPlayer.start(path)
+                showMusicPicker = false
+            },
+            onDismiss = { showMusicPicker = false },
+        )
     }
 
     if (showBackground) {
