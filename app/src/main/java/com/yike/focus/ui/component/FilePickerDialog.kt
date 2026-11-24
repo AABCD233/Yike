@@ -20,7 +20,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowUp
+import androidx.compose.material.icons.rounded.ArrowUpward
 import androidx.compose.material.icons.rounded.Folder
 import androidx.compose.material.icons.rounded.MusicNote
 import androidx.compose.runtime.Composable
@@ -82,7 +82,7 @@ fun FilePickerDialog(
                         .padding(10.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Icon(Icons.AutoMirrored.Rounded.KeyboardArrowUp, contentDescription = "上一层", tint = colorScheme.primary)
+                    Icon(Icons.Rounded.ArrowUpward, contentDescription = "上一层", tint = colorScheme.primary)
                     Spacer(Modifier.width(8.dp))
                     Text("上一层", fontSize = 14.sp, color = colorScheme.primary)
                 }
