@@ -82,6 +82,9 @@ fun FocusScreen(navController: Navigator) {
             BitmapFactory.decodeFile(path, BitmapFactory.Options().apply { inSampleSize = 2 })
         }.getOrNull()?.asImageBitmap() }
     }
+    var quote by remember { mutableStateOf(Quotes.cached()) }
+    var quoteFrom by remember { mutableStateOf(Quotes.cachedFrom()) }
+    val context = LocalContext.current
     val pickBg = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->
         if (uri != null) {
             runCatching {
@@ -95,9 +98,6 @@ fun FocusScreen(navController: Navigator) {
             }
         }
     }
-    var quote by remember { mutableStateOf(Quotes.cached()) }
-    var quoteFrom by remember { mutableStateOf(Quotes.cachedFrom()) }
-    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         while (true) {
