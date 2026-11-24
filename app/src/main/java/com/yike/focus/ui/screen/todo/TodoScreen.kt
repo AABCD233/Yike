@@ -269,15 +269,15 @@ private fun TaskDetailDialog(
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                PanelAction("编辑", Icons.Rounded.Edit, onClick = onEdit)
-                PanelAction("更换背景", Icons.Rounded.Image, onClick = onChangeBackground)
-                PanelAction("白名单", Icons.Rounded.Apps, onClick = onOpenWhitelist)
+                PanelAction("编辑", Icons.Rounded.Edit, Modifier.weight(1f), onClick = onEdit)
+                PanelAction("更换背景", Icons.Rounded.Image, Modifier.weight(1f), onClick = onChangeBackground)
+                PanelAction("白名单", Icons.Rounded.Apps, Modifier.weight(1f), onClick = onOpenWhitelist)
             }
             Spacer(Modifier.height(10.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                PanelAction("上移", Icons.Rounded.ArrowUpward, onClick = onMoveUp)
-                PanelAction("下移", Icons.Rounded.ArrowDownward, onClick = onMoveDown)
-                PanelAction("删除", Icons.Rounded.DeleteOutline, danger = true, onClick = onDelete)
+                PanelAction("上移", Icons.Rounded.ArrowUpward, Modifier.weight(1f), onClick = onMoveUp)
+                PanelAction("下移", Icons.Rounded.ArrowDownward, Modifier.weight(1f), onClick = onMoveDown)
+                PanelAction("删除", Icons.Rounded.DeleteOutline, Modifier.weight(1f), danger = true, onClick = onDelete)
             }
             Spacer(Modifier.height(14.dp))
             Card(modifier = Modifier.fillMaxWidth(), onClick = onOpenHistory, showIndication = true) {
@@ -356,11 +356,12 @@ private fun TaskDetailDialog(
 private fun PanelAction(
     label: String,
     icon: androidx.compose.ui.graphics.vector.ImageVector,
+    modifier: Modifier = Modifier,
     danger: Boolean = false,
     onClick: () -> Unit,
 ) {
     Card(
-        modifier = Modifier.weight(1f),
+        modifier = modifier,
         onClick = onClick,
         showIndication = true,
     ) {
