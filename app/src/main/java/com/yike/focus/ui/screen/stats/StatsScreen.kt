@@ -67,7 +67,7 @@ fun StatsScreen(navController: Navigator, bottomPadding: Dp) {
     val last7 = remember { TodoStore.dailySeconds(7) }
 
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().background(colorScheme.background),
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = bottomPadding + 24.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {

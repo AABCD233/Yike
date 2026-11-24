@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yike.focus.data.FocusTimer
 import com.yike.focus.ui.navigation3.Navigator
+import com.yike.focus.ui.component.miuix.ConfirmDialog
 import com.yike.focus.ui.util.Notify
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import kotlinx.coroutines.delay
@@ -78,19 +79,17 @@ fun FocusScreen(navController: Navigator) {
         if (finishedTitle == null) {
             LaunchedEffect(Unit) { navController.pop() }
         } else {
-            AlertDialog(
-                onDismissRequest = { navController.pop() },
-                title = { Text("完成一个番茄") },
-                text = { Text("「$finishedTitle」专注 ${finishedSeconds / 60} 分钟，起来活动一下？") },
-                confirmButton = {
-                    TextButton(onClick = {
-                        finishedTitle = null
-                        FocusTimer.startRest(5)
-                    }) { Text("休息 5 分钟") }
+            ConfirmDialog(
+                show = true,
+                title = "完成一个番茄",
+                summary = "「$finishedTitle」专注 ${finishedSeconds / 60} 分钟，起来活动一下？",
+                confirmText = "休息 5 分钟",
+                dismissText = "先不休息",
+                onConfirm = {
+                    finishedTitle = null
+                    FocusTimer.startRest(5)
                 },
-                dismissButton = {
-                    TextButton(onClick = { navController.pop() }) { Text("先不休息") }
-                },
+                onDismiss = { navController.pop() },
             )
         }
         return

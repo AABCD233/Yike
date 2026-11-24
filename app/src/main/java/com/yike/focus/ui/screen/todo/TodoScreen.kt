@@ -43,6 +43,8 @@ import com.yike.focus.data.Todo
 import com.yike.focus.data.TodoKind
 import com.yike.focus.data.TodoStore
 import com.yike.focus.ui.navigation3.Navigator
+import com.yike.focus.ui.component.miuix.ConfirmDialog
+import com.yike.focus.ui.component.miuix.InputDialog
 import com.yike.focus.ui.screen.boost.BoostDialog
 import com.yike.focus.ui.navigation3.Route
 import top.yukonga.miuix.kmp.basic.Card
@@ -169,7 +171,9 @@ fun TodoScreen(
     }
 
     editing?.let { todo ->
-        RenameDialog(
+        InputDialog(
+            show = true,
+            title = "重命名",
             initial = todo.title,
             onDismiss = { editing = null },
             onConfirm = { name ->
@@ -181,34 +185,19 @@ fun TodoScreen(
     }
 
     deleting?.let { todo ->
-        AlertDialog(
-            onDismissRequest = { deleting = null },
-            title = { Text("删除待办") },
-            text = { Text("删除「${todo.title}」？已经产生的专注记录会保留。") },
-            confirmButton = {
-                TextButton(onClick = {
-                    TodoStore.deleteTodo(todo.id)
-                    todos = TodoStore.todos()
-                    deleting = null
-                }) { Text("删除") }
+        ConfirmDialog(
+            show = true,
+            title = "删除待办",
+            summary = "删除「${todo.title}」？已经产生的专注记录会保留。",
+            confirmText = "删除",
+            onDismiss = { deleting = null },
+            onConfirm = {
+                TodoStore.deleteTodo(todo.id)
+                todos = TodoStore.todos()
+                deleting = null
             },
-            dismissButton = { TextButton(onClick = { deleting = null }) { Text("取消") } },
         )
     }
-}
-
-@Composable
-private fun RenameDialog(initial: String, onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
-    var text by remember { mutableStateOf(initial) }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("重命名") },
-        text = { TextField(value = text, onValueChange = { text = it }, singleLine = true) },
-        confirmButton = {
-            TextButton(onClick = { if (text.isNotBlank()) onConfirm(text.trim()) }) { Text("保存") }
-        },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("取消") } },
-    )
 }
 
 @Composable

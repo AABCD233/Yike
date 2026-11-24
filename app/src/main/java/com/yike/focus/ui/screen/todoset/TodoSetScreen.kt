@@ -42,6 +42,8 @@ import com.yike.focus.data.TodoSet
 import com.yike.focus.data.TodoStore
 import com.yike.focus.ui.navigation3.Navigator
 import com.yike.focus.ui.navigation3.Route
+import com.yike.focus.ui.component.miuix.ConfirmDialog
+import com.yike.focus.ui.component.miuix.InputDialog
 import com.yike.focus.ui.screen.todo.TodoCard
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
@@ -196,39 +198,31 @@ fun TodoSetScreen(navController: Navigator, bottomPadding: Dp) {
     }
 
     renaming?.let { set ->
-        var text by remember(set.id) { mutableStateOf(set.name) }
-        AlertDialog(
-            onDismissRequest = { renaming = null },
-            title = { androidx.compose.material3.Text("重命名待办集") },
-            text = {
-                OutlinedTextField(value = text, onValueChange = { text = it }, singleLine = true)
+        InputDialog(
+            show = true,
+            title = "重命名待办集",
+            initial = set.name,
+            onDismiss = { renaming = null },
+            onConfirm = { name ->
+                TodoStore.renameTodoSet(set.id, name)
+                sets = TodoStore.todoSets()
+                renaming = null
             },
-            confirmButton = {
-                TextButton(onClick = {
-                    if (text.isNotBlank()) {
-                        TodoStore.renameTodoSet(set.id, text.trim())
-                        sets = TodoStore.todoSets()
-                        renaming = null
-                    }
-                }) { androidx.compose.material3.Text("保存") }
-            },
-            dismissButton = { TextButton(onClick = { renaming = null }) { androidx.compose.material3.Text("取消") } },
         )
     }
 
     deleting?.let { set ->
-        AlertDialog(
-            onDismissRequest = { deleting = null },
-            title = { androidx.compose.material3.Text("删除待办集") },
-            text = { androidx.compose.material3.Text("删除「${set.name}」？里面的待办会保留。") },
-            confirmButton = {
-                TextButton(onClick = {
-                    TodoStore.deleteTodoSet(set.id)
-                    sets = TodoStore.todoSets()
-                    deleting = null
-                }) { androidx.compose.material3.Text("删除") }
+        ConfirmDialog(
+            show = true,
+            title = "删除待办集",
+            summary = "删除「${set.name}」？里面的待办会保留。",
+            confirmText = "删除",
+            onDismiss = { deleting = null },
+            onConfirm = {
+                TodoStore.deleteTodoSet(set.id)
+                sets = TodoStore.todoSets()
+                deleting = null
             },
-            dismissButton = { TextButton(onClick = { deleting = null }) { androidx.compose.material3.Text("取消") } },
         )
     }
 }
