@@ -72,6 +72,7 @@ import com.yike.focus.ui.screen.lock.LockActiveScreen
 import com.yike.focus.ui.screen.lock.LockScreen
 import com.yike.focus.ui.screen.me.MeScreen
 import com.yike.focus.ui.screen.stats.StatsScreen
+import com.yike.focus.ui.screen.whitelist.WhitelistScreen
 import com.yike.focus.ui.screen.todo.TodoScreen
 import com.yike.focus.ui.screen.todoset.TodoSetScreen
 import com.yike.focus.ui.screen.permission.PermissionScreen
@@ -101,6 +102,10 @@ import top.yukonga.miuix.kmp.utils.PagerNavigationSpringSpec
 import top.yukonga.miuix.kmp.utils.pagerGestureOverride
 
 class MainActivity : ComponentActivity() {
+
+    companion object {
+        const val EXTRA_OPEN_FOCUS = "open_focus"
+    }
 
     private val intentState = MutableStateFlow(0)
 
@@ -134,6 +139,20 @@ class MainActivity : ComponentActivity() {
             }
 
             val navigator = rememberNavigator(Route.Main)
+            val openFocus = intent?.getBooleanExtra(EXTRA_OPEN_FOCUS, false) == true
+            LaunchedEffect(openFocus) {
+                if (openFocus) navigator.push(Route.Focus)
+            }
+            val runningFocus by FocusTimer.state.collectAsStateWithLifecycle()
+            val context = LocalContext.current
+            LaunchedEffect(runningFocus != null, runningFocus?.kind) {
+                val active = runningFocus?.kind == "focus"
+                if (active && com.yike.focus.data.BoostSettings.hardcore) {
+                    com.yike.focus.service.GuardService.start(context)
+                } else {
+                    com.yike.focus.service.GuardService.stop(context)
+                }
+            }
             val systemDensity = LocalDensity.current
             val density = remember(systemDensity, uiState.pageScale) {
                 Density(systemDensity.density * uiState.pageScale, systemDensity.fontScale)
@@ -183,6 +202,7 @@ class MainActivity : ComponentActivity() {
                             entry<Route.Focus>(swipeDismiss = NavSwipeDirection.None) { FocusScreen(navigator) }
                             entry<Route.History>(swipeDismiss = swipeDismiss) { HistoryScreen(navigator) }
                             entry<Route.LockActive>(swipeDismiss = NavSwipeDirection.None) { LockActiveScreen(navigator) }
+                            entry<Route.Whitelist>(swipeDismiss = swipeDismiss) { WhitelistScreen(navigator) }
                         }
                     }
 

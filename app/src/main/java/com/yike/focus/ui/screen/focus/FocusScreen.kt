@@ -173,7 +173,7 @@ fun FocusScreen(navController: Navigator) {
                 IconButton(onClick = { showBackground = true }) {
                     Icon(Icons.Rounded.Palette, contentDescription = "背景", tint = onBackground.copy(alpha = 0.9f))
                 }
-                IconButton(onClick = { showWhitelistTip = true }) {
+                IconButton(onClick = { navController.push(com.yike.focus.ui.navigation3.Route.Whitelist) }) {
                     Icon(Icons.Rounded.Apps, contentDescription = "白名单", tint = onBackground.copy(alpha = 0.9f))
                 }
             }
@@ -297,17 +297,6 @@ fun FocusScreen(navController: Navigator) {
         }
     }
 
-    if (showWhitelistTip) {
-        ConfirmDialog(
-            show = true,
-            title = "白名单",
-            summary = "白名单管理还没做，等硬核模式的拦截页接好一起放出来。",
-            confirmText = "知道了",
-            dismissText = null,
-            onConfirm = { showWhitelistTip = false },
-            onDismiss = { showWhitelistTip = false },
-        )
-    }
 }
 
 @Composable
