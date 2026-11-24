@@ -91,6 +91,7 @@ fun FocusScreen(navController: Navigator) {
     var finishedSeconds by remember { mutableIntStateOf(0) }
     var showBackground by remember { mutableStateOf(false) }
     var showMusic by remember { mutableStateOf(false) }
+    var showWhitelistTip by remember { mutableStateOf(false) }
     var bgPreset by remember { mutableStateOf(FocusLook.backgroundPreset) }
     var noiseKind by remember { mutableStateOf(FocusLook.noiseKind) }
     val context = LocalContext.current
@@ -177,7 +178,7 @@ fun FocusScreen(navController: Navigator) {
                 }
                 FocusIconButton(Icons.Rounded.Palette, "背景") { showBackground = true }
                 FocusIconButton(Icons.Rounded.MusicNote, "音乐") { showMusic = true }
-                FocusIconButton(Icons.Rounded.Apps, "白名单") { }
+                FocusIconButton(Icons.Rounded.Apps, "白名单") { showWhitelistTip = true }
             }
 
             Spacer(Modifier.weight(1f))
@@ -292,6 +293,18 @@ fun FocusScreen(navController: Navigator) {
                 }
             }
         }
+    }
+
+    if (showWhitelistTip) {
+        ConfirmDialog(
+            show = true,
+            title = "白名单",
+            summary = "白名单应用管理还没做，等硬核模式接好一起放出来。",
+            confirmText = "知道了",
+            dismissText = null,
+            onConfirm = { showWhitelistTip = false },
+            onDismiss = { showWhitelistTip = false },
+        )
     }
 
     if (showMusic) {

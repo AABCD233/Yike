@@ -65,9 +65,9 @@ fun LockScreen(navController: Navigator, bottomPadding: Dp) {
                 BannerCard(
                     title = "小憩",
                     subtitle = "放松身心的深呼吸，感受禅修般的宁静",
-                    container = Color(0xFFD8F3EC),
-                    titleColor = Color(0xFF0F3B33),
-                    subtitleColor = Color(0xFF2E6A5E),
+                    container = colorScheme.primaryContainer,
+                    titleColor = colorScheme.onPrimaryContainer,
+                    subtitleColor = colorScheme.onSurfaceVariantSummary,
                     onClick = { tip = "小憩（呼吸引导）还没有做，下一步接。" },
                 )
             }
@@ -75,9 +75,9 @@ fun LockScreen(navController: Navigator, bottomPadding: Dp) {
                 BannerCard(
                     title = "立刻开始快速锁机",
                     subtitle = "选择锁机时长，并立刻开始锁机",
-                    container = Color(0xFFFCE2DE),
-                    titleColor = Color(0xFF5A211A),
-                    subtitleColor = Color(0xFF8C4438),
+                    container = colorScheme.secondaryContainer,
+                    titleColor = colorScheme.onSecondaryContainer,
+                    subtitleColor = colorScheme.onSurfaceVariantSummary,
                     onClick = { pickDuration = true },
                 )
             }
@@ -85,9 +85,9 @@ fun LockScreen(navController: Navigator, bottomPadding: Dp) {
                 BannerCard(
                     title = "添加自定义锁机时间段",
                     subtitle = "在指定时间范围内锁住手机，不做熬夜手机党",
-                    container = Color(0xFFDCE9FB),
-                    titleColor = Color(0xFF163A63),
-                    subtitleColor = Color(0xFF3A628F),
+                    container = colorScheme.tertiaryContainer,
+                    titleColor = colorScheme.onTertiaryContainer,
+                    subtitleColor = colorScheme.onSurfaceVariantSummary,
                     onClick = { tip = "定时锁机等后台服务接好再做。" },
                 )
             }
