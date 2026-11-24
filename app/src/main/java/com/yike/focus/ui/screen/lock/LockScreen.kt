@@ -59,7 +59,7 @@ fun LockScreen(navController: Navigator, bottomPadding: Dp) {
                 .padding(horizontal = 16.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text("锁机", fontSize = 26.sp, fontWeight = FontWeight.Medium, color = TP.TextDark)
+            Text("静默", fontSize = 26.sp, fontWeight = FontWeight.Medium, color = TP.TextDark)
             Spacer(Modifier.weight(1f))
             Pill("必开权限") { tip = "锁机需要「悬浮窗」和「忽略电池优化」两个权限，接入时会引导你开启。" }
         }

@@ -2,8 +2,7 @@
 
 一个自己写的番茄钟：待办、专注计时、锁机、数据统计。
 
-界面基座来自 [KernelSU-Style-UI-Kit](https://github.com/chenaizhang/KernelSU-Style-UI-Kit)，
-功能是独立实现的，图标和名字也是自己的。和市面上任何一款番茄类应用都没有关系。
+界面基座来自 [KernelSU-Style-UI-Kit](https://github.com/chenaizhang/KernelSU-Style-UI-Kit)。
 
 ## 功能
 
