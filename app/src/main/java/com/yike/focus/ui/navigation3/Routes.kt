@@ -50,4 +50,12 @@ sealed interface Route : NavKey, Parcelable {
     @Parcelize
     @Serializable
     data object Whitelist : Route
+
+    @Parcelize
+    @Serializable
+    data object WhitelistOpen : Route
+
+    @Parcelize
+    @Serializable
+    data object Boost : Route
 }

@@ -63,3 +63,13 @@ jobs:
           name: yike-apk
           path: out/*.apk
           retention-days: 30
+
+      # 每次构建覆盖同一个 ci 标签下的 APK，方便用加速链接直接下载，不会堆版本
+      - name: Publish rolling apk
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view ci > /dev/null 2>&1 || gh release create ci --prerelease --title "自动构建" --notes "main 分支每次构建都会覆盖这个包，不是正式版本。"
+          cp out/*.apk out/yike-debug.apk || true
+          gh release upload ci out/yike-debug.apk --clobber

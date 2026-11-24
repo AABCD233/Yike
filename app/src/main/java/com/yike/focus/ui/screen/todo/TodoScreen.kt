@@ -45,8 +45,6 @@ import com.yike.focus.data.TodoKind
 import com.yike.focus.data.TodoStore
 import com.yike.focus.ui.navigation3.Navigator
 import com.yike.focus.ui.component.miuix.ConfirmDialog
-import com.yike.focus.ui.component.miuix.InputDialog
-import com.yike.focus.ui.screen.boost.BoostDialog
 import com.yike.focus.ui.navigation3.Route
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
@@ -62,7 +60,6 @@ fun TodoScreen(
 ) {
     var todos by remember { mutableStateOf(TodoStore.todos()) }
     var showAdd by remember { mutableStateOf(false) }
-    var showBoost by remember { mutableStateOf(false) }
     var editing by remember { mutableStateOf<Todo?>(null) }
     var deleting by remember { mutableStateOf<Todo?>(null) }
     val focusState by FocusTimer.state.collectAsState()
@@ -89,7 +86,7 @@ fun TodoScreen(
                     tint = colorScheme.onBackground,
                 )
             }
-            IconButton(onClick = { showBoost = true }) {
+            IconButton(onClick = { navController.push(Route.Boost) }) {
                 Icon(
                     Icons.Rounded.Bolt,
                     contentDescription = "功能增强",
@@ -156,16 +153,6 @@ fun TodoScreen(
         }
     }
 
-    if (showBoost) {
-        BoostDialog(
-            onDismiss = { showBoost = false },
-            onOpenWhitelist = {
-                showBoost = false
-                navController.push(Route.Whitelist)
-            },
-        )
-    }
-
     if (showAdd) {
         AddTodoDialog(
             onDismiss = { showAdd = false },
@@ -178,13 +165,11 @@ fun TodoScreen(
     }
 
     editing?.let { todo ->
-        InputDialog(
-            show = true,
-            title = "重命名",
-            initial = todo.title,
+        AddTodoDialog(
             onDismiss = { editing = null },
-            onConfirm = { name ->
-                TodoStore.updateTodo(todo.copy(title = name))
+            initial = todo,
+            onCreate = { updated ->
+                TodoStore.updateTodo(updated)
                 todos = TodoStore.todos()
                 editing = null
             },
@@ -224,7 +209,7 @@ internal fun TodoCard(
             .fillMaxWidth()
             .combinedClickable(
                 onClick = onStart,
-                onLongClick = { if (onEdit != null || onDelete != null) menu = true },
+                onLongClick = { onEdit?.invoke() },
             ),
         showIndication = true,
     ) {
@@ -273,7 +258,7 @@ internal fun TodoCard(
                     DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
                         if (onEdit != null) {
                             DropdownMenuItem(
-                                text = { androidx.compose.material3.Text("重命名") },
+                                text = { androidx.compose.material3.Text("编辑") },
                                 onClick = { menu = false; onEdit() },
                             )
                         }

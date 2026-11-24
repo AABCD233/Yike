@@ -48,18 +48,19 @@ import java.time.LocalDate
 @Composable
 fun AddTodoDialog(
     onDismiss: () -> Unit,
+    initial: Todo? = null,
     onCreate: (Todo) -> Unit,
 ) {
-    var title by remember { mutableStateOf("") }
-    var kind by remember { mutableStateOf(TodoKind.NORMAL) }
-    var mode by remember { mutableStateOf(TimerMode.COUNTDOWN) }
-    var minutes by remember { mutableStateOf(defaultFocusMinutes()) }
-    var customOpen by remember { mutableStateOf(false) }
-    var customText by remember { mutableStateOf("") }
-    var hoursText by remember { mutableStateOf("") }
-    var dailyText by remember { mutableStateOf("") }
+    var title by remember { mutableStateOf(initial?.title ?: "") }
+    var kind by remember { mutableStateOf(initial?.kind ?: TodoKind.NORMAL) }
+    var mode by remember { mutableStateOf(initial?.timerMode ?: TimerMode.COUNTDOWN) }
+    var minutes by remember { mutableStateOf(initial?.durationMin ?: defaultFocusMinutes()) }
+    var customOpen by remember { mutableStateOf(initial != null && initial.durationMin != 25 && initial.durationMin != 35) }
+    var customText by remember { mutableStateOf(initial?.durationMin?.toString() ?: "") }
+    var hoursText by remember { mutableStateOf(initial?.targetHours?.takeIf { it > 0f }?.toString() ?: "") }
+    var dailyText by remember { mutableStateOf(initial?.dailyMin?.takeIf { it > 0 }?.toString() ?: "") }
     var advanced by remember { mutableStateOf(false) }
-    var note by remember { mutableStateOf("") }
+    var note by remember { mutableStateOf(initial?.note ?: "") }
 
     Dialog(onDismissRequest = onDismiss) {
         Surface(
@@ -73,7 +74,7 @@ fun AddTodoDialog(
                         Icon(Icons.Rounded.Close, contentDescription = "关闭", tint = androidx.compose.material3.MaterialTheme.colorScheme.onSurface)
                     }
                     Text(
-                        "添加待办",
+                        if (initial == null) "添加待办" else "编辑待办",
                         modifier = Modifier.weight(1f),
                         textAlign = TextAlign.Center,
                         fontSize = 17.sp,
@@ -84,6 +85,7 @@ fun AddTodoDialog(
                             if (title.isNotBlank()) {
                                 onCreate(
                                     Todo(
+                                        id = initial?.id ?: 0L,
                                         title = title.trim(),
                                         kind = kind,
                                         timerMode = mode,
@@ -93,6 +95,7 @@ fun AddTodoDialog(
                                         endDate = if (kind == TodoKind.GOAL) LocalDate.now().plusDays(30).toString() else null,
                                         dailyMin = dailyText.toIntOrNull() ?: 0,
                                         note = note,
+                                        createdAt = initial?.createdAt ?: System.currentTimeMillis(),
                                     )
                                 )
                             }

@@ -72,6 +72,7 @@ import com.yike.focus.ui.screen.lock.LockActiveScreen
 import com.yike.focus.ui.screen.lock.LockScreen
 import com.yike.focus.ui.screen.me.MeScreen
 import com.yike.focus.ui.screen.stats.StatsScreen
+import com.yike.focus.ui.screen.whitelist.WhitelistOpenScreen
 import com.yike.focus.ui.screen.whitelist.WhitelistScreen
 import com.yike.focus.ui.screen.todo.TodoScreen
 import com.yike.focus.ui.screen.todoset.TodoSetScreen
@@ -203,6 +204,8 @@ class MainActivity : ComponentActivity() {
                             entry<Route.History>(swipeDismiss = swipeDismiss) { HistoryScreen(navigator) }
                             entry<Route.LockActive>(swipeDismiss = NavSwipeDirection.None) { LockActiveScreen(navigator) }
                             entry<Route.Whitelist>(swipeDismiss = swipeDismiss) { WhitelistScreen(navigator) }
+                            entry<Route.WhitelistOpen>(swipeDismiss = swipeDismiss) { WhitelistOpenScreen(navigator) }
+                            entry<Route.Boost>(swipeDismiss = swipeDismiss) { BoostScreen() }
                         }
                     }
 

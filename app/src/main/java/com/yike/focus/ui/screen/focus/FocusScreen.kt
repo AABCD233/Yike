@@ -173,7 +173,7 @@ fun FocusScreen(navController: Navigator) {
                 IconButton(onClick = { showBackground = true }) {
                     Icon(Icons.Rounded.Palette, contentDescription = "背景", tint = onBackground.copy(alpha = 0.9f))
                 }
-                IconButton(onClick = { navController.push(com.yike.focus.ui.navigation3.Route.Whitelist) }) {
+                IconButton(onClick = { navController.push(com.yike.focus.ui.navigation3.Route.WhitelistOpen) }) {
                     Icon(Icons.Rounded.Apps, contentDescription = "白名单", tint = onBackground.copy(alpha = 0.9f))
                 }
             }
