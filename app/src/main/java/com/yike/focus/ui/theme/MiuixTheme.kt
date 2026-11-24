@@ -3,6 +3,9 @@ package com.yike.focus.ui.theme
 import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.Color
@@ -64,10 +67,49 @@ fun MiuixTemplateTheme(
                     isAppearanceLightNavigationBars = !darkTheme
                 }
             }
-            CompositionLocalProvider(
-                LocalContentColor provides MiuixTheme.colorScheme.onBackground,
+            val miuixColors = MiuixTheme.colorScheme
+            // Material3 组件（对话框、输入框、下拉菜单）也套一层同色系的 MaterialTheme，
+            // 否则在 Miuix 模式下会掉回 Material 默认配色，看着很割裂。
+            MaterialTheme(
+                colorScheme = if (darkTheme) {
+                    darkColorScheme(
+                        primary = miuixColors.primary,
+                        onPrimary = miuixColors.onPrimary,
+                        primaryContainer = miuixColors.primaryContainer,
+                        onPrimaryContainer = miuixColors.onPrimaryContainer,
+                        secondaryContainer = miuixColors.secondaryContainer,
+                        onSecondaryContainer = miuixColors.onSecondaryContainer,
+                        background = miuixColors.background,
+                        onBackground = miuixColors.onBackground,
+                        surface = miuixColors.surface,
+                        onSurface = miuixColors.onSurface,
+                        surfaceVariant = miuixColors.surfaceContainer,
+                        onSurfaceVariant = miuixColors.onSurfaceVariantSummary,
+                        outline = miuixColors.outline,
+                    )
+                } else {
+                    lightColorScheme(
+                        primary = miuixColors.primary,
+                        onPrimary = miuixColors.onPrimary,
+                        primaryContainer = miuixColors.primaryContainer,
+                        onPrimaryContainer = miuixColors.onPrimaryContainer,
+                        secondaryContainer = miuixColors.secondaryContainer,
+                        onSecondaryContainer = miuixColors.onSecondaryContainer,
+                        background = miuixColors.background,
+                        onBackground = miuixColors.onBackground,
+                        surface = miuixColors.surface,
+                        onSurface = miuixColors.onSurface,
+                        surfaceVariant = miuixColors.surfaceContainer,
+                        onSurfaceVariant = miuixColors.onSurfaceVariantSummary,
+                        outline = miuixColors.outline,
+                    )
+                },
             ) {
-                content()
+                CompositionLocalProvider(
+                    LocalContentColor provides miuixColors.onBackground,
+                ) {
+                    content()
+                }
             }
         }
     )
