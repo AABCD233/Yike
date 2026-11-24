@@ -23,7 +23,7 @@ android {
     // 固定签名：仓库内证书，debug/release 共用，避免每次构建指纹不同导致覆盖安装失败
     signingConfigs {
         create("tomato") {
-            storeFile = rootProject.file("keystore/tomato.p12")
+            storeFile = rootProject.file("keystore/yike.p12")
             storeType = "PKCS12"
             storePassword = "wordlens"
             keyAlias = "wordlens"

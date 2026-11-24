@@ -6,7 +6,7 @@
     <string name="home_android_version">Android version</string>
     <string name="home_learn_more_title">Learn about %1$s</string>
     <string name="home_learn_more_summary">Tap to view the project and documentation</string>
-    <string name="home_learn_more_url" translatable="false">https://github.com/AABCD233/TomatoPlan</string>
+    <string name="home_learn_more_url" translatable="false">https://github.com/AABCD233/Yike</string>
     <string name="about_source_link">View source on %1$s</string>
     <string name="permission_section">Permissions</string>
     <string name="permission_ready">Core permissions are ready.</string>

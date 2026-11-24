@@ -5,7 +5,7 @@ import okhttp3.Request
 
 fun checkNewVersion(): LatestVersionInfo {
     if (!isNetworkAvailable(templateApp)) return LatestVersionInfo()
-    val url = "https://api.github.com/repos/AABCD233/TomatoPlan/releases/latest"
+    val url = "https://api.github.com/repos/AABCD233/Yike/releases/latest"
     // default null value if failed
     val defaultValue = LatestVersionInfo()
     runCatching {
