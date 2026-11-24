@@ -65,6 +65,7 @@ import com.yike.focus.ui.navigation3.Route
 import com.yike.focus.ui.navigation3.rememberNavigator
 import com.yike.focus.ui.screen.about.AboutScreen
 import com.yike.focus.ui.screen.colorpalette.ColorPaletteScreen
+import com.yike.focus.ui.screen.boost.BoostScreen
 import com.yike.focus.ui.screen.focus.FocusScreen
 import com.yike.focus.ui.screen.history.HistoryScreen
 import com.yike.focus.ui.screen.home.HomePager
