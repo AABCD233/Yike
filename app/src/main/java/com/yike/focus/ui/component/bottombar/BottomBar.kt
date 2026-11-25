@@ -97,7 +97,7 @@ fun BottomBar(
 ) {
     when (LocalUiMode.current) {
         UiMode.Miuix -> BottomBarMiuix(blurBackdrop, backdrop, modifier)
-        UiMode.Material -> BottomBarMaterial()
+        UiMode.Material -> BottomBarMiuix(blurBackdrop, backdrop, modifier)
     }
 }
 
@@ -107,6 +107,6 @@ fun SideRail(
 ) {
     when (LocalUiMode.current) {
         UiMode.Miuix -> NavigationRailMiuix(modifier)
-        UiMode.Material -> NavigationRailMaterial(modifier)
+        UiMode.Material -> NavigationRailMiuix(modifier)
     }
 }

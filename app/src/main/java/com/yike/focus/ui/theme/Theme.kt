@@ -103,7 +103,7 @@ fun TemplateTheme(
             content = content
         )
 
-        UiMode.Material -> MaterialTemplateTheme(
+        UiMode.Material -> MiuixTemplateTheme(
             appSettings = currentAppSettings,
             content = content
         )

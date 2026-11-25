@@ -51,7 +51,7 @@ class MainActivityViewModel(
             enableFloatingBottomBarBlur = settingRepo.enableFloatingBottomBarBlur,
             enableSwipeDismiss = settingRepo.enableSwipeDismiss,
             pagerInterceptionMode = settingRepo.pagerInterceptionMode,
-            uiMode = UiMode.fromValue(settingRepo.uiMode),
+            uiMode = UiMode.Miuix,
         )
     }
 
