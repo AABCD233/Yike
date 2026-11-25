@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import com.yike.focus.receiver.ReminderReceiver
+import com.yike.focus.templateApp
 import java.time.LocalDate
 import java.util.Calendar
 
