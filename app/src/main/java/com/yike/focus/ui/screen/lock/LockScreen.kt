@@ -35,7 +35,6 @@ import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
-import top.yukonga.miuix.kmp.utils.PressFeedbackType
 
 @Composable
 fun LockScreen(navController: Navigator, bottomPadding: Dp) {
@@ -197,7 +196,6 @@ private fun BannerCard(
         colors = CardDefaults.defaultColors(color = container),
         onClick = onClick,
         showIndication = true,
-        pressFeedbackType = PressFeedbackType.Tilt,
     ) {
         Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 18.dp)) {
             Text(title, fontSize = 18.sp, fontWeight = FontWeight.Medium, color = titleColor)
