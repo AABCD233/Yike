@@ -116,6 +116,23 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
+            val appContext = LocalContext.current
+            var onboarded by remember {
+                mutableStateOf(
+                    appContext.getSharedPreferences("settings", android.content.Context.MODE_PRIVATE)
+                        .getBoolean("onboarded", false)
+                )
+            }
+            if (!onboarded) {
+                com.yike.focus.ui.screen.setup.PermissionSetupScreen(
+                    onDone = {
+                        appContext.getSharedPreferences("settings", android.content.Context.MODE_PRIVATE)
+                            .edit().putBoolean("onboarded", true).apply()
+                        onboarded = true
+                    },
+                )
+                return@setContent
+            }
             RequestNotificationPermission()
             FocusLeavingReminder()
             val viewModel = viewModel<MainActivityViewModel>()

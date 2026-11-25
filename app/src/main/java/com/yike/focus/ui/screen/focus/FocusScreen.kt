@@ -121,6 +121,20 @@ fun FocusScreen(navController: Navigator) {
         }
     }
 
+    val viewForBars = androidx.compose.ui.platform.LocalView.current
+    LaunchedEffect(aodMode) {
+        val activity = viewForBars.context as? android.app.Activity ?: return@LaunchedEffect
+        val window = activity.window
+        val controller = androidx.core.view.WindowCompat.getInsetsController(window, viewForBars)
+        if (aodMode) {
+            controller.hide(androidx.core.view.WindowInsetsCompat.Type.systemBars())
+            controller.systemBarsBehavior =
+                androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        } else {
+            controller.show(androidx.core.view.WindowInsetsCompat.Type.systemBars())
+        }
+    }
+
     LaunchedEffect(aodMode) {
         while (aodMode) {
             delay(40_000)
@@ -273,6 +287,12 @@ fun FocusScreen(navController: Navigator) {
                         color = onBackground.copy(alpha = 0.9f),
                         fontSize = 15.sp,
                         lineHeight = 22.sp,
+                    )
+                    Text(
+                        java.time.LocalTime.now().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm")),
+                        color = onBackground.copy(alpha = 0.45f),
+                        fontSize = 13.sp,
+                        modifier = Modifier.padding(top = 6.dp),
                     )
                     quoteFrom?.takeIf { it.isNotBlank() }?.let {
                         Text(
