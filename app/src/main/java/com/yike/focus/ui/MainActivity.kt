@@ -68,7 +68,7 @@ import com.yike.focus.ui.screen.colorpalette.ColorPaletteScreen
 import com.yike.focus.ui.screen.boost.BoostScreen
 import com.yike.focus.ui.screen.focus.FocusScreen
 import com.yike.focus.ui.screen.history.HistoryScreen
-import com.yike.focus.ui.screen.home.HomePager
+import com.yike.focus.ui.screen.HomePager
 import com.yike.focus.ui.screen.lock.LockActiveScreen
 import com.yike.focus.ui.screen.lock.LockScreen
 import com.yike.focus.ui.screen.me.MeScreen

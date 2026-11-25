@@ -3,7 +3,7 @@ package com.yike.focus.ui.util
 import android.content.Context
 import android.os.Build
 import android.system.Os
-import com.yike.focus.ui.screen.home.getAppVersion
+import com.yike.focus.ui.util.getAppVersion
 import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
