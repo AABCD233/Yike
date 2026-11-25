@@ -54,6 +54,36 @@ object AppGuard {
         return context.packageManager.resolveActivity(homeIntent, 0)?.activityInfo?.packageName
     }
 
+    /** 最近一次切到前台的应用（包名 + 类名），类名用来识别多任务页 */
+    fun foregroundApp(): Pair<String, String?>? {
+        val context = templateApp
+        val manager = context.getSystemService(Context.USAGE_STATS_SERVICE) as? UsageStatsManager
+            ?: return null
+        val now = System.currentTimeMillis()
+        val events = manager.queryEvents(now - 15_000, now)
+        var lastPackage: String? = null
+        var lastClass: String? = null
+        var lastTs = 0L
+        val event = UsageEvents.Event()
+        while (events.hasNextEvent()) {
+            events.getNextEvent(event)
+            if (event.eventType == UsageEvents.Event.MOVE_TO_FOREGROUND && event.timeStamp >= lastTs) {
+                lastTs = event.timeStamp
+                lastPackage = event.packageName
+                lastClass = event.className
+            }
+        }
+        val pkg = lastPackage ?: return null
+        return pkg to lastClass
+    }
+
+    /** 当前是不是停在多任务（最近任务）界面 */
+    fun isRecents(pkg: String, className: String?): Boolean {
+        if (pkg != "com.android.systemui") return false
+        val cls = className?.lowercase() ?: return false
+        return cls.contains("recents") || cls.contains("overview") || cls.contains("launcherui")
+    }
+
     /** 最近一次切到前台的应用包名 */
     fun foregroundPackage(): String? {
         val context = templateApp

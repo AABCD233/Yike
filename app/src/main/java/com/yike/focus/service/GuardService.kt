@@ -52,11 +52,13 @@ class GuardService : Service() {
                     val running = FocusTimer.state.value
                     if (running == null || running.kind != "focus" || running.isPaused) continue
                     if (!BoostSettings.hardcore && !BoostSettings.blockDesktop) continue
-                    val pkg = AppGuard.foregroundPackage() ?: continue
+                    val foreground = AppGuard.foregroundApp() ?: continue
+                    val pkg = foreground.first
                     if (pkg == packageName) continue
 
                     val onHome = pkg == AppGuard.homePackage()
-                    if (BoostSettings.blockDesktop && onHome) {
+                    val onRecents = AppGuard.isRecents(pkg, foreground.second)
+                    if (BoostSettings.blockDesktop && (onHome || onRecents)) {
                         launchGuard(desktop = true)
                         continue
                     }
