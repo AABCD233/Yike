@@ -237,6 +237,17 @@ fun FocusScreen(navController: Navigator) {
                     com.yike.focus.data.RoundEvent.celebrateTitle = activeTodo?.title
                     com.yike.focus.data.RoundEvent.requestPage = 0
                     navController.replaceAll(listOf(com.yike.focus.ui.navigation3.Route.Main))
+                } else if (PomodoroSettings.autoBreak) {
+                    // 开了自动休息：直接进休息倒计时
+                    val rounds = activeTodo?.rounds ?: PomodoroSettings.roundsBeforeLong
+                    val long = rounds > 0 && PomodoroSettings.roundIndex % rounds == 0
+                    val breakMin = if (long) {
+                        activeTodo?.longBreakMin ?: PomodoroSettings.longBreakMinutes
+                    } else {
+                        activeTodo?.breakMin ?: PomodoroSettings.breakMinutes
+                    }
+                    finishedTitle = null
+                    FocusTimer.startRest(breakMin, long = long)
                 }
             } else {
                 // 休息结束：开了「自动开始下一个」就直接接着上一个任务
