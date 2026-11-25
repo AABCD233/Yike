@@ -18,6 +18,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -49,7 +50,13 @@ fun LockActiveScreen(navController: Navigator) {
     var askQuit by remember { mutableStateOf(false) }
     var done by remember { mutableStateOf(false) }
 
-    // 锁机期间屏幕常亮
+    // 锁机期间屏幕常亮，并进入系统「屏幕固定」，上滑回桌面会被拉回这个页面
+    DisposableEffect(Unit) {
+        val activity = view.context as? android.app.Activity
+        runCatching { activity?.startLockTask() }
+        onDispose { runCatching { activity?.stopLockTask() } }
+    }
+
     LaunchedEffect(Unit) {
         view.keepScreenOn = true
         while (true) {
@@ -110,7 +117,7 @@ fun LockActiveScreen(navController: Navigator) {
             )
             Spacer(Modifier.height(16.dp))
             Text(
-                "这期间放下手机，做点别的事",
+                "这期间放下手机；上滑回桌面也会被拉回这里",
                 fontSize = 14.sp,
                 color = Color.White.copy(alpha = 0.7f),
             )

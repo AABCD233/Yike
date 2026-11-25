@@ -149,6 +149,12 @@ class MainActivity : ComponentActivity() {
             val runningFocus by FocusTimer.state.collectAsStateWithLifecycle()
             val context = LocalContext.current
             LaunchedEffect(runningFocus != null, runningFocus?.kind) {
+                val running = runningFocus
+                if (running != null && (running.kind == "focus" || running.kind == "lock")) {
+                    if (com.yike.focus.data.BoostSettings.dnd) com.yike.focus.data.Dnd.enable()
+                } else {
+                    com.yike.focus.data.Dnd.disable()
+                }
                 val active = runningFocus?.kind == "focus"
                 if (active && com.yike.focus.data.BoostSettings.hardcore) {
                     com.yike.focus.service.GuardService.start(context)

@@ -20,6 +20,10 @@ object BoostSettings {
         get() = prefs().getBoolean("boost_block_notify", false)
         set(value) = prefs().edit().putBoolean("boost_block_notify", value).apply()
 
+    var dnd: Boolean
+        get() = prefs().getBoolean("boost_dnd", false)
+        set(value) = prefs().edit().putBoolean("boost_dnd", value).apply()
+
     var whitelistEnabled: Boolean
         get() = prefs().getBoolean("boost_whitelist", false)
         set(value) = prefs().edit().putBoolean("boost_whitelist", value).apply()

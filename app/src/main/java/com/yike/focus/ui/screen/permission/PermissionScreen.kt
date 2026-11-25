@@ -21,6 +21,7 @@ import androidx.compose.material.icons.rounded.BatterySaver
 import androidx.compose.material.icons.rounded.FolderOpen
 import androidx.compose.material.icons.rounded.Layers
 import androidx.compose.material.icons.rounded.Notifications
+import androidx.compose.material.icons.rounded.NotificationsPaused
 import androidx.compose.material.icons.rounded.PictureInPicture
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
@@ -116,6 +117,23 @@ fun PermissionScreen() {
                             .putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, context.packageName)
                             .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
                         runCatching { context.startActivity(intent) }
+                    },
+                )
+            }
+            item {
+                PermissionRow(
+                    icon = Icons.Rounded.NotificationsPaused,
+                    title = "勿扰访问",
+                    summary = "计时开始自动开勿扰、结束自动关",
+                    granted = com.yike.focus.data.Dnd.granted(),
+                    actionText = "去开启",
+                    onAction = {
+                        runCatching {
+                            context.startActivity(
+                                android.content.Intent(android.provider.Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS)
+                                    .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                            )
+                        }
                     },
                 )
             }

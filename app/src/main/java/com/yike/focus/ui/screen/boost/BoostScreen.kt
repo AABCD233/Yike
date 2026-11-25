@@ -44,7 +44,7 @@ fun BoostScreen() {
     val navigator = LocalNavigator.current
     var hardcore by remember { mutableStateOf(BoostSettings.hardcore) }
     var strict by remember { mutableStateOf(BoostSettings.strict) }
-    var blockNotify by remember { mutableStateOf(BoostSettings.blockNotify) }
+    var dnd by remember { mutableStateOf(BoostSettings.dnd) }
 
     Column(modifier = Modifier.fillMaxSize().background(colorScheme.background)) {
         Row(
@@ -84,11 +84,15 @@ fun BoostScreen() {
                         onCheckedChange = { strict = it; BoostSettings.strict = it },
                     )
                     SwitchPreference(
-                        title = "拦截通知",
-                        summary = "计时期间拦截其他应用通知（需要通知使用权，后续版本生效）",
+                        title = "勿扰模式",
+                        summary = if (com.yike.focus.data.Dnd.granted()) {
+                            "计时开始时自动开启勿扰，结束恢复原状"
+                        } else {
+                            "需要「勿扰访问」权限，去「我的 → 权限」开启"
+                        },
                         startAction = { BoostIcon(Icons.Rounded.NotificationsOff) },
-                        checked = blockNotify,
-                        onCheckedChange = { blockNotify = it; BoostSettings.blockNotify = it },
+                        checked = dnd,
+                        onCheckedChange = { dnd = it; BoostSettings.dnd = it },
                     )
                 }
             }

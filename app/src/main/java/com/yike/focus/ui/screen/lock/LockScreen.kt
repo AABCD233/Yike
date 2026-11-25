@@ -29,6 +29,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yike.focus.data.FocusTimer
+import kotlinx.coroutines.delay
+import androidx.compose.runtime.LaunchedEffect
 import com.yike.focus.ui.navigation3.Navigator
 import com.yike.focus.ui.navigation3.Route
 import top.yukonga.miuix.kmp.basic.Card
@@ -41,6 +43,8 @@ fun LockScreen(navController: Navigator, bottomPadding: Dp) {
     var tip by remember { mutableStateOf<String?>(null) }
     var pickDuration by remember { mutableStateOf(false) }
     var customMinutes by remember { mutableStateOf("") }
+    var pendingMinutes by remember { mutableStateOf<Int?>(null) }
+    var countdown by remember { mutableStateOf(5) }
 
     Column(modifier = Modifier.fillMaxSize().background(colorScheme.background)) {
         Row(
@@ -124,8 +128,8 @@ fun LockScreen(navController: Navigator, bottomPadding: Dp) {
                             Card(
                                 onClick = {
                                     pickDuration = false
-                                    FocusTimer.startLock(min)
-                                    navController.push(Route.LockActive)
+                                    countdown = 5
+                                    pendingMinutes = min
                                 },
                                 showIndication = true,
                             ) {
@@ -152,8 +156,8 @@ fun LockScreen(navController: Navigator, bottomPadding: Dp) {
                                 val min = customMinutes.toIntOrNull() ?: return@Card
                                 if (min in 1..600) {
                                     pickDuration = false
-                                    FocusTimer.startLock(min)
-                                    navController.push(Route.LockActive)
+                                    countdown = 5
+                                    pendingMinutes = min
                                 }
                             },
                             showIndication = true,
@@ -167,6 +171,34 @@ fun LockScreen(navController: Navigator, bottomPadding: Dp) {
                     }
                 }
         }
+    }
+
+    pendingMinutes?.let { minutes ->
+        LaunchedEffect(countdown) {
+            if (countdown > 0) {
+                delay(1000)
+                countdown--
+            }
+        }
+        com.yike.focus.ui.component.miuix.ConfirmDialog(
+            show = true,
+            title = "即将开始锁机",
+            summary = if (countdown > 0) {
+                "还有 $countdown 秒。倒计时结束后会锁机 $minutes 分钟，期间上滑回桌面也会被拉回来。"
+            } else {
+                "锁机 $minutes 分钟，期间屏幕常亮，不能提前退出。"
+            },
+            confirmText = if (countdown > 0) "请稍等 $countdown" else "开始锁机",
+            dismissText = "取消",
+            onConfirm = {
+                if (countdown == 0) {
+                    pendingMinutes = null
+                    FocusTimer.startLock(minutes)
+                    navController.push(Route.LockActive)
+                }
+            },
+            onDismiss = { pendingMinutes = null },
+        )
     }
 
     tip?.let { text ->
