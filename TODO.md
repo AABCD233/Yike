@@ -2,6 +2,11 @@
 
 ## 下次做
 
+- 禁止多任务还是失效：现在的「失焦拉回」没起作用，要研究番茄ToDo 的做法（怀疑是悬浮窗常驻覆盖 + startActivity 组合，或 ActivityManager 的 lock task）
+- 专注完成的弹窗还是 Material 样式：FinishDialog 用了 Material3 的 Card/Text，要换成 Miuix 的 OverlayDialog + TextButton
+- 关于页图标：Canvas 里 drawArc 画不出来（只剩红点和米色底），改成矢量图并显式给 fillColor 透明，或直接画两段 arc
+- 待办划线只应生效当天：现在按「累计完成次数 >= 总轮数」判断，永久划线；要改成按当天次数判断
+
 - 熄屏时钟：位置移动间隔从 40 秒改成 10 分钟；移动幅度加大（但不超出屏幕）；背景改成真黑 #000000，省电
 
 - 音乐目录选择：目前用自己的目录浏览器读 /sdcard，没给「所有文件访问」时会看不到文件。改成用系统媒体库（MediaStore）按文件夹列歌，只需要音频读取权限；同时保留手动选目录作兜底
