@@ -393,6 +393,13 @@ fun MainScreen(
         drawContent()
     }
 
+    LaunchedEffect(com.yike.focus.data.RoundEvent.requestPage) {
+        com.yike.focus.data.RoundEvent.requestPage?.let { page ->
+            mainPagerState.animateToPage(page)
+            com.yike.focus.data.RoundEvent.requestPage = null
+        }
+    }
+
     val settledPage = mainPagerState.pagerState.settledPage
     LaunchedEffect(settledPage) {
         onPageChanged(settledPage)

@@ -230,6 +230,24 @@ fun TodoScreen(
         )
     }
 
+    com.yike.focus.data.RoundEvent.celebrateTitle?.let { name ->
+        AlertDialog(
+            onDismissRequest = { com.yike.focus.data.RoundEvent.celebrateTitle = null },
+            title = { androidx.compose.material3.Text("恭喜完成本次专注") },
+            text = { androidx.compose.material3.Text("「$name」的计划轮数已经完成，真棒！") },
+            confirmButton = {
+                TextButton(onClick = { com.yike.focus.data.RoundEvent.celebrateTitle = null }) {
+                    androidx.compose.material3.Text("去打卡分享")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { com.yike.focus.data.RoundEvent.celebrateTitle = null }) {
+                    androidx.compose.material3.Text("取消")
+                }
+            },
+        )
+    }
+
     deleting?.let { todo ->
         AlertDialog(
             onDismissRequest = { deleting = null },

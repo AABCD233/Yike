@@ -33,6 +33,7 @@ import androidx.compose.material.icons.rounded.Apps
 import androidx.compose.material.icons.rounded.MusicNote
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material3.IconButton
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -152,39 +153,42 @@ fun FocusScreen(navController: Navigator) {
             LaunchedEffect(Unit) { navController.pop() }
         } else {
             val wasRest = finishedTitle == "休息"
-            ConfirmDialog(
-                show = true,
-                title = if (wasRest) "休息结束" else "完成一个番茄",
-                summary = if (wasRest) {
-                    "回来继续吧，今天已经完成 ${PomodoroSettings.roundIndex} 个番茄"
-                } else {
-                    "「$finishedTitle」专注 ${finishedSeconds / 60} 分钟，起来活动一下？"
-                },
-                confirmText = if (wasRest) "再来一个" else "休息一下",
-                dismissText = "结束",
-                onConfirm = {
-                    val lastId = PomodoroSettings.lastTodoId
-                    finishedTitle = null
-                    if (wasRest) {
-                        val todo = TodoStore.todo(lastId)
-                        if (todo != null) {
-                            FocusTimer.start(todo)
-                        } else {
-                            navController.pop()
-                        }
-                    } else {
-                        val active = TodoStore.todo(lastId)
-                        val rounds = active?.rounds ?: PomodoroSettings.roundsBeforeLong
-                        val long = rounds > 0 && PomodoroSettings.roundIndex % rounds == 0
-                        FocusTimer.startRest(
-                            if (long) (active?.longBreakMin ?: PomodoroSettings.longBreakMinutes)
-                            else (active?.breakMin ?: PomodoroSettings.breakMinutes),
-                            long = long,
-                        )
-                    }
-                },
-                onDismiss = { navController.pop() },
-            )
+            val active = TodoStore.todo(PomodoroSettings.lastTodoId)
+            val rounds = active?.rounds ?: PomodoroSettings.roundsBeforeLong
+            val isLongBreak = rounds > 0 && PomodoroSettings.roundIndex % rounds == 0
+            val breakMin = if (isLongBreak) {
+                active?.longBreakMin ?: PomodoroSettings.longBreakMinutes
+            } else {
+                active?.breakMin ?: PomodoroSettings.breakMinutes
+            }
+
+            if (wasRest) {
+                ConfirmDialog(
+                    show = true,
+                    title = "休息结束",
+                    summary = "今天已经完成 ${PomodoroSettings.roundIndex} 个番茄，继续吗？",
+                    confirmText = "再来一个",
+                    dismissText = "结束",
+                    onConfirm = {
+                        finishedTitle = null
+                        val todo = TodoStore.todo(PomodoroSettings.lastTodoId)
+                        if (todo != null) FocusTimer.start(todo) else navController.pop()
+                    },
+                    onDismiss = { navController.pop() },
+                )
+            } else {
+                FinishDialog(
+                    title = finishedTitle ?: "",
+                    seconds = finishedSeconds,
+                    breakMinutes = breakMin,
+                    isLongBreak = isLongBreak,
+                    onBreak = {
+                        finishedTitle = null
+                        FocusTimer.startRest(breakMin, long = isLongBreak)
+                    },
+                    onClose = { navController.pop() },
+                )
+            }
         }
         return
     }
@@ -228,18 +232,10 @@ fun FocusScreen(navController: Navigator) {
                 val justFinished = activeTodo != null && activeTodo.totalRounds > 0 &&
                     doneCount >= activeTodo.totalRounds
                 if (justFinished) {
-                    celebrate = activeTodo?.title
-                } else if (PomodoroSettings.autoBreak) {
-                    val active = TodoStore.todo(PomodoroSettings.lastTodoId)
-                    val rounds = active?.rounds ?: PomodoroSettings.roundsBeforeLong
-                    val long = rounds > 0 && PomodoroSettings.roundIndex % rounds == 0
-                    val breakMin = if (long) {
-                        active?.longBreakMin ?: PomodoroSettings.longBreakMinutes
-                    } else {
-                        active?.breakMin ?: PomodoroSettings.breakMinutes
-                    }
-                    FocusTimer.startRest(breakMin, long = long)
-                    finishedTitle = null
+                    // 轮数完成：回主界面，并在待办页弹完成提示
+                    com.yike.focus.data.RoundEvent.celebrateTitle = activeTodo?.title
+                    com.yike.focus.data.RoundEvent.requestPage = 0
+                    navController.replaceAll(listOf(com.yike.focus.ui.navigation3.Route.Main))
                 }
             } else {
                 // 休息结束：开了「自动开始下一个」就直接接着上一个任务
@@ -539,4 +535,53 @@ private fun formatClock(seconds: Int): String {
     val m = (s % 3600) / 60
     val sec = s % 60
     return if (h > 0) "%d:%02d:%02d".format(h, m, sec) else "%02d:%02d".format(m, sec)
+}
+
+@Composable
+private fun FinishDialog(
+    title: String,
+    seconds: Int,
+    breakMinutes: Int,
+    isLongBreak: Boolean,
+    onBreak: () -> Unit,
+    onClose: () -> Unit,
+) {
+    val todayCount = TodoStore.todayCount(PomodoroSettings.lastTodoId)
+    OverlayDialog(
+        show = true,
+        title = "完成一个番茄",
+        summary = "「$title」专注 ${seconds / 60} 分钟，今日第 $todayCount 个",
+        onDismissRequest = onClose,
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Text(
+                if (isLongBreak) "这一轮结束了，建议来一次长休息（$breakMinutes 分钟）"
+                else "接下来是 $breakMinutes 分钟休息",
+                fontSize = 13.sp,
+                color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(14.dp))
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Card(
+                    modifier = Modifier.weight(1f),
+                    onClick = onClose,
+                    showIndication = true,
+                ) {
+                    Box(modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp), contentAlignment = Alignment.Center) {
+                        Text("结束", fontSize = 14.sp, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface)
+                    }
+                }
+                Spacer(Modifier.width(10.dp))
+                Card(
+                    modifier = Modifier.weight(1f),
+                    onClick = onBreak,
+                    showIndication = true,
+                ) {
+                    Box(modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp), contentAlignment = Alignment.Center) {
+                        Text("休息 $breakMinutes 分钟", fontSize = 14.sp, color = colorScheme.primary)
+                    }
+                }
+            }
+        }
+    }
 }
