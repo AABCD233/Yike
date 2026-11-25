@@ -68,6 +68,7 @@ import com.yike.focus.ui.navigation3.rememberNavigator
 import com.yike.focus.ui.screen.about.AboutScreen
 import com.yike.focus.ui.screen.colorpalette.ColorPaletteScreen
 import com.yike.focus.ui.screen.boost.BoostScreen
+import com.yike.focus.ui.screen.finish.FinishScreen
 import com.yike.focus.ui.screen.focus.FocusScreen
 import com.yike.focus.ui.screen.history.HistoryScreen
 import com.yike.focus.ui.screen.lock.LockActiveScreen
@@ -109,6 +110,7 @@ class MainActivity : ComponentActivity() {
 
     companion object {
         const val EXTRA_OPEN_FOCUS = "open_focus"
+        const val EXTRA_SHOW_FINISH = "show_finish"
     }
 
     private val intentState = MutableStateFlow(0)
@@ -137,6 +139,8 @@ class MainActivity : ComponentActivity() {
             }
             RequestNotificationPermission()
             FocusLeavingReminder()
+            DesktopGuard()
+            AppForegroundTracker()
             val viewModel = viewModel<MainActivityViewModel>()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             val selectedMainPage by viewModel.selectedMainPage.collectAsStateWithLifecycle()
@@ -163,6 +167,10 @@ class MainActivity : ComponentActivity() {
             val openFocus = intent?.getBooleanExtra(EXTRA_OPEN_FOCUS, false) == true
             LaunchedEffect(openFocus) {
                 if (openFocus) navigator.push(Route.Focus)
+            }
+            val showFinish = intent?.getBooleanExtra(EXTRA_SHOW_FINISH, false) == true
+            LaunchedEffect(showFinish) {
+                if (showFinish) navigator.push(Route.Finish)
             }
             val runningFocus by FocusTimer.state.collectAsStateWithLifecycle()
             val context = LocalContext.current
@@ -238,6 +246,7 @@ class MainActivity : ComponentActivity() {
                             entry<Route.WhitelistOpen>(swipeDismiss = swipeDismiss) { WhitelistOpenScreen(navigator) }
                             entry<Route.Boost>(swipeDismiss = swipeDismiss) { BoostScreen() }
                             entry<Route.Music>(swipeDismiss = swipeDismiss) { MusicScreen(navigator) }
+                            entry<Route.Finish>(swipeDismiss = NavSwipeDirection.None) { FinishScreen(navigator) }
                         }
                     }
 
@@ -268,6 +277,63 @@ private fun RequestNotificationPermission() {
             context, Manifest.permission.POST_NOTIFICATIONS
         ) == PackageManager.PERMISSION_GRANTED
         if (!granted) launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
+    }
+}
+
+@Composable
+private fun AppForegroundTracker() {
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    DisposableEffect(lifecycle) {
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_START -> com.yike.focus.data.AppState.foreground = true
+                Lifecycle.Event.ON_STOP -> com.yike.focus.data.AppState.foreground = false
+                else -> Unit
+            }
+        }
+        lifecycle.addObserver(observer)
+        com.yike.focus.data.AppState.foreground = true
+        onDispose { lifecycle.removeObserver(observer) }
+    }
+}
+
+/**
+ * 「禁止桌面和多任务」：页面一停就延迟 800ms 看一眼前台，
+ * 不是白名单应用就把自己拉回来。依赖悬浮窗权限，Android 10+ 才允许后台启动 Activity。
+ */
+@Composable
+private fun DesktopGuard() {
+    val context = LocalContext.current
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    DisposableEffect(lifecycle) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event != Lifecycle.Event.ON_STOP) return@LifecycleEventObserver
+            val running = FocusTimer.state.value ?: return@LifecycleEventObserver
+            if (running.kind != "focus" || running.isPaused) return@LifecycleEventObserver
+            if (!com.yike.focus.data.BoostSettings.blockDesktop) return@LifecycleEventObserver
+            android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                val foreground = com.yike.focus.data.AppGuard.foregroundApp() ?: return@postDelayed
+                val pkg = foreground.first
+                val onHome = pkg == com.yike.focus.data.AppGuard.homePackage()
+                val allowed = pkg == context.packageName ||
+                    (com.yike.focus.data.AppGuard.isExempt(pkg) && !onHome) ||
+                    com.yike.focus.data.AppGuard.whitelist().contains(pkg)
+                if (allowed) return@postDelayed
+                runCatching {
+                    context.startActivity(
+                        android.content.Intent(context, MainActivity::class.java).apply {
+                            addFlags(
+                                android.content.Intent.FLAG_ACTIVITY_NEW_TASK or
+                                    android.content.Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or
+                                    android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP
+                            )
+                        }
+                    )
+                }
+            }, 800)
+        }
+        lifecycle.addObserver(observer)
+        onDispose { lifecycle.removeObserver(observer) }
     }
 }
 

@@ -44,6 +44,21 @@ object Notify {
 
     fun focusDone(context: Context, title: String, seconds: Int) {
         ensureChannel(context)
+        // 不在前台时，借悬浮窗权限把计时页拉起来，让用户看到完成框而不是只有一条通知
+        if (!com.yike.focus.data.AppState.foreground && com.yike.focus.data.AppGuard.hasOverlayAccess()) {
+            runCatching {
+                context.startActivity(
+                    android.content.Intent(context, MainActivity::class.java).apply {
+                        addFlags(
+                            android.content.Intent.FLAG_ACTIVITY_NEW_TASK or
+                                android.content.Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or
+                                android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP
+                        )
+                        putExtra(MainActivity.EXTRA_SHOW_FINISH, true)
+                    }
+                )
+            }
+        }
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
         }

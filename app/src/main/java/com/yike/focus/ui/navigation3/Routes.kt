@@ -63,4 +63,8 @@ sealed interface Route : NavKey, Parcelable {
     @Serializable
     data object Music : Route
 
+    @Parcelize
+    @Serializable
+    data object Finish : Route
+
 }
