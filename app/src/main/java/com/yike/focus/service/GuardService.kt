@@ -51,21 +51,29 @@ class GuardService : Service() {
                     delay(1200)
                     val running = FocusTimer.state.value
                     if (running == null || running.kind != "focus" || running.isPaused) continue
-                    if (!BoostSettings.hardcore) continue
+                    if (!BoostSettings.hardcore && !BoostSettings.blockDesktop) continue
                     val pkg = AppGuard.foregroundPackage() ?: continue
+                    if (pkg == packageName) continue
+
+                    val onHome = pkg == AppGuard.homePackage()
+                    if (BoostSettings.blockDesktop && onHome) {
+                        launchGuard(desktop = true)
+                        continue
+                    }
+                    if (!BoostSettings.hardcore) continue
                     if (AppGuard.isExempt(pkg)) continue
                     if (AppGuard.whitelist().contains(pkg)) continue
-                    launchGuard()
+                    launchGuard(desktop = false)
                 }
             }
         }
         return START_STICKY
     }
 
-    private fun launchGuard() {
+    private fun launchGuard(desktop: Boolean) {
         runCatching {
             startActivity(
-                Intent(this, GuardActivity::class.java).addFlags(
+                Intent(this, GuardActivity::class.java).putExtra("desktop", desktop).addFlags(
                     Intent.FLAG_ACTIVITY_NEW_TASK or
                         Intent.FLAG_ACTIVITY_CLEAR_TOP or
                         Intent.FLAG_ACTIVITY_SINGLE_TOP

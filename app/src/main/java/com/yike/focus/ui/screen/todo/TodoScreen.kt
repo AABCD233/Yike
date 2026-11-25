@@ -395,6 +395,7 @@ internal fun TodoCard(
 ) {
     val count = remember(todo.id, todo.title) { TodoStore.todayCount(todo.id) }
     val todaySec = remember(todo.id, todo.title) { TodoStore.todaySeconds(todo.id) }
+    val finished = todo.totalRounds > 0 && count >= todo.totalRounds
     val bitmap = rememberBitmap(todo.bgPath)
 
     Card(
@@ -402,6 +403,7 @@ internal fun TodoCard(
             .fillMaxWidth()
             .combinedClickable(onClick = onStart, onLongClick = { onLongPress?.invoke() }),
         showIndication = true,
+        pressFeedbackType = top.yukonga.miuix.kmp.utils.PressFeedbackType.Tilt,
     ) {
         Box {
             bitmap?.let {
@@ -430,10 +432,11 @@ internal fun TodoCard(
                         fontWeight = FontWeight.Medium,
                         color = if (bitmap != null) Color.White else colorScheme.onSurface,
                         maxLines = 2,
+                        textDecoration = if (finished) androidx.compose.ui.text.style.TextDecoration.LineThrough else null,
                     )
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        subtitleOf(todo, todaySec),
+                        if (finished) "已完成 $count/${todo.totalRounds} 轮" else subtitleOf(todo, todaySec),
                         fontSize = 13.sp,
                         color = if (bitmap != null) Color.White.copy(alpha = 0.85f)
                         else colorScheme.onSurfaceVariantSummary,

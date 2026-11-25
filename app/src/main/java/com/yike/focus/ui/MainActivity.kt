@@ -174,7 +174,12 @@ class MainActivity : ComponentActivity() {
                     com.yike.focus.data.Dnd.disable()
                 }
                 val active = runningFocus?.kind == "focus"
-                if (active && com.yike.focus.data.BoostSettings.hardcore) {
+                runCatching {
+                    val am = context.getSystemService(android.app.ActivityManager::class.java)
+                    am?.appTasks?.firstOrNull()
+                        ?.setExcludeFromRecents(active && com.yike.focus.data.BoostSettings.hideRecents)
+                }
+                if (active && (com.yike.focus.data.BoostSettings.hardcore || com.yike.focus.data.BoostSettings.blockDesktop)) {
                     com.yike.focus.service.GuardService.start(context)
                 } else {
                     com.yike.focus.service.GuardService.stop(context)

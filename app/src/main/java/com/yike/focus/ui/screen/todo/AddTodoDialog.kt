@@ -63,6 +63,7 @@ fun AddTodoDialog(
     var reminder by remember { mutableStateOf(initial?.reminderEnabled ?: false) }
     var reminderHour by remember { mutableStateOf(initial?.reminderHour ?: 8) }
     var reminderMinute by remember { mutableStateOf(initial?.reminderMinute ?: 0) }
+    var totalRounds by remember { mutableStateOf(initial?.totalRounds ?: 0) }
 
     OverlayDialog(
         show = true,
@@ -185,6 +186,12 @@ fun AddTodoDialog(
                     onPlus = { longBreakMin = (longBreakMin + 5).coerceAtMost(120) },
                 )
                 Stepper(
+                    title = "总共几轮算完成（0 不限）",
+                    value = if (totalRounds == 0) "不限" else "$totalRounds 轮",
+                    onMinus = { totalRounds = (totalRounds - 1).coerceAtLeast(0) },
+                    onPlus = { totalRounds = (totalRounds + 1).coerceAtMost(50) },
+                )
+                Stepper(
                     title = "几轮后长休息",
                     value = "$rounds 个",
                     onMinus = { rounds = (rounds - 1).coerceAtLeast(1) },
@@ -251,6 +258,7 @@ fun AddTodoDialog(
                                 reminderEnabled = reminder,
                                 reminderHour = reminderHour,
                                 reminderMinute = reminderMinute,
+                                totalRounds = totalRounds,
                             )
                         )
                     }

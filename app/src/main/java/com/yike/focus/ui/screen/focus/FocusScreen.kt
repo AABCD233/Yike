@@ -82,6 +82,7 @@ fun FocusScreen(navController: Navigator) {
     var showMusicPicker by remember { mutableStateOf(false) }
     var musicPath by remember { mutableStateOf(FocusLook.musicPath) }
     var aodMode by remember { mutableStateOf(false) }
+    var celebrate by remember { mutableStateOf<String?>(null) }
     var aodOffset by remember { mutableStateOf(androidx.compose.ui.unit.IntOffset(0, 0)) }
     var bgPreset by remember { mutableStateOf(FocusLook.backgroundPreset) }
     var bgImage by remember { mutableStateOf(FocusLook.backgroundImage) }
@@ -126,7 +127,7 @@ fun FocusScreen(navController: Navigator) {
         val activity = viewForBars.context as? android.app.Activity ?: return@LaunchedEffect
         val window = activity.window
         val controller = androidx.core.view.WindowCompat.getInsetsController(window, viewForBars)
-        if (aodMode) {
+    if (aodMode) {
             controller.hide(androidx.core.view.WindowInsetsCompat.Type.systemBars())
             controller.systemBarsBehavior =
                 androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
@@ -222,7 +223,13 @@ fun FocusScreen(navController: Navigator) {
                 PomodoroSettings.roundIndex = PomodoroSettings.roundIndex + 1
                 finishedTitle = s.title
                 finishedSeconds = done?.seconds ?: (s.totalSeconds - 1)
-                if (PomodoroSettings.autoBreak) {
+                val activeTodo = TodoStore.todo(PomodoroSettings.lastTodoId)
+                val doneCount = if (activeTodo != null) TodoStore.todayCount(activeTodo.id) else 0
+                val justFinished = activeTodo != null && activeTodo.totalRounds > 0 &&
+                    doneCount >= activeTodo.totalRounds
+                if (justFinished) {
+                    celebrate = activeTodo?.title
+                } else if (PomodoroSettings.autoBreak) {
                     val active = TodoStore.todo(PomodoroSettings.lastTodoId)
                     val rounds = active?.rounds ?: PomodoroSettings.roundsBeforeLong
                     val long = rounds > 0 && PomodoroSettings.roundIndex % rounds == 0
@@ -288,12 +295,6 @@ fun FocusScreen(navController: Navigator) {
                         fontSize = 15.sp,
                         lineHeight = 22.sp,
                     )
-                    Text(
-                        java.time.LocalTime.now().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm")),
-                        color = onBackground.copy(alpha = 0.45f),
-                        fontSize = 13.sp,
-                        modifier = Modifier.padding(top = 6.dp),
-                    )
                     quoteFrom?.takeIf { it.isNotBlank() }?.let {
                         Text(
                             "—— $it",
@@ -303,6 +304,12 @@ fun FocusScreen(navController: Navigator) {
                         )
                     }
                 }
+                Text(
+                    java.time.LocalTime.now().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm")),
+                    color = onBackground.copy(alpha = 0.45f),
+                    fontSize = 13.sp,
+                    modifier = Modifier.padding(top = 14.dp, end = 4.dp),
+                )
                 IconButton(onClick = { showBackground = true }) {
                     Icon(Icons.Rounded.Palette, contentDescription = "背景", tint = onBackground.copy(alpha = 0.9f))
                 }
@@ -400,6 +407,18 @@ fun FocusScreen(navController: Navigator) {
             }
             Spacer(Modifier.height(28.dp))
         }
+    }
+
+    celebrate?.let { name ->
+        ConfirmDialog(
+            show = true,
+            title = "恭喜完成本次专注",
+            summary = "「$name」的轮数已经完成，真棒！要看今日专注并分享吗？",
+            confirmText = "去打卡分享",
+            dismissText = "取消",
+            onConfirm = { celebrate = null },
+            onDismiss = { celebrate = null; navController.pop() },
+        )
     }
 
     if (aodMode) {

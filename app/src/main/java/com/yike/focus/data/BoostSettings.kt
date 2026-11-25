@@ -20,6 +20,16 @@ object BoostSettings {
         get() = prefs().getBoolean("boost_block_notify", false)
         set(value) = prefs().edit().putBoolean("boost_block_notify", value).apply()
 
+    /** 禁止桌面和多任务：专注时切到桌面就弹拦截页 */
+    var blockDesktop: Boolean
+        get() = prefs().getBoolean("boost_block_desktop", false)
+        set(value) = prefs().edit().putBoolean("boost_block_desktop", value).apply()
+
+    /** 在最近任务里隐藏本应用 */
+    var hideRecents: Boolean
+        get() = prefs().getBoolean("boost_hide_recents", false)
+        set(value) = prefs().edit().putBoolean("boost_hide_recents", value).apply()
+
     var dnd: Boolean
         get() = prefs().getBoolean("boost_dnd", false)
         set(value) = prefs().edit().putBoolean("boost_dnd", value).apply()

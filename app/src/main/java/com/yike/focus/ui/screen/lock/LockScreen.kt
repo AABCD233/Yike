@@ -237,6 +237,7 @@ private fun BannerCard(
         colors = CardDefaults.defaultColors(color = container),
         onClick = onClick,
         showIndication = true,
+        pressFeedbackType = top.yukonga.miuix.kmp.utils.PressFeedbackType.Tilt,
     ) {
         Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 18.dp)) {
             Text(title, fontSize = 18.sp, fontWeight = FontWeight.Medium, color = titleColor)

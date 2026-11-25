@@ -45,6 +45,8 @@ fun BoostScreen() {
     var hardcore by remember { mutableStateOf(BoostSettings.hardcore) }
     var strict by remember { mutableStateOf(BoostSettings.strict) }
     var dnd by remember { mutableStateOf(BoostSettings.dnd) }
+    var blockDesktop by remember { mutableStateOf(BoostSettings.blockDesktop) }
+    var hideRecents by remember { mutableStateOf(BoostSettings.hideRecents) }
 
     Column(modifier = Modifier.fillMaxSize().background(colorScheme.background)) {
         Row(
@@ -82,6 +84,20 @@ fun BoostScreen() {
                         startAction = { BoostIcon(Icons.Rounded.Lock) },
                         checked = strict,
                         onCheckedChange = { strict = it; BoostSettings.strict = it },
+                    )
+                    SwitchPreference(
+                        title = "禁止桌面和多任务",
+                        summary = "专注时上滑回桌面或进最近任务，会弹拦截页把你拉回计时",
+                        startAction = { BoostIcon(Icons.Rounded.Block) },
+                        checked = blockDesktop,
+                        onCheckedChange = { blockDesktop = it; BoostSettings.blockDesktop = it },
+                    )
+                    SwitchPreference(
+                        title = "在最近任务里隐藏",
+                        summary = "专注时本应用不出现在多任务列表里",
+                        startAction = { BoostIcon(Icons.Rounded.Apps) },
+                        checked = hideRecents,
+                        onCheckedChange = { hideRecents = it; BoostSettings.hideRecents = it },
                     )
                     SwitchPreference(
                         title = "勿扰模式",

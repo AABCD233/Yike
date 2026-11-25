@@ -10,7 +10,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 private const val DB_NAME = "yike.db"
-private const val DB_VERSION = 4
+private const val DB_VERSION = 5
 private val DAY_FMT: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
 class TodoDb(context: Context) : SQLiteOpenHelper(context, DB_NAME, null, DB_VERSION) {
@@ -48,7 +48,8 @@ class TodoDb(context: Context) : SQLiteOpenHelper(context, DB_NAME, null, DB_VER
                 rounds INTEGER NOT NULL DEFAULT 4,
                 reminder_enabled INTEGER NOT NULL DEFAULT 0,
                 reminder_hour INTEGER NOT NULL DEFAULT 8,
-                reminder_minute INTEGER NOT NULL DEFAULT 0
+                reminder_minute INTEGER NOT NULL DEFAULT 0,
+                total_rounds INTEGER NOT NULL DEFAULT 0
             )
             """.trimIndent()
         )
@@ -79,6 +80,9 @@ class TodoDb(context: Context) : SQLiteOpenHelper(context, DB_NAME, null, DB_VER
             runCatching { db.execSQL("ALTER TABLE todo ADD COLUMN break_min INTEGER NOT NULL DEFAULT 5") }
             runCatching { db.execSQL("ALTER TABLE todo ADD COLUMN long_break_min INTEGER NOT NULL DEFAULT 15") }
             runCatching { db.execSQL("ALTER TABLE todo ADD COLUMN rounds INTEGER NOT NULL DEFAULT 4") }
+        }
+        if (oldVersion < 5) {
+            runCatching { db.execSQL("ALTER TABLE todo ADD COLUMN total_rounds INTEGER NOT NULL DEFAULT 0") }
         }
         if (oldVersion < 4) {
             runCatching { db.execSQL("ALTER TABLE todo ADD COLUMN reminder_enabled INTEGER NOT NULL DEFAULT 0") }
@@ -148,6 +152,7 @@ object TodoStore {
                     reminderEnabled = c.getInt(c.getColumnIndexOrThrow("reminder_enabled")) != 0,
                     reminderHour = c.getInt(c.getColumnIndexOrThrow("reminder_hour")),
                     reminderMinute = c.getInt(c.getColumnIndexOrThrow("reminder_minute")),
+                    totalRounds = c.getInt(c.getColumnIndexOrThrow("total_rounds")),
                 )
             }
         }
@@ -177,6 +182,7 @@ object TodoStore {
             put("reminder_enabled", if (todo.reminderEnabled) 1 else 0)
             put("reminder_hour", todo.reminderHour)
             put("reminder_minute", todo.reminderMinute)
+            put("total_rounds", todo.totalRounds)
         }
         return db.insert("todo", null, values)
     }
@@ -201,6 +207,7 @@ object TodoStore {
             put("reminder_enabled", if (todo.reminderEnabled) 1 else 0)
             put("reminder_hour", todo.reminderHour)
             put("reminder_minute", todo.reminderMinute)
+            put("total_rounds", todo.totalRounds)
         }
         db.update("todo", values, "id = ?", arrayOf(todo.id.toString()))
     }

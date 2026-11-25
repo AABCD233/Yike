@@ -47,6 +47,13 @@ object AppGuard {
         }
     }
 
+    /** 当前桌面启动器的包名 */
+    fun homePackage(): String? {
+        val context = templateApp
+        val homeIntent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME)
+        return context.packageManager.resolveActivity(homeIntent, 0)?.activityInfo?.packageName
+    }
+
     /** 最近一次切到前台的应用包名 */
     fun foregroundPackage(): String? {
         val context = templateApp

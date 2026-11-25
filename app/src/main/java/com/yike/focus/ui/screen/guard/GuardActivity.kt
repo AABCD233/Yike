@@ -35,7 +35,8 @@ class GuardActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent { GuardScreen(onDone = ::backToFocus) }
+        val desktop = intent?.getBooleanExtra("desktop", false) ?: false
+        setContent { GuardScreen(desktop = desktop, onDone = ::backToFocus) }
     }
 
     private fun backToFocus() {
@@ -50,7 +51,7 @@ class GuardActivity : ComponentActivity() {
 }
 
 @Composable
-private fun GuardScreen(onDone: () -> Unit) {
+private fun GuardScreen(desktop: Boolean, onDone: () -> Unit) {
     var left by remember { mutableIntStateOf(3) }
     val quote = remember { Quotes.cached() }
 
@@ -69,14 +70,14 @@ private fun GuardScreen(onDone: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
-                "不要因为走得太远就忘了当初为什么出发",
+                if (desktop) "您已禁止访问桌面和多任务" else "不要因为走得太远就忘了当初为什么出发",
                 color = Color.White.copy(alpha = 0.85f),
                 fontSize = 16.sp,
                 textAlign = TextAlign.Center,
             )
             Spacer(Modifier.height(12.dp))
             Text(
-                "不要因为一刻就忘了当初为什么要打开番茄钟",
+                if (desktop) "回到计时页继续吧" else "不要因为一刻就忘了当初为什么要打开番茄钟",
                 color = Color.White.copy(alpha = 0.55f),
                 fontSize = 13.sp,
                 textAlign = TextAlign.Center,
