@@ -40,6 +40,7 @@ class TemplateApplication : Application(), ViewModelStoreOwner {
         templateApp = this
         TodoStore.init(this)
         FocusTimer.init(this)
+        runCatching { com.yike.focus.data.Reminders.start(this) }
 
         if (!isUserUnlocked()) {
             return

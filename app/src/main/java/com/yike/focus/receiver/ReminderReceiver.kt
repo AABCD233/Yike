@@ -9,18 +9,32 @@ import android.content.Intent
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.yike.focus.R
+import com.yike.focus.data.AppGuard
+import com.yike.focus.data.BoostSettings
+import com.yike.focus.data.FocusTimer
 import com.yike.focus.data.Reminders
-import com.yike.focus.data.TodoStore
 import com.yike.focus.ui.MainActivity
 
-/** 收到闹钟就发一条通知，然后把明天同一时间的闹钟排上 */
+/** 收到闹钟：挑出今天该提醒的待办，发通知，然后排下一次 */
 class ReminderReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
-        val todoId = intent.getLongExtra("todoId", 0L)
-        val title = intent.getStringExtra("title") ?: "该开始今天的专注了"
-        notify(context, todoId, title)
-        TodoStore.todo(todoId)?.let { Reminders.schedule(context, it) }
+        // 专注中就别再推每日提醒了，免得打扰
+        val running = FocusTimer.state.value
+        val busy = running != null && !running.isPaused &&
+            (running.kind == "focus" || running.kind == "lock")
+
+        if (!busy) {
+            Reminders.dueNow().forEach { todo ->
+                notify(context, todo.id, todo.title)
+                Reminders.markFired(todo.id)
+            }
+        }
+        Reminders.rescheduleAll(context)
+        if (AppGuard.hasUsageAccess() && BoostSettings.hardcore) {
+            // 硬核模式在跑的话顺手把守护服务叫起来（服务自己会判断要不要干活）
+            com.yike.focus.service.GuardService.start(context)
+        }
     }
 
     private fun notify(context: Context, todoId: Long, title: String) {

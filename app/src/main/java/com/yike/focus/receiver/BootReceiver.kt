@@ -9,7 +9,7 @@ import com.yike.focus.data.Reminders
 class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == Intent.ACTION_BOOT_COMPLETED) {
-            Reminders.rescheduleAll(context)
+            Reminders.start(context)
         }
     }
 }
