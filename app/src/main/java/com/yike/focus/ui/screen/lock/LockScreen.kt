@@ -195,14 +195,15 @@ fun LockScreen(navController: Navigator, bottomPadding: Dp) {
             onConfirm = {
                 if (countdown == 0) {
                     pendingMinutes = null
-                    if (!com.yike.focus.service.LockAccessibility.enabled(context)) {
-                        tip = "还没有开无障碍权限。没有它，锁机时上滑回桌面就退出了。去「我的 → 权限 → 无障碍」开启。"
+                    if (com.yike.focus.service.LockAccessibility.enabled(context)) {
+                        FocusTimer.startLock(minutes)
+                        context.startActivity(
+                            android.content.Intent(context, LockActivity::class.java)
+                                .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                        )
+                    } else {
+                        tip = "还没有开无障碍权限，开不了锁机。去「我的 → 权限 → 无障碍」开启后再试。"
                     }
-                    FocusTimer.startLock(minutes)
-                    context.startActivity(
-                        android.content.Intent(context, LockActivity::class.java)
-                            .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
-                    )
                 }
             },
             onDismiss = { pendingMinutes = null },
