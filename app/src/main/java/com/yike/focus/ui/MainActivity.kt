@@ -210,7 +210,7 @@ class MainActivity : ComponentActivity() {
                             entry<Route.Settings>(swipeDismiss = swipeDismiss) { SettingPager(navigator, androidx.compose.ui.unit.Dp(0f)) }
                             entry<Route.Focus>(swipeDismiss = NavSwipeDirection.None) { FocusScreen(navigator) }
                             entry<Route.History>(swipeDismiss = swipeDismiss) { HistoryScreen(navigator) }
-                            entry<Route.LockActive>(swipeDismiss = NavSwipeDirection.None) { LockActiveScreen(navigator) }
+                            entry<Route.LockActive>(swipeDismiss = NavSwipeDirection.None) { LockActiveScreen(onExit = { navigator.pop() }) }
                             entry<Route.Whitelist>(swipeDismiss = swipeDismiss) { WhitelistScreen(navigator) }
                             entry<Route.WhitelistOpen>(swipeDismiss = swipeDismiss) { WhitelistOpenScreen(navigator) }
                             entry<Route.Boost>(swipeDismiss = swipeDismiss) { BoostScreen() }

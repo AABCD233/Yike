@@ -18,7 +18,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -36,13 +35,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yike.focus.data.FocusTimer
-import com.yike.focus.ui.navigation3.Navigator
 import com.yike.focus.ui.util.Notify
 import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.delay
 
 @Composable
-fun LockActiveScreen(navController: Navigator) {
+fun LockActiveScreen(onExit: () -> Unit) {
     val state by FocusTimer.state.collectAsState()
     val view = LocalView.current
     val context = LocalContext.current
@@ -50,13 +48,7 @@ fun LockActiveScreen(navController: Navigator) {
     var askQuit by remember { mutableStateOf(false) }
     var done by remember { mutableStateOf(false) }
 
-    // 锁机期间屏幕常亮，并进入系统「屏幕固定」，上滑回桌面会被拉回这个页面
-    DisposableEffect(Unit) {
-        val activity = view.context as? android.app.Activity
-        runCatching { activity?.startLockTask() }
-        onDispose { runCatching { activity?.stopLockTask() } }
-    }
-
+    // 锁机期间屏幕常亮；回桌面会被无障碍服务拉回来
     LaunchedEffect(Unit) {
         view.keepScreenOn = true
         while (true) {
@@ -72,13 +64,13 @@ fun LockActiveScreen(navController: Navigator) {
     if (s == null) {
         if (done) {
             AlertDialog(
-                onDismissRequest = { navController.pop() },
+                onDismissRequest = { onExit() },
                 title = { Text("锁机结束") },
                 text = { Text("时间到了，可以拿起手机了。") },
-                confirmButton = { TextButton(onClick = { navController.pop() }) { Text("好") } },
+                confirmButton = { TextButton(onClick = { onExit() }) { Text("好") } },
             )
         } else {
-            LaunchedEffect(Unit) { navController.pop() }
+            LaunchedEffect(Unit) { onExit() }
         }
         return
     }
@@ -144,7 +136,7 @@ fun LockActiveScreen(navController: Navigator) {
                 TextButton(onClick = {
                     askQuit = false
                     FocusTimer.stop(abandoned = true)
-                    navController.pop()
+                    onExit()
                 }) { Text("结束") }
             },
             dismissButton = {

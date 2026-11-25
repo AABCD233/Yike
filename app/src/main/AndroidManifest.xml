@@ -60,6 +60,26 @@
             android:theme="@style/Theme.Yike"
             android:turnScreenOn="true" />
 
+        <service
+            android:name=".service.LockAccessibilityService"
+            android:exported="false"
+            android:label="@string/app_name"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/lock_accessibility" />
+        </service>
+
+        <activity
+            android:name=".ui.screen.lock.LockActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:launchMode="singleTask"
+            android:theme="@style/Theme.Yike" />
+
         <receiver
             android:name=".receiver.ReminderReceiver"
             android:exported="false" />

@@ -89,4 +89,5 @@
     <string name='settings_pager_gesture_ios_like'>iOS-like</string>
     <string name='nav_rail_expand'>Expand navigation rail</string>
     <string name='nav_rail_collapse'>Collapse navigation rail</string>
+    <string name="lock_accessibility_desc">锁机期间拦住返回和主页按键，并把锁机页拉回前台。只在锁机时生效，平时不读取任何屏幕内容。</string>
 </resources>

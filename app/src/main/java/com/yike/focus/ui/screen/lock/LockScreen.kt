@@ -32,6 +32,7 @@ import com.yike.focus.data.FocusTimer
 import kotlinx.coroutines.delay
 import androidx.compose.runtime.LaunchedEffect
 import com.yike.focus.ui.navigation3.Navigator
+import androidx.compose.ui.platform.LocalContext
 import com.yike.focus.ui.navigation3.Route
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
@@ -40,6 +41,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 
 @Composable
 fun LockScreen(navController: Navigator, bottomPadding: Dp) {
+    val context = LocalContext.current
     var tip by remember { mutableStateOf<String?>(null) }
     var pickDuration by remember { mutableStateOf(false) }
     var customMinutes by remember { mutableStateOf("") }
@@ -193,8 +195,14 @@ fun LockScreen(navController: Navigator, bottomPadding: Dp) {
             onConfirm = {
                 if (countdown == 0) {
                     pendingMinutes = null
+                    if (!com.yike.focus.service.LockAccessibility.enabled(context)) {
+                        tip = "还没有开无障碍权限。没有它，锁机时上滑回桌面就退出了。去「我的 → 权限 → 无障碍」开启。"
+                    }
                     FocusTimer.startLock(minutes)
-                    navController.push(Route.LockActive)
+                    context.startActivity(
+                        android.content.Intent(context, LockActivity::class.java)
+                            .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                    )
                 }
             },
             onDismiss = { pendingMinutes = null },

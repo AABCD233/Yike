@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Accessibility
 import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.BatterySaver
 import androidx.compose.material.icons.rounded.FolderOpen
@@ -118,6 +119,16 @@ fun PermissionScreen() {
                             .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
                         runCatching { context.startActivity(intent) }
                     },
+                )
+            }
+            item {
+                PermissionRow(
+                    icon = Icons.Rounded.Accessibility,
+                    title = "无障碍（锁机用）",
+                    summary = "锁机时拦住返回/主页键，并把锁机页拉回前台",
+                    granted = com.yike.focus.service.LockAccessibility.enabled(context),
+                    actionText = "去开启",
+                    onAction = { com.yike.focus.service.LockAccessibility.openSettings(context) },
                 )
             }
             item {
