@@ -66,6 +66,7 @@ import com.yike.focus.ui.component.FilePickerDialog
 import com.yike.focus.ui.component.miuix.ConfirmDialog
 import com.yike.focus.ui.navigation3.Navigator
 import com.yike.focus.ui.util.Notify
+import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.overlay.OverlayDialog
