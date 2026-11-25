@@ -95,7 +95,8 @@ fun TodoScreen(
         if (uri != null && todo != null) {
             runCatching {
                 val dir = File(context.filesDir, "todo_bg").apply { mkdirs() }
-                val file = File(dir, "todo_${todo.id}.jpg")
+                todo.bgPath?.let { old -> runCatching { File(old).delete() } }
+                val file = File(dir, "todo_${todo.id}_${System.currentTimeMillis()}.jpg")
                 context.contentResolver.openInputStream(uri)?.use { input ->
                     file.outputStream().use { output -> input.copyTo(output) }
                 }

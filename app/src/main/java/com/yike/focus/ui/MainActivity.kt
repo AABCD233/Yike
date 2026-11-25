@@ -252,7 +252,14 @@ private fun FocusLeavingReminder() {
             if (event == Lifecycle.Event.ON_STOP) {
                 val running = FocusTimer.state.value
                 if (running != null && running.kind == "focus" && !running.isPaused) {
-                    Notify.leavingFocus(context, running.title)
+                    // 20 秒后再看一眼前台应用：如果用户在白名单应用里，就别打扰
+                    android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                        val pkg = com.yike.focus.data.AppGuard.foregroundPackage()
+                        val allowed = pkg == null ||
+                            com.yike.focus.data.AppGuard.isExempt(pkg) ||
+                            com.yike.focus.data.AppGuard.whitelist().contains(pkg)
+                        if (!allowed) Notify.leavingFocus(context, running.title)
+                    }, 20_000)
                 }
             }
         }
