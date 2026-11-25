@@ -69,6 +69,7 @@ import com.yike.focus.ui.screen.about.AboutScreen
 import com.yike.focus.ui.screen.colorpalette.ColorPaletteScreen
 import com.yike.focus.ui.screen.boost.BoostScreen
 import com.yike.focus.ui.screen.finish.FinishScreen
+import com.yike.focus.ui.screen.focussettings.FocusSettingsScreen
 import com.yike.focus.ui.screen.focus.FocusScreen
 import com.yike.focus.ui.screen.history.HistoryScreen
 import com.yike.focus.ui.screen.lock.LockActiveScreen
@@ -247,6 +248,7 @@ class MainActivity : ComponentActivity() {
                             entry<Route.Boost>(swipeDismiss = swipeDismiss) { BoostScreen() }
                             entry<Route.Music>(swipeDismiss = swipeDismiss) { MusicScreen(navigator) }
                             entry<Route.Finish>(swipeDismiss = NavSwipeDirection.None) { FinishScreen(navigator) }
+                            entry<Route.FocusSettings>(swipeDismiss = swipeDismiss) { FocusSettingsScreen() }
                         }
                     }
 

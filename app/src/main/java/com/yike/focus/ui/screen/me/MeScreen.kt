@@ -140,6 +140,12 @@ fun MeScreen(navController: Navigator, bottomPadding: Dp) {
         item {
             Card {
                 ArrowPreference(
+                    title = "专注设置",
+                    summary = "自动休息、休息后自动继续",
+                    startAction = { PrefIcon(Icons.Rounded.Timer) },
+                    onClick = { navController.push(Route.FocusSettings) },
+                )
+                ArrowPreference(
                     title = "专注记录",
                     summary = "每一次专注都会存档",
                     startAction = { PrefIcon(Icons.Rounded.History) },
