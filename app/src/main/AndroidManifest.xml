@@ -61,6 +61,15 @@
             android:turnScreenOn="true" />
 
         <service
+            android:name=".service.FloatingBubbleService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="floating_timer" />
+        </service>
+
+        <service
             android:name=".service.ReminderService"
             android:exported="false"
             android:foregroundServiceType="specialUse">

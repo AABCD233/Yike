@@ -183,6 +183,11 @@ class MainActivity : ComponentActivity() {
                     com.yike.focus.data.Dnd.disable()
                 }
                 val active = runningFocus?.kind == "focus"
+                if (active) {
+                    com.yike.focus.service.FloatingBubbleService.start(context)
+                } else {
+                    com.yike.focus.service.FloatingBubbleService.stop(context)
+                }
                 runCatching {
                     val am = context.getSystemService(android.app.ActivityManager::class.java)
                     am?.appTasks?.firstOrNull()
