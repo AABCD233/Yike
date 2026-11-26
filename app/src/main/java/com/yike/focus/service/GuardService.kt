@@ -56,9 +56,10 @@ class GuardService : Service() {
                     val pkg = foreground.first
                     if (pkg == packageName) continue
 
-                    val onHome = pkg == AppGuard.homePackage()
-                    val onRecents = AppGuard.isRecents(pkg, foreground.second)
-                    if (BoostSettings.blockDesktop && (onHome || onRecents)) {
+                    // 开了「禁止桌面和多任务」：不管它是桌面、最近任务还是别的，
+                    // 只要不是我们、也不在白名单里，就拉回来
+                    if (BoostSettings.blockDesktop) {
+                        if (AppGuard.whitelist().contains(pkg)) continue
                         launchGuard(desktop = true)
                         continue
                     }
