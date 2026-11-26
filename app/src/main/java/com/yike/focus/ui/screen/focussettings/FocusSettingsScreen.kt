@@ -34,6 +34,8 @@ fun FocusSettingsScreen() {
     val navigator = LocalNavigator.current
     var autoBreak by remember { mutableStateOf(PomodoroSettings.autoBreak) }
     var autoNext by remember { mutableStateOf(PomodoroSettings.autoNext) }
+    var reminderService by remember { mutableStateOf(PomodoroSettings.reminderService) }
+    val context = androidx.compose.ui.platform.LocalContext.current
 
     Column(modifier = Modifier.fillMaxSize().background(colorScheme.background)) {
         Row(
@@ -47,6 +49,17 @@ fun FocusSettingsScreen() {
         }
 
         Card(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+            SwitchPreference(
+                title = "常驻提醒服务",
+                summary = "常驻一个轻量进程，待办提醒更准时；通知栏会有一条静音通知",
+                checked = reminderService,
+                onCheckedChange = { on ->
+                    reminderService = on
+                    PomodoroSettings.reminderService = on
+                    if (on) com.yike.focus.service.ReminderService.start(context)
+                    else com.yike.focus.service.ReminderService.stop(context)
+                },
+            )
             SwitchPreference(
                 title = "自动开始休息",
                 summary = "番茄结束直接进休息倒计时，不用再点一下",

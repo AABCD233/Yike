@@ -24,6 +24,11 @@ object PomodoroSettings {
         get() = prefs().getBoolean("pomo_auto_break", true)
         set(value) = prefs().edit().putBoolean("pomo_auto_break", value).apply()
 
+    /** 常驻提醒服务（前台服务 + 静音通知），比闹钟准时 */
+    var reminderService: Boolean
+        get() = prefs().getBoolean("reminder_service", true)
+        set(value) = prefs().edit().putBoolean("reminder_service", value).apply()
+
     var autoNext: Boolean
         get() = prefs().getBoolean("pomo_auto_next", false)
         set(value) = prefs().edit().putBoolean("pomo_auto_next", value).apply()

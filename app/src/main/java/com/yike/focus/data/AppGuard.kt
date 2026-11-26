@@ -106,7 +106,26 @@ object AppGuard {
 
     private fun prefs() = templateApp.getSharedPreferences("settings", Context.MODE_PRIVATE)
 
+    /** 这些系统组件不拦：拦了会选不了图片、打不开文件选择器 */
+    private val defaultWhitelist = setOf(
+        "com.android.providers.media",
+        "com.android.providers.media.module",
+        "com.google.android.providers.media.module",
+        "com.android.providers.downloads",
+        "com.android.providers.downloads.ui",
+        "com.android.documentsui",
+        "com.google.android.documentsui",
+        "com.android.photopicker",
+        "com.google.android.photopicker",
+        "com.android.intentresolver",
+        "com.google.android.intentresolver",
+    )
+
     fun whitelist(): Set<String> =
+        ((prefs().getStringSet("guard_whitelist", emptySet()) ?: emptySet()) + defaultWhitelist)
+
+    /** 只返回用户自己加的，默认白名单不写进设置里 */
+    fun userWhitelist(): Set<String> =
         prefs().getStringSet("guard_whitelist", emptySet())?.toSet() ?: emptySet()
 
     fun setWhitelist(packages: Set<String>) {
@@ -117,6 +136,7 @@ object AppGuard {
     fun isExempt(pkg: String): Boolean {
         val context = templateApp
         if (pkg == context.packageName) return true
+        if (pkg in defaultWhitelist) return true
         if (pkg == "com.android.systemui") return true
         val launcher = context.packageManager.getLaunchIntentForPackage(pkg) != null
         val homeIntent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME)

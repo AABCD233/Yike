@@ -65,7 +65,7 @@ fun WhitelistScreen(navController: Navigator) {
     var apps by remember { mutableStateOf<List<AppEntry>>(emptyList()) }
     var query by remember { mutableStateOf("") }
     var showSystem by remember { mutableStateOf(false) }
-    var selected by remember { mutableStateOf(AppGuard.whitelist()) }
+    var selected by remember { mutableStateOf(AppGuard.userWhitelist()) }
     var permissionTip by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(Unit) {
@@ -157,7 +157,7 @@ fun WhitelistScreen(navController: Navigator) {
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             items(filtered, key = { it.packageName }) { app ->
-                val checked = selected.contains(app.packageName)
+                val checked = selected.contains(app.packageName) || AppGuard.whitelist().contains(app.packageName)
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     onClick = {

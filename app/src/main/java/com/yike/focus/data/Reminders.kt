@@ -100,6 +100,36 @@ object Reminders {
         }
     }
 
+    fun notifyNow(context: android.content.Context, todoId: Long, title: String) {
+        val manager = context.getSystemService(android.app.NotificationManager::class.java) ?: return
+        val channelId = "todo_reminder"
+        if (manager.getNotificationChannel(channelId) == null) {
+            manager.createNotificationChannel(
+                android.app.NotificationChannel(
+                    channelId, "每日提醒", android.app.NotificationManager.IMPORTANCE_DEFAULT
+                )
+            )
+        }
+        val pending = android.app.PendingIntent.getActivity(
+            context, 0,
+            android.content.Intent(context, com.yike.focus.ui.MainActivity::class.java).apply {
+                flags = android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP or android.content.Intent.FLAG_ACTIVITY_NEW_TASK
+            },
+            android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE,
+        )
+        val notification = androidx.core.app.NotificationCompat.Builder(context, channelId)
+            .setSmallIcon(com.yike.focus.R.drawable.ic_launcher_foreground)
+            .setContentTitle("今天的待办")
+            .setContentText(title)
+            .setAutoCancel(true)
+            .setContentIntent(pending)
+            .build()
+        runCatching {
+            androidx.core.app.NotificationManagerCompat.from(context)
+                .notify(todoId.toInt().let { if (it <= 0) 3001 else it }, notification)
+        }
+    }
+
     fun markFired(todoId: Long) {
         val prefs = templateApp.getSharedPreferences("settings", Context.MODE_PRIVATE)
         prefs.edit().putString("fired_$todoId", LocalDate.now().toString()).apply()

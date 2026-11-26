@@ -41,6 +41,9 @@ class TemplateApplication : Application(), ViewModelStoreOwner {
         TodoStore.init(this)
         FocusTimer.init(this)
         runCatching { com.yike.focus.data.Reminders.start(this) }
+        if (com.yike.focus.data.PomodoroSettings.reminderService) {
+            runCatching { com.yike.focus.service.ReminderService.start(this) }
+        }
 
         if (!isUserUnlocked()) {
             return

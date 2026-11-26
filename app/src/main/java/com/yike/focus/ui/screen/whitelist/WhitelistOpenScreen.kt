@@ -60,6 +60,8 @@ fun WhitelistOpenScreen(navController: Navigator) {
             val pm = context.packageManager
             AppGuard.whitelist().mapNotNull { pkg ->
                 runCatching {
+                    // 没有启动入口的系统组件（图片选择器之类）不显示
+                    if (pm.getLaunchIntentForPackage(pkg) == null) return@runCatching null
                     val info = pm.getApplicationInfo(pkg, 0)
                     WhitelistedApp(
                         packageName = pkg,

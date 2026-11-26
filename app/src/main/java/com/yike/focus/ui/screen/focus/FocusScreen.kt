@@ -99,7 +99,7 @@ fun FocusScreen(navController: Navigator) {
     val pickBg = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->
         if (uri != null) {
             runCatching {
-                val file = java.io.File(context.filesDir, "focus_bg.jpg")
+                val file = java.io.File(context.filesDir, "focus_bg_${System.currentTimeMillis()}.jpg")
                 context.contentResolver.openInputStream(uri)?.use { input ->
                     file.outputStream().use { out -> input.copyTo(out) }
                 }

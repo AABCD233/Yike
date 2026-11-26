@@ -61,6 +61,15 @@
             android:turnScreenOn="true" />
 
         <service
+            android:name=".service.ReminderService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="reminder" />
+        </service>
+
+        <service
             android:name=".service.LockAccessibilityService"
             android:exported="false"
             android:label="@string/app_name"

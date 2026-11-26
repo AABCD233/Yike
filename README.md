@@ -1,7 +1,6 @@
 # 一刻
 
-一个番茄类学习app：待办、专注计时、锁机、数据统计等，目前很多功能模仿番茄todo
-代码由ai编写
+一个自己写的番茄钟：待办、专注计时、锁机、数据统计。
 
 界面基座来自 [KernelSU-Style-UI-Kit](https://github.com/chenaizhang/KernelSU-Style-UI-Kit)。
 
@@ -18,7 +17,6 @@
 
 ## 安装
 
-目前还未发布正式版本
 从 Actions 里最新一次 `Build APK` 下载 artifact `yike-apk`，装里面的 APK。
 
 - Android 12（API 31）以上
