@@ -86,6 +86,8 @@ fun FocusScreen(navController: Navigator) {
     var aodMode by remember { mutableStateOf(false) }
     var celebrate by remember { mutableStateOf<String?>(null) }
     var aodOffset by remember { mutableStateOf(androidx.compose.ui.unit.IntOffset(0, 0)) }
+    var incX by remember { mutableStateOf(1) }
+    var incY by remember { mutableStateOf(1) }
     var bgPreset by remember { mutableStateOf(FocusLook.backgroundPreset) }
     var bgImage by remember { mutableStateOf(FocusLook.backgroundImage) }
     val bgBitmap = remember(bgImage) {
@@ -110,9 +112,9 @@ fun FocusScreen(navController: Navigator) {
         }
     }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(aodMode) {
         while (true) {
-            delay(250)
+            delay(if (aodMode) 1000 else 250)
             tick++
         }
     }
@@ -138,12 +140,35 @@ fun FocusScreen(navController: Navigator) {
         }
     }
 
+    // 熄屏时钟：窗口常亮 + 锁屏上也能显示；防烧屏按设置间隔斜向挪动
     LaunchedEffect(aodMode) {
+        val activity = viewForBars.context as? android.app.Activity ?: return@LaunchedEffect
+        val window = activity.window
+        if (aodMode) {
+            window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O_MR1) {
+                runCatching { activity.setShowWhenLocked(true) }
+            }
+        } else {
+            window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O_MR1) {
+                runCatching { activity.setShowWhenLocked(false) }
+            }
+        }
+    }
+
+    LaunchedEffect(aodMode) {
+        if (!aodMode || !com.yike.focus.data.AodSettings.antiBurn) return@LaunchedEffect
+        val step = 3
+        val range = 60
         while (aodMode) {
-            delay(40_000)
-            val x = (-20..20).random()
-            val y = (-32..32).random()
-            aodOffset = androidx.compose.ui.unit.IntOffset(x, y)
+            delay(com.yike.focus.data.AodSettings.shiftMinutes * 60_000L)
+            if (aodOffset.x + incX * step > range || aodOffset.x + incX * step < -range) incX = -incX
+            if (aodOffset.y + incY * step > range || aodOffset.y + incY * step < -range) incY = -incY
+            aodOffset = androidx.compose.ui.unit.IntOffset(
+                aodOffset.x + incX * step,
+                aodOffset.y + incY * step,
+            )
         }
     }
 
@@ -439,9 +464,14 @@ fun FocusScreen(navController: Navigator) {
         ) {
             Text(
                 formatClock(if (s.isCountdown) remaining else elapsed),
-                color = Color.White.copy(alpha = 0.9f),
+                color = Color(0xFFE3E3E3),
                 fontSize = 96.sp,
-                fontWeight = FontWeight.Light,
+                fontWeight = when (com.yike.focus.data.AodSettings.fontWeight) {
+                    0 -> FontWeight.Light
+                    1 -> FontWeight.Normal
+                    2 -> FontWeight.Medium
+                    else -> FontWeight.SemiBold
+                },
                 modifier = Modifier.offset { aodOffset },
             )
         }

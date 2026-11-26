@@ -1,6 +1,7 @@
 package com.yike.focus.ui.screen.focussettings
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -26,6 +27,7 @@ import com.yike.focus.ui.navigation3.LocalNavigator
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 
@@ -36,6 +38,11 @@ fun FocusSettingsScreen() {
     var autoNext by remember { mutableStateOf(PomodoroSettings.autoNext) }
     var reminderService by remember { mutableStateOf(PomodoroSettings.reminderService) }
     val context = androidx.compose.ui.platform.LocalContext.current
+    var antiBurn by remember { mutableStateOf(com.yike.focus.data.AodSettings.antiBurn) }
+    var shiftMinutes by remember { mutableStateOf(com.yike.focus.data.AodSettings.shiftMinutes) }
+    var weight by remember { mutableStateOf(com.yike.focus.data.AodSettings.fontWeight) }
+    var showShift by remember { mutableStateOf(false) }
+    var showWeight by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.fillMaxSize().background(colorScheme.background)) {
         Row(
@@ -74,11 +81,91 @@ fun FocusSettingsScreen() {
             )
         }
 
+        Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
+            Column {
+                SwitchPreference(
+                    title = "熄屏时钟防烧屏",
+                    summary = "开着时钟会慢慢移动位置，避免屏幕烧出痕迹",
+                    checked = antiBurn,
+                    onCheckedChange = { antiBurn = it; com.yike.focus.data.AodSettings.antiBurn = it },
+                )
+                ArrowPreference(
+                    title = "移位间隔",
+                    summary = "${shiftMinutes} 分钟移动一次",
+                    onClick = { showShift = true },
+                )
+                ArrowPreference(
+                    title = "时钟字体粗细",
+                    summary = com.yike.focus.data.AodSettings.weightNames[weight],
+                    onClick = { showWeight = true },
+                )
+            }
+        }
+
         Text(
             "待办的计划轮数在每条待办的高级设置里改；轮数完成后会回到待办页弹完成提示。",
             fontSize = 12.sp,
             color = colorScheme.onSurfaceVariantSummary,
             modifier = Modifier.padding(horizontal = 20.dp),
         )
+    }
+
+    if (showShift) {
+        top.yukonga.miuix.kmp.overlay.OverlayDialog(
+            show = true,
+            title = "移位间隔",
+            summary = "间隔越短越不容易烧屏，但移动也越频繁",
+            onDismissRequest = { showShift = false },
+        ) {
+            Column {
+                com.yike.focus.data.AodSettings.shiftChoices.forEach { m ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(
+                                if (m == shiftMinutes) colorScheme.primaryContainer else androidx.compose.ui.graphics.Color.Transparent
+                            )
+                            .clickable {
+                                shiftMinutes = m
+                                com.yike.focus.data.AodSettings.shiftMinutes = m
+                                showShift = false
+                            }
+                            .padding(horizontal = 12.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text("$m 分钟", fontSize = 14.sp, color = colorScheme.onSurface)
+                    }
+                }
+            }
+        }
+    }
+
+    if (showWeight) {
+        top.yukonga.miuix.kmp.overlay.OverlayDialog(
+            show = true,
+            title = "时钟字体粗细",
+            onDismissRequest = { showWeight = false },
+        ) {
+            Column {
+                com.yike.focus.data.AodSettings.weightNames.forEachIndexed { index, name ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(
+                                if (index == weight) colorScheme.primaryContainer else androidx.compose.ui.graphics.Color.Transparent
+                            )
+                            .clickable {
+                                weight = index
+                                com.yike.focus.data.AodSettings.fontWeight = index
+                                showWeight = false
+                            }
+                            .padding(horizontal = 12.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(name, fontSize = 14.sp, color = colorScheme.onSurface)
+                    }
+                }
+            }
+        }
     }
 }
