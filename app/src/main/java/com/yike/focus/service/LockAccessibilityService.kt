@@ -25,10 +25,34 @@ class LockAccessibilityService : AccessibilityService() {
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         event ?: return
         if (event.eventType != AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) return
-        if (!isLocking()) return
+
+        val locking = isLocking()
+        val focusGuard = !locking &&
+            com.yike.focus.data.BoostSettings.blockDesktop &&
+            FocusTimer.state.value?.kind == "focus"
+        if (!locking && !focusGuard) return
+
         val pkg = event.packageName?.toString() ?: return
-        if (pkg == packageName || pkg.startsWith("com.android.systemui")) return
-        bringBackLock()
+        if (pkg == packageName) return
+        if (com.yike.focus.data.AppGuard.whitelist().contains(pkg)) return
+        if (com.yike.focus.data.AppGuard.isExempt(pkg)) return
+
+        if (locking) bringBackLock() else bringBackTimer()
+    }
+
+    private fun bringBackTimer() {
+        runCatching {
+            startActivity(
+                Intent(this, com.yike.focus.ui.MainActivity::class.java).apply {
+                    addFlags(
+                        Intent.FLAG_ACTIVITY_NEW_TASK or
+                            Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or
+                            Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    )
+                    putExtra(com.yike.focus.ui.MainActivity.EXTRA_OPEN_FOCUS, true)
+                }
+            )
+        }
     }
 
     private fun bringBackLock() {

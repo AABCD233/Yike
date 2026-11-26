@@ -87,14 +87,20 @@ fun BoostScreen() {
                     )
                     SwitchPreference(
                         title = "禁止桌面和多任务",
-                        summary = if (!AppGuard.hasUsageAccess() || !AppGuard.hasOverlayAccess()) {
-                            "缺权限：需要「使用情况访问」和「显示在其他应用上层」，去「我的 → 权限」开启"
+                        summary = if (!com.yike.focus.service.LockAccessibility.enabled()) {
+                            "需要「无障碍」权限，去「我的 → 权限」开启后才能拦住桌面和最近任务"
                         } else {
-                            "专注时上滑回桌面或进最近任务，会被拉回计时页"
+                            "专注时切到桌面或最近任务，会立刻被拉回计时页"
                         },
                         startAction = { BoostIcon(Icons.Rounded.Block) },
                         checked = blockDesktop,
-                        onCheckedChange = { blockDesktop = it; BoostSettings.blockDesktop = it },
+                        onCheckedChange = { on ->
+                            blockDesktop = on
+                            BoostSettings.blockDesktop = on
+                            if (on && !com.yike.focus.service.LockAccessibility.enabled()) {
+                                navigator.push(Route.Permissions)
+                            }
+                        },
                     )
                     SwitchPreference(
                         title = "在最近任务里隐藏",
