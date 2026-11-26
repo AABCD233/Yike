@@ -570,29 +570,22 @@ private fun FinishDialog(
                 if (isLongBreak) "这一轮结束了，建议来一次长休息（$breakMinutes 分钟）"
                 else "接下来是 $breakMinutes 分钟休息",
                 fontSize = 13.sp,
-                color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant,
+                color = colorScheme.onSurfaceVariantSummary,
             )
             Spacer(Modifier.height(14.dp))
             Row(modifier = Modifier.fillMaxWidth()) {
-                Card(
-                    modifier = Modifier.weight(1f),
+                top.yukonga.miuix.kmp.basic.TextButton(
+                    text = "结束",
                     onClick = onClose,
-                    showIndication = true,
-                ) {
-                    Box(modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp), contentAlignment = Alignment.Center) {
-                        Text("结束", fontSize = 14.sp, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface)
-                    }
-                }
-                Spacer(Modifier.width(10.dp))
-                Card(
                     modifier = Modifier.weight(1f),
+                )
+                Spacer(Modifier.width(12.dp))
+                top.yukonga.miuix.kmp.basic.TextButton(
+                    text = "休息 $breakMinutes 分钟",
                     onClick = onBreak,
-                    showIndication = true,
-                ) {
-                    Box(modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp), contentAlignment = Alignment.Center) {
-                        Text("休息 $breakMinutes 分钟", fontSize = 14.sp, color = colorScheme.primary)
-                    }
-                }
+                    modifier = Modifier.weight(1f),
+                    colors = top.yukonga.miuix.kmp.basic.ButtonDefaults.textButtonColorsPrimary(),
+                )
             }
         }
     }

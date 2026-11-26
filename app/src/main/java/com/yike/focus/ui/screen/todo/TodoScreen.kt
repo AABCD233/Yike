@@ -411,8 +411,9 @@ internal fun TodoCard(
     onLongPress: (() -> Unit)? = null,
     onMenu: (() -> Unit)? = null,
 ) {
-    val count = remember(todo.id, todo.title) { TodoStore.todayCount(todo.id) }
-    val todaySec = remember(todo.id, todo.title) { TodoStore.todaySeconds(todo.id) }
+    val today = java.time.LocalDate.now().toString()
+    val count = remember(todo.id, todo.title, today) { TodoStore.todayCount(todo.id) }
+    val todaySec = remember(todo.id, todo.title, today) { TodoStore.todaySeconds(todo.id) }
     val finished = todo.totalRounds > 0 && count >= todo.totalRounds
     val bitmap = rememberBitmap(todo.bgPath)
 

@@ -87,7 +87,11 @@ fun BoostScreen() {
                     )
                     SwitchPreference(
                         title = "禁止桌面和多任务",
-                        summary = "专注时上滑回桌面或进最近任务，会弹拦截页把你拉回计时",
+                        summary = if (!AppGuard.hasUsageAccess() || !AppGuard.hasOverlayAccess()) {
+                            "缺权限：需要「使用情况访问」和「显示在其他应用上层」，去「我的 → 权限」开启"
+                        } else {
+                            "专注时上滑回桌面或进最近任务，会被拉回计时页"
+                        },
                         startAction = { BoostIcon(Icons.Rounded.Block) },
                         checked = blockDesktop,
                         onCheckedChange = { blockDesktop = it; BoostSettings.blockDesktop = it },
