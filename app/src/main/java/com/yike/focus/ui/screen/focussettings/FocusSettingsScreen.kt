@@ -51,7 +51,7 @@ fun FocusSettingsScreen() {
         Card(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
             SwitchPreference(
                 title = "常驻提醒服务",
-                summary = "常驻一个轻量进程，待办提醒更准时；通知栏会有一条静音通知",
+                summary = "默认用系统闹钟，不需要常驻。开这个会常驻一个轻量进程，提醒更准时，代价是通知栏有一条静音通知",
                 checked = reminderService,
                 onCheckedChange = { on ->
                     reminderService = on

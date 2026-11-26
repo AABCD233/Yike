@@ -26,7 +26,7 @@ object PomodoroSettings {
 
     /** 常驻提醒服务（前台服务 + 静音通知），比闹钟准时 */
     var reminderService: Boolean
-        get() = prefs().getBoolean("reminder_service", true)
+        get() = prefs().getBoolean("reminder_service", false)
         set(value) = prefs().edit().putBoolean("reminder_service", value).apply()
 
     var autoNext: Boolean
