@@ -96,8 +96,12 @@ class FloatingBubbleService : Service() {
                     false
                 }
                 MotionEvent.ACTION_MOVE -> {
-                    layoutParams.x = startX + (event.rawX - touchX).toInt()
-                    layoutParams.y = startY + (event.rawY - touchY).toInt()
+                    val bubbleSize = dp(64)
+                    val metrics = resources.displayMetrics
+                    val maxX = (metrics.widthPixels - bubbleSize).coerceAtLeast(0)
+                    val maxY = (metrics.heightPixels - bubbleSize).coerceAtLeast(0)
+                    layoutParams.x = (startX + (event.rawX - touchX).toInt()).coerceIn(0, maxX)
+                    layoutParams.y = (startY + (event.rawY - touchY).toInt()).coerceIn(0, maxY)
                     runCatching { wm.updateViewLayout(view, layoutParams) }
                     true
                 }
@@ -113,8 +117,16 @@ class FloatingBubbleService : Service() {
     }
 
     private fun updateText() {
-        bubble?.text = timerText()
-        if (FocusTimer.state.value == null) stopSelf()
+        val state = FocusTimer.state.value
+        if (state == null) {
+            stopSelf()
+            return
+        }
+        val view = bubble ?: return
+        view.text = timerText()
+        // 在自己 App 里不需要悬浮球，切出去才显示
+        val visible = !com.yike.focus.data.AppState.foreground
+        view.visibility = if (visible) View.VISIBLE else View.GONE
     }
 
     private fun timerText(): String {

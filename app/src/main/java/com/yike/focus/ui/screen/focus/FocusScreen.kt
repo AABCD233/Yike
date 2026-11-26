@@ -50,6 +50,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -145,12 +146,18 @@ fun FocusScreen(navController: Navigator) {
         val activity = viewForBars.context as? android.app.Activity ?: return@LaunchedEffect
         val window = activity.window
         if (aodMode) {
-            window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            window.addFlags(
+                android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or
+                    android.view.WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON
+            )
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O_MR1) {
                 runCatching { activity.setShowWhenLocked(true) }
             }
         } else {
-            window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            window.clearFlags(
+                android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or
+                    android.view.WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON
+            )
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O_MR1) {
                 runCatching { activity.setShowWhenLocked(false) }
             }
@@ -455,6 +462,11 @@ fun FocusScreen(navController: Navigator) {
     }
 
     if (aodMode) {
+        val enter by androidx.compose.animation.core.animateFloatAsState(
+            targetValue = 1f,
+            animationSpec = androidx.compose.animation.core.tween(320),
+            label = "aodEnter",
+        )
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -472,7 +484,13 @@ fun FocusScreen(navController: Navigator) {
                     2 -> FontWeight.Medium
                     else -> FontWeight.SemiBold
                 },
-                modifier = Modifier.offset { aodOffset },
+                modifier = Modifier
+                    .offset { aodOffset }
+                    .graphicsLayer {
+                        alpha = enter
+                        scaleX = 0.82f + 0.18f * enter
+                        scaleY = 0.82f + 0.18f * enter
+                    },
             )
         }
     }
