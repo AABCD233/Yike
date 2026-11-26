@@ -121,8 +121,30 @@ object AppGuard {
         "com.google.android.intentresolver",
     )
 
+    /** 动态找出系统里负责「选图片 / 选文件」的应用，各家长得不一样，不能写死包名 */
+    private fun pickerPackages(): Set<String> {
+        val context = templateApp
+        val pm = context.packageManager
+        val intents = listOf(
+            Intent(Intent.ACTION_PICK).setType("image/*"),
+            Intent(Intent.ACTION_GET_CONTENT).setType("image/*"),
+            Intent(Intent.ACTION_GET_CONTENT).setType("*/*"),
+            Intent("android.provider.action.PICK_IMAGES"),
+            Intent("android.provider.action.PICK_IMAGES").setType("image/*"),
+        )
+        val found = mutableSetOf<String>()
+        intents.forEach { intent ->
+            runCatching {
+                pm.queryIntentActivities(intent.addCategory(Intent.CATEGORY_DEFAULT), 0)
+                    .forEach { found += it.activityInfo.packageName }
+            }
+        }
+        return found
+    }
+
     fun whitelist(): Set<String> =
-        ((prefs().getStringSet("guard_whitelist", emptySet()) ?: emptySet()) + defaultWhitelist)
+        ((prefs().getStringSet("guard_whitelist", emptySet()) ?: emptySet()) +
+            defaultWhitelist + pickerPackages())
 
     /** 只返回用户自己加的，默认白名单不写进设置里 */
     fun userWhitelist(): Set<String> =
@@ -137,6 +159,7 @@ object AppGuard {
         val context = templateApp
         if (pkg == context.packageName) return true
         if (pkg in defaultWhitelist) return true
+        if (pkg in pickerPackages()) return true
         if (pkg == "com.android.systemui") return true
         val launcher = context.packageManager.getLaunchIntentForPackage(pkg) != null
         val homeIntent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME)
