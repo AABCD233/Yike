@@ -377,12 +377,18 @@ fun FocusScreen(navController: Navigator) {
                 IconButton(onClick = { navController.push(com.yike.focus.ui.navigation3.Route.Music) }) {
                     Icon(Icons.Rounded.MusicNote, contentDescription = "背景音乐", tint = onBackground.copy(alpha = 0.9f))
                 }
-                IconButton(onClick = { immersive = !immersive }) {
-                    Icon(
-                        if (immersive) androidx.compose.material.icons.Icons.Filled.FullscreenExit
-                        else androidx.compose.material.icons.Icons.Rounded.Fullscreen,
-                        contentDescription = "全屏",
-                        tint = onBackground.copy(alpha = 0.9f),
+                Box(
+                    modifier = Modifier
+                        .padding(top = 8.dp, end = 8.dp)
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(onBackground.copy(alpha = 0.14f))
+                        .clickable { immersive = !immersive }
+                        .padding(horizontal = 10.dp, vertical = 6.dp),
+                ) {
+                    Text(
+                        if (immersive) "退出全屏" else "全屏",
+                        color = onBackground.copy(alpha = 0.9f),
+                        fontSize = 12.sp,
                     )
                 }
                 IconButton(onClick = { navController.push(com.yike.focus.ui.navigation3.Route.WhitelistOpen) }) {
