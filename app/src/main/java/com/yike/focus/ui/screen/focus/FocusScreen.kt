@@ -462,11 +462,10 @@ fun FocusScreen(navController: Navigator) {
     }
 
     if (aodMode) {
-        val enter by androidx.compose.animation.core.animateFloatAsState(
-            targetValue = 1f,
-            animationSpec = androidx.compose.animation.core.tween(320),
-            label = "aodEnter",
-        )
+        val enter = remember { androidx.compose.animation.core.Animatable(0f) }
+        LaunchedEffect(Unit) {
+            enter.animateTo(1f, androidx.compose.animation.core.tween(320))
+        }
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -487,9 +486,9 @@ fun FocusScreen(navController: Navigator) {
                 modifier = Modifier
                     .offset { aodOffset }
                     .graphicsLayer {
-                        alpha = enter
-                        scaleX = 0.82f + 0.18f * enter
-                        scaleY = 0.82f + 0.18f * enter
+                        alpha = enter.value
+                        scaleX = 0.82f + 0.18f * enter.value
+                        scaleY = 0.82f + 0.18f * enter.value
                     },
             )
         }
