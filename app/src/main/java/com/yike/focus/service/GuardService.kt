@@ -58,7 +58,7 @@ class GuardService : Service() {
 
                     // 开了「禁止桌面和多任务」：不管它是桌面、最近任务还是别的，
                     // 只要不是我们、也不在白名单里，就拉回来
-                    if (BoostSettings.blockDesktop && com.yike.focus.service.LockAccessibility.enabled(this)) {
+                    if (BoostSettings.blockDesktop && com.yike.focus.service.LockAccessibility.enabled(this@GuardService)) {
                         if (AppGuard.whitelist().contains(pkg)) continue
                         launchGuard(desktop = true)
                         continue
