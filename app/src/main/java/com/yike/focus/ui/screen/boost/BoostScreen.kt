@@ -87,17 +87,17 @@ fun BoostScreen() {
                     )
                     SwitchPreference(
                         title = "禁止桌面和多任务",
-                        summary = if (!com.yike.focus.service.LockAccessibility.enabled()) {
-                            "需要「无障碍」权限，去「我的 → 权限」开启后才能拦住桌面和最近任务"
+                        summary = if (!AppGuard.hasUsageAccess() || !AppGuard.hasOverlayAccess()) {
+                            "需要「应用列表」和「显示在其他应用上层」两个权限，去「我的 → 权限」开启"
                         } else {
-                            "专注时切到桌面或最近任务，会立刻被拉回计时页"
+                            "专注时切到桌面或最近任务会被拉回计时页（不需要无障碍）"
                         },
                         startAction = { BoostIcon(Icons.Rounded.Block) },
                         checked = blockDesktop,
                         onCheckedChange = { on ->
                             blockDesktop = on
                             BoostSettings.blockDesktop = on
-                            if (on && !com.yike.focus.service.LockAccessibility.enabled()) {
+                            if (on && (!AppGuard.hasUsageAccess() || !AppGuard.hasOverlayAccess())) {
                                 navigator.push(Route.Permissions)
                             }
                         },
