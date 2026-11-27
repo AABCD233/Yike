@@ -274,7 +274,7 @@ fun FocusScreen(navController: Navigator) {
     else if (background.luminance() > 0.55f) Color(0xFF1B1F24) else Color.White
 
     // 严格模式：返回手势也不能退出
-    BackHandler(enabled = strictMode) { }
+    BackHandler(enabled = strictMode && FocusTimer.state.value?.mode == com.yike.focus.data.TimerMode.COUNTDOWN) { }
 
     LaunchedEffect(s.isCountdown, remaining, s.isPaused) {
         if (s.isCountdown && remaining == 0 && !s.isPaused) {

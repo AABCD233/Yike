@@ -11,6 +11,12 @@ data class TodoSet(
     val name: String,
     val color: Int = 0,
     val sortOrder: Int = 0,
+    /** 完成单个待办后的休息分钟 */
+    val restMin: Int = 5,
+    /** 全部完成后的长休息分钟 */
+    val longRestMin: Int = 15,
+    /** 连续执行子待办（仅倒计时） */
+    val autoNext: Boolean = false,
 )
 
 data class Todo(

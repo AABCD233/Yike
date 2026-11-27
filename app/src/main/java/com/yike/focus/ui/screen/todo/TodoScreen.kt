@@ -88,6 +88,7 @@ fun TodoScreen(
     var detailed by remember { mutableStateOf<Todo?>(null) }
     var deleting by remember { mutableStateOf<Todo?>(null) }
     var checkIn by remember { mutableStateOf<Todo?>(null) }
+    var refreshKey by remember { mutableIntStateOf(0) }
     var bgFor by remember { mutableStateOf<Todo?>(null) }
     val focusState by FocusTimer.state.collectAsState()
 
@@ -163,6 +164,7 @@ fun TodoScreen(
                 items(todos, key = { it.id }) { todo ->
                     TodoCard(
                         todo = todo,
+                        refreshKey = refreshKey,
                         running = focusState?.todoId == todo.id,
                         onStart = {
                             if (todo.timerMode == TimerMode.NONE) {
@@ -287,6 +289,7 @@ fun TodoScreen(
                             )
                         )
                         todos = TodoStore.todos()
+                        refreshKey++
                         checkIn = null
                     },
                     modifier = Modifier.weight(1f),
@@ -458,10 +461,11 @@ internal fun TodoCard(
     onStart: () -> Unit,
     onLongPress: (() -> Unit)? = null,
     onMenu: (() -> Unit)? = null,
+    refreshKey: Int = 0,
 ) {
     val today = java.time.LocalDate.now().toString()
-    val count = remember(todo.id, todo.title, today) { TodoStore.todayCount(todo.id) }
-    val todaySec = remember(todo.id, todo.title, today) { TodoStore.todaySeconds(todo.id) }
+    val count = remember(todo.id, todo.title, today, refreshKey) { TodoStore.todayCount(todo.id) }
+    val todaySec = remember(todo.id, todo.title, today, refreshKey) { TodoStore.todaySeconds(todo.id) }
     val finished = todo.totalRounds > 0 && count >= todo.totalRounds
     val bitmap = rememberBitmap(todo.bgPath)
 

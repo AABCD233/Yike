@@ -10,7 +10,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 private const val DB_NAME = "yike.db"
-private const val DB_VERSION = 6
+private const val DB_VERSION = 7
 private val DAY_FMT: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
 class TodoDb(context: Context) : SQLiteOpenHelper(context, DB_NAME, null, DB_VERSION) {
@@ -22,7 +22,10 @@ class TodoDb(context: Context) : SQLiteOpenHelper(context, DB_NAME, null, DB_VER
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
                 color INTEGER NOT NULL DEFAULT 0,
-                sort_order INTEGER NOT NULL DEFAULT 0
+                sort_order INTEGER NOT NULL DEFAULT 0,
+                rest_min INTEGER NOT NULL DEFAULT 5,
+                long_rest_min INTEGER NOT NULL DEFAULT 15,
+                auto_next INTEGER NOT NULL DEFAULT 0
             )
             """.trimIndent()
         )
@@ -81,6 +84,11 @@ class TodoDb(context: Context) : SQLiteOpenHelper(context, DB_NAME, null, DB_VER
             runCatching { db.execSQL("ALTER TABLE todo ADD COLUMN break_min INTEGER NOT NULL DEFAULT 5") }
             runCatching { db.execSQL("ALTER TABLE todo ADD COLUMN long_break_min INTEGER NOT NULL DEFAULT 15") }
             runCatching { db.execSQL("ALTER TABLE todo ADD COLUMN rounds INTEGER NOT NULL DEFAULT 4") }
+        }
+        if (oldVersion < 7) {
+            runCatching { db.execSQL("ALTER TABLE todo_set ADD COLUMN rest_min INTEGER NOT NULL DEFAULT 5") }
+            runCatching { db.execSQL("ALTER TABLE todo_set ADD COLUMN long_rest_min INTEGER NOT NULL DEFAULT 15") }
+            runCatching { db.execSQL("ALTER TABLE todo_set ADD COLUMN auto_next INTEGER NOT NULL DEFAULT 0") }
         }
         if (oldVersion < 6) {
             runCatching { db.execSQL("ALTER TABLE todo ADD COLUMN habit_per_week INTEGER NOT NULL DEFAULT 0") }
@@ -255,6 +263,9 @@ object TodoStore {
                     name = c.getString(c.getColumnIndexOrThrow("name")),
                     color = c.getInt(c.getColumnIndexOrThrow("color")),
                     sortOrder = c.getInt(c.getColumnIndexOrThrow("sort_order")),
+                    restMin = c.getInt(c.getColumnIndexOrThrow("rest_min")),
+                    longRestMin = c.getInt(c.getColumnIndexOrThrow("long_rest_min")),
+                    autoNext = c.getInt(c.getColumnIndexOrThrow("auto_next")) != 0,
                 )
             }
         }
@@ -266,8 +277,31 @@ object TodoStore {
             put("name", set.name)
             put("color", set.color)
             put("sort_order", set.sortOrder)
+            put("rest_min", set.restMin)
+            put("long_rest_min", set.longRestMin)
+            put("auto_next", if (set.autoNext) 1 else 0)
         }
         return db.insert("todo_set", null, values)
+    }
+
+    fun updateTodoSet(set: TodoSet) {
+        val values = ContentValues().apply {
+            put("name", set.name)
+            put("color", set.color)
+            put("sort_order", set.sortOrder)
+            put("rest_min", set.restMin)
+            put("long_rest_min", set.longRestMin)
+            put("auto_next", if (set.autoNext) 1 else 0)
+        }
+        db.update("todo_set", values, "id = ?", arrayOf(set.id.toString()))
+    }
+
+    /** 把已有待办挂到某个集上（setId=null 表示移出） */
+    fun assignTodoToSet(todoId: Long, setId: Long?) {
+        val values = ContentValues().apply {
+            if (setId == null) putNull("set_id") else put("set_id", setId)
+        }
+        db.update("todo", values, "id = ?", arrayOf(todoId.toString()))
     }
 
     fun renameTodoSet(id: Long, name: String) {
