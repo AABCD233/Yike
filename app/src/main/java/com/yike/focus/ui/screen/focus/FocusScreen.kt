@@ -58,6 +58,7 @@ import androidx.compose.ui.unit.sp
 import com.yike.focus.data.BoostSettings
 import com.yike.focus.data.FocusLook
 import com.yike.focus.data.FocusTimer
+import com.yike.focus.data.MusicPlaylist
 import com.yike.focus.data.MusicPlayer
 import com.yike.focus.data.PomodoroSettings
 import com.yike.focus.data.TodoStore
@@ -278,6 +279,7 @@ fun FocusScreen(navController: Navigator) {
         if (s.isCountdown && remaining == 0 && !s.isPaused) {
             val done = FocusTimer.stop(abandoned = false)
             MusicPlayer.stop()
+            MusicPlaylist.release()
             if (!isRest) {
                 Notify.focusDone(context, s.title, done?.seconds ?: s.totalSeconds)
                 PomodoroSettings.roundIndex = PomodoroSettings.roundIndex + 1
@@ -379,18 +381,11 @@ fun FocusScreen(navController: Navigator) {
                 IconButton(onClick = { navController.push(com.yike.focus.ui.navigation3.Route.Music) }) {
                     Icon(Icons.Rounded.MusicNote, contentDescription = "背景音乐", tint = onBackground.copy(alpha = 0.9f))
                 }
-                Box(
-                    modifier = Modifier
-                        .padding(top = 8.dp, end = 8.dp)
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(onBackground.copy(alpha = 0.14f))
-                        .clickable { immersive = !immersive }
-                        .padding(horizontal = 10.dp, vertical = 6.dp),
-                ) {
-                    Text(
-                        if (immersive) "退出全屏" else "全屏",
-                        color = onBackground.copy(alpha = 0.9f),
-                        fontSize = 12.sp,
+                IconButton(onClick = { immersive = !immersive }) {
+                    Icon(
+                        imageVector = if (immersive) CloseFullscreenIcon else OpenFullscreenIcon,
+                        contentDescription = if (immersive) "退出全屏" else "全屏",
+                        tint = onBackground.copy(alpha = 0.9f),
                     )
                 }
                 IconButton(onClick = { navController.push(com.yike.focus.ui.navigation3.Route.WhitelistOpen) }) {
@@ -477,6 +472,7 @@ fun FocusScreen(navController: Navigator) {
                     onClick = {
                         if (strictMode && remaining > 0) return@ActionPill
                         MusicPlayer.stop()
+            MusicPlaylist.release()
                         FocusTimer.stop(abandoned = false)
                         navController.pop()
                     },
@@ -674,3 +670,40 @@ private fun FinishDialog(
         }
     }
 }
+
+/** 全屏图标（自绘，避免依赖图标库里没有的 Fullscreen） */
+private val OpenFullscreenIcon: androidx.compose.ui.graphics.vector.ImageVector
+    get() = androidx.compose.ui.graphics.vector.ImageVector.Builder(
+        name = "OpenFullscreen", defaultWidth = 24.dp, defaultHeight = 24.dp,
+        viewportWidth = 24f, viewportHeight = 24f,
+    ).apply {
+        addPath(
+            pathData = androidx.compose.ui.graphics.vector.PathParser().apply {
+                moveTo(4f, 9f); verticalLineTo(4f); horizontalLineTo(9f)
+                moveTo(15f, 4f); horizontalLineTo(20f); verticalLineTo(9f)
+                moveTo(20f, 15f); verticalLineTo(20f); horizontalLineTo(15f)
+                moveTo(9f, 20f); horizontalLineTo(4f); verticalLineTo(15f)
+            }.toPath(),
+            stroke = androidx.compose.ui.graphics.SolidColor(androidx.compose.ui.graphics.Color.Black),
+            strokeLineWidth = 2.2f,
+            strokeLineCap = androidx.compose.ui.graphics.StrokeCap.Round,
+        )
+    }.build()
+
+private val CloseFullscreenIcon: androidx.compose.ui.graphics.vector.ImageVector
+    get() = androidx.compose.ui.graphics.vector.ImageVector.Builder(
+        name = "CloseFullscreen", defaultWidth = 24.dp, defaultHeight = 24.dp,
+        viewportWidth = 24f, viewportHeight = 24f,
+    ).apply {
+        addPath(
+            pathData = androidx.compose.ui.graphics.vector.PathParser().apply {
+                moveTo(9f, 4f); verticalLineTo(9f); horizontalLineTo(4f)
+                moveTo(20f, 9f); horizontalLineTo(15f); verticalLineTo(4f)
+                moveTo(15f, 20f); verticalLineTo(15f); horizontalLineTo(20f)
+                moveTo(4f, 15f); horizontalLineTo(9f); verticalLineTo(20f)
+            }.toPath(),
+            stroke = androidx.compose.ui.graphics.SolidColor(androidx.compose.ui.graphics.Color.Black),
+            strokeLineWidth = 2.2f,
+            strokeLineCap = androidx.compose.ui.graphics.StrokeCap.Round,
+        )
+    }.build()

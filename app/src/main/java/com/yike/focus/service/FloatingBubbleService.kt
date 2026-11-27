@@ -86,6 +86,8 @@ class FloatingBubbleService : Service() {
         var startY = 0
         var touchX = 0f
         var touchY = 0f
+        var moved = false
+        val slop = dp(8)
         view.setOnTouchListener { _, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
@@ -93,22 +95,33 @@ class FloatingBubbleService : Service() {
                     startY = layoutParams.y
                     touchX = event.rawX
                     touchY = event.rawY
-                    false
+                    moved = false
+                    true
                 }
                 MotionEvent.ACTION_MOVE -> {
+                    val dx = (event.rawX - touchX).toInt()
+                    val dy = (event.rawY - touchY).toInt()
+                    if (kotlin.math.abs(dx) > slop || kotlin.math.abs(dy) > slop) moved = true
                     val bubbleSize = dp(64)
                     val metrics = resources.displayMetrics
                     val maxX = (metrics.widthPixels - bubbleSize).coerceAtLeast(0)
                     val maxY = (metrics.heightPixels - bubbleSize).coerceAtLeast(0)
-                    layoutParams.x = (startX + (event.rawX - touchX).toInt()).coerceIn(0, maxX)
-                    layoutParams.y = (startY + (event.rawY - touchY).toInt()).coerceIn(0, maxY)
+                    layoutParams.x = (startX + dx).coerceIn(0, maxX)
+                    layoutParams.y = (startY + dy).coerceIn(0, maxY)
                     runCatching { wm.updateViewLayout(view, layoutParams) }
                     true
                 }
-                else -> false
+                MotionEvent.ACTION_UP -> {
+                    if (moved) {
+                        true // 拖过就不算点击
+                    } else {
+                        backToTimer()
+                        true
+                    }
+                }
+                else -> true
             }
         }
-        view.setOnClickListener { backToTimer() }
 
         runCatching {
             wm.addView(view, layoutParams)

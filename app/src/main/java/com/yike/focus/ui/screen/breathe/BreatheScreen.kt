@@ -53,7 +53,7 @@ import kotlinx.coroutines.delay
 import kotlin.math.cos
 import kotlin.math.sin
 
-private const val ROUND_SECONDS = 180
+private const val ROUND_SECONDS = 90
 
 private val GUIDES = listOf(
     "放松肩膀", "放松手臂", "放松背部", "放松腿部", "放松面部", "放松全身",
@@ -174,37 +174,24 @@ fun BreatheScreen(navController: Navigator) {
             Spacer(Modifier.weight(1f))
             Canvas(modifier = Modifier.size(320.dp)) {
                 val center = Offset(size.width / 2, size.height / 2)
-                val petalW = size.minDimension * 0.15f
-                val petalH = size.minDimension * 0.30f
-                val minR = size.minDimension * 0.12f
-                val maxR = size.minDimension * 0.28f
-                val r = minR + (maxR - minR) * breath.value
-                val open = 0.55f + 0.45f * breath.value
+                val base = size.minDimension * 0.26f
+                val r = base * (0.72f + 0.55f * breath.value)
 
-                repeat(12) { i ->
-                    val baseAngle = 30f * i
-                    // 花瓣自身随呼吸轻轻摆开
-                    val angle = baseAngle + slowSpin * 0.15f
-                    val rad = Math.toRadians((angle - 90f).toDouble())
-                    val cx = center.x + (r * cos(rad)).toFloat()
-                    val cy = center.y + (r * sin(rad)).toFloat()
-
-                    rotate(degrees = angle, pivot = Offset(cx, cy)) {
-                        drawOval(
-                            color = Color.White.copy(alpha = 0.22f * open),
-                            topLeft = Offset(cx - petalW / 2, cy - petalH),
-                            size = Size(petalW, petalH),
-                        )
-                        drawOval(
-                            color = Color.White.copy(alpha = 0.14f * open),
-                            topLeft = Offset(cx - petalW * 0.34f, cy - petalH * 0.66f),
-                            size = Size(petalW * 0.68f, petalH * 0.66f),
-                        )
-                    }
-                }
+                // 外圈光晕
                 drawCircle(
-                    color = Color.White.copy(alpha = 0.28f),
-                    radius = petalW * 0.55f,
+                    color = Color.White.copy(alpha = 0.10f + 0.10f * breath.value),
+                    radius = r * 1.45f,
+                    center = center,
+                )
+                // 主体
+                drawCircle(
+                    color = Color.White.copy(alpha = 0.30f),
+                    radius = r,
+                    center = center,
+                )
+                drawCircle(
+                    color = Color.White.copy(alpha = 0.18f),
+                    radius = r * 0.72f,
                     center = center,
                 )
             }
@@ -240,7 +227,7 @@ fun BreatheScreen(navController: Navigator) {
             }
             Spacer(Modifier.height(20.dp))
             Text(
-                "小憩 3 分钟，随时可以暂停",
+                "小憩 90 秒，随时可以暂停",
                 color = Color.White.copy(alpha = 0.45f),
                 fontSize = 12.sp,
             )

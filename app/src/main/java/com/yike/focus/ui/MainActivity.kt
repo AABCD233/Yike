@@ -320,6 +320,7 @@ private fun DesktopGuard() {
             val running = FocusTimer.state.value ?: return@LifecycleEventObserver
             if (running.kind != "focus" || running.isPaused) return@LifecycleEventObserver
             if (!com.yike.focus.data.BoostSettings.blockDesktop) return@LifecycleEventObserver
+            if (!com.yike.focus.service.LockAccessibility.enabled(context)) return@LifecycleEventObserver
             android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
                 val foreground = com.yike.focus.data.AppGuard.foregroundApp() ?: return@postDelayed
                 val pkg = foreground.first
