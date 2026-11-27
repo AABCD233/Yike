@@ -300,19 +300,11 @@ private fun AboutContent(
                         iconY = y + size.height
                     },
             ) {
-                Box(
-                    modifier = Modifier
-                        .requiredSize(245.dp)
-                        .clip(RoundedCornerShape(56.dp))
-                        .background(Color(0xFFF3EBDD)),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_about_mark_fill),
-                        contentDescription = null,
-                        modifier = Modifier.size(200.dp),
-                    )
-                }
+                Image(
+                    painter = painterResource(id = R.drawable.ic_about_a1),
+                    contentDescription = null,
+                    modifier = Modifier.requiredSize(245.dp),
+                )
             }
             Text(
                 modifier = Modifier
