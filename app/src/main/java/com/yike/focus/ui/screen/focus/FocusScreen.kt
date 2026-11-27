@@ -379,7 +379,7 @@ fun FocusScreen(navController: Navigator) {
                 }
                 IconButton(onClick = { immersive = !immersive }) {
                     Icon(
-                        if (immersive) androidx.compose.material.icons.Icons.Rounded.FullscreenExit
+                        if (immersive) androidx.compose.material.icons.Icons.Filled.FullscreenExit
                         else androidx.compose.material.icons.Icons.Rounded.Fullscreen,
                         contentDescription = "全屏",
                         tint = onBackground.copy(alpha = 0.9f),
