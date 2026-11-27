@@ -303,7 +303,7 @@ private fun AboutContent(
                 Image(
                     painter = painterResource(id = R.drawable.ic_about_a1),
                     contentDescription = null,
-                    modifier = Modifier.requiredSize(245.dp),
+                    modifier = Modifier.fillMaxSize(),
                 )
             }
             Text(
