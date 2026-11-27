@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- 实心圆环：外圆减内圆（evenOdd），不用描边 -->
+    <path
+        android:fillColor="#2A2A33"
+        android:fillType="evenOdd"
+        android:pathData="M54,28 A26,26 0 1,1 54,80 A26,26 0 1,1 54,28 Z M54,36 A18,18 0 1,0 54,72 A18,18 0 1,0 54,36 Z" />
+    <!-- 顶部缺口：用底色盖掉一小段 -->
+    <path
+        android:fillColor="#F3EBDD"
+        android:pathData="M50,22 L58,22 L58,34 L50,34 Z" />
+    <!-- 中心点 -->
+    <path
+        android:fillColor="#C8432B"
+        android:pathData="M48,54 a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 Z" />
+</vector>

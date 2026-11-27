@@ -307,11 +307,10 @@ private fun AboutContent(
                         .background(Color(0xFFF3EBDD)),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text(
-                        "一刻",
-                        fontSize = 72.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = Color(0xFF2A2A33),
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_about_mark_fill),
+                        contentDescription = null,
+                        modifier = Modifier.size(200.dp),
                     )
                 }
             }
