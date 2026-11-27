@@ -384,7 +384,7 @@ fun FocusScreen(navController: Navigator) {
                 }
                 IconButton(onClick = { immersive = !immersive }) {
                     Icon(
-                        imageVector = androidx.compose.material.icons.Icons.Rounded.PictureInPicture,
+                        imageVector = if (immersive) ExitFullscreenIcon else EnterFullscreenIcon,
                         contentDescription = if (immersive) "退出全屏" else "全屏",
                         tint = if (immersive) colorScheme.primary else onBackground.copy(alpha = 0.9f),
                     )
@@ -671,3 +671,31 @@ private fun FinishDialog(
         }
     }
 }
+
+/** 四角括号（进入全屏）：用填充矩形画，不依赖 stroke 渲染 */
+private val EnterFullscreenIcon: androidx.compose.ui.graphics.vector.ImageVector
+    get() = fullscreenIcon(
+        "EnterFullscreen",
+        "M3,9 V3 H9 V5 H5 V9 Z M15,3 H21 V9 H19 V5 H15 Z M21,15 V21 H15 V19 H19 V15 Z M3,15 H5 V19 H9 V21 H3 Z",
+    )
+
+/** 四角向内的箭头（退出全屏） */
+private val ExitFullscreenIcon: androidx.compose.ui.graphics.vector.ImageVector
+    get() = fullscreenIcon(
+        "ExitFullscreen",
+        "M9,3 V9 H3 V7 H7 V3 Z M15,3 H17 V7 H21 V9 H15 Z M21,15 V17 H17 V21 H15 V15 Z M3,15 H9 V21 H7 V17 H3 Z",
+    )
+
+private fun fullscreenIcon(name: String, pathData: String): androidx.compose.ui.graphics.vector.ImageVector =
+    androidx.compose.ui.graphics.vector.ImageVector.Builder(
+        name = name,
+        defaultWidth = 24.dp,
+        defaultHeight = 24.dp,
+        viewportWidth = 24f,
+        viewportHeight = 24f,
+    ).apply {
+        addPath(
+            pathData = androidx.compose.ui.graphics.vector.PathParser().parsePathString(pathData).toNodes(),
+            fill = androidx.compose.ui.graphics.SolidColor(androidx.compose.ui.graphics.Color.Black),
+        )
+    }.build()

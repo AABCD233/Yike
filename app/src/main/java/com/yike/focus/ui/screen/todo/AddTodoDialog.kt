@@ -219,6 +219,7 @@ fun AddTodoDialog(
             }
 
             if (advanced) {
+                if (mode == TimerMode.COUNTDOWN) {
                 Stepper(
                     title = "休息时长",
                     value = "$breakMin 分钟",
@@ -243,6 +244,8 @@ fun AddTodoDialog(
                     onMinus = { rounds = (rounds - 1).coerceAtLeast(1) },
                     onPlus = { rounds = (rounds + 1).coerceAtMost(12) },
                 )
+                }
+
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
                     verticalAlignment = Alignment.CenterVertically,

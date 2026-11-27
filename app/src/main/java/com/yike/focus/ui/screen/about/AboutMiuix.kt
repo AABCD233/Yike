@@ -307,25 +307,12 @@ private fun AboutContent(
                         .background(Color(0xFFF3EBDD)),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Canvas(modifier = Modifier.size(150.dp)) {
-                        val stroke = 11.dp.toPx()
-                        val inset = stroke / 2
-                        val arcSize = Size(size.width - stroke, size.height - stroke)
-                        drawArc(
-                            color = Color(0xFF2A2A33),
-                            startAngle = -90f,
-                            sweepAngle = 300f,
-                            useCenter = false,
-                            topLeft = Offset(inset, inset),
-                            size = arcSize,
-                            style = Stroke(width = stroke, cap = StrokeCap.Round),
-                        )
-                        drawCircle(
-                            color = Color(0xFFC8432B),
-                            radius = 11.dp.toPx(),
-                            center = Offset(size.width / 2, size.height / 2),
-                        )
-                    }
+                    Text(
+                        "一刻",
+                        fontSize = 72.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = Color(0xFF2A2A33),
+                    )
                 }
             }
             Text(

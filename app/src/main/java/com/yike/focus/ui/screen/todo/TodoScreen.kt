@@ -87,6 +87,7 @@ fun TodoScreen(
     var editing by remember { mutableStateOf<Todo?>(null) }
     var detailed by remember { mutableStateOf<Todo?>(null) }
     var deleting by remember { mutableStateOf<Todo?>(null) }
+    var checkIn by remember { mutableStateOf<Todo?>(null) }
     var bgFor by remember { mutableStateOf<Todo?>(null) }
     val focusState by FocusTimer.state.collectAsState()
 
@@ -164,7 +165,9 @@ fun TodoScreen(
                         todo = todo,
                         running = focusState?.todoId == todo.id,
                         onStart = {
-                            if (FocusTimer.state.value != null) {
+                            if (todo.timerMode == TimerMode.NONE) {
+                                checkIn = todo
+                            } else if (FocusTimer.state.value != null) {
                                 navController.push(Route.Focus)
                             } else {
                                 FocusTimer.start(todo)
@@ -247,6 +250,45 @@ fun TodoScreen(
                 top.yukonga.miuix.kmp.basic.TextButton(
                     text = "去打卡分享",
                     onClick = { com.yike.focus.data.RoundEvent.celebrateTitle = null },
+                    modifier = Modifier.weight(1f),
+                    colors = top.yukonga.miuix.kmp.basic.ButtonDefaults.textButtonColorsPrimary(),
+                )
+            }
+        }
+    }
+
+    checkIn?.let { todo ->
+        top.yukonga.miuix.kmp.overlay.OverlayDialog(
+            show = true,
+            title = "打卡提示",
+            summary = "「${todo.title}」是「不计时」类型的待办，确认即完成一次。",
+            onDismissRequest = { checkIn = null },
+        ) {
+            Row(modifier = Modifier.fillMaxWidth()) {
+                top.yukonga.miuix.kmp.basic.TextButton(
+                    text = "取消",
+                    onClick = { checkIn = null },
+                    modifier = Modifier.weight(1f),
+                )
+                Spacer(Modifier.width(12.dp))
+                top.yukonga.miuix.kmp.basic.TextButton(
+                    text = "确定",
+                    onClick = {
+                        val now = System.currentTimeMillis()
+                        TodoStore.insertSession(
+                            com.yike.focus.data.FocusSession(
+                                todoId = todo.id,
+                                title = todo.title,
+                                startTs = now,
+                                endTs = now,
+                                seconds = 0,
+                                kind = "focus",
+                                abandoned = false,
+                            )
+                        )
+                        todos = TodoStore.todos()
+                        checkIn = null
+                    },
                     modifier = Modifier.weight(1f),
                     colors = top.yukonga.miuix.kmp.basic.ButtonDefaults.textButtonColorsPrimary(),
                 )
