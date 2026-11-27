@@ -23,6 +23,21 @@ object FocusLook {
         get() = prefs().getString("focus_bg_image", null)
         set(value) = prefs().edit().putString("focus_bg_image", value).apply()
 
+    // ---- 按待办分别存：todoId=0 表示全局默认 ----
+    fun presetOf(todoId: Long): Int =
+        prefs().getInt("focus_bg_$todoId", backgroundPreset)
+
+    fun setPresetOf(todoId: Long, value: Int) {
+        prefs().edit().putInt("focus_bg_$todoId", value.coerceIn(0, 4)).apply()
+    }
+
+    fun imageOf(todoId: Long): String? =
+        prefs().getString("focus_bg_image_$todoId", if (todoId == 0L) backgroundImage else null)
+
+    fun setImageOf(todoId: Long, path: String?) {
+        prefs().edit().putString("focus_bg_image_$todoId", path).apply()
+    }
+
     val backgroundNames = listOf("素白", "淡青", "暖砂", "墨黑", "跟随主题")
     val backgroundColors = listOf(
         0xFFF6F7F9,

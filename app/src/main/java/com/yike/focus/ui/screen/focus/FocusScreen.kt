@@ -101,8 +101,9 @@ fun FocusScreen(navController: Navigator) {
         animationSpec = androidx.compose.animation.core.tween(1800),
         label = "aodY",
     )
-    var bgPreset by remember { mutableStateOf(FocusLook.backgroundPreset) }
-    var bgImage by remember { mutableStateOf(FocusLook.backgroundImage) }
+    val activeTodoId = state?.todoId ?: 0L
+    var bgPreset by remember(activeTodoId) { mutableStateOf(FocusLook.presetOf(activeTodoId)) }
+    var bgImage by remember(activeTodoId) { mutableStateOf(FocusLook.imageOf(activeTodoId)) }
     val bgBitmap = remember(bgImage) {
         bgImage?.let { path -> runCatching {
             BitmapFactory.decodeFile(path, BitmapFactory.Options().apply { inSampleSize = 2 })
@@ -118,7 +119,8 @@ fun FocusScreen(navController: Navigator) {
                 context.contentResolver.openInputStream(uri)?.use { input ->
                     file.outputStream().use { out -> input.copyTo(out) }
                 }
-                FocusLook.backgroundImage = file.absolutePath
+                FocusLook.setImageOf(activeTodoId, file.absolutePath)
+                FocusLook.setPresetOf(activeTodoId, 4)
                 bgImage = file.absolutePath
                 bgPreset = -1
             }
@@ -572,8 +574,8 @@ fun FocusScreen(navController: Navigator) {
                             .background(if (index == bgPreset) colorScheme.primaryContainer else Color.Transparent)
                             .clickable {
                                 bgPreset = index
-                                FocusLook.backgroundPreset = index
-                                FocusLook.backgroundImage = null
+                                FocusLook.setPresetOf(activeTodoId, index)
+                                FocusLook.setImageOf(activeTodoId, null)
                                 bgImage = null
                             }
                             .padding(horizontal = 12.dp, vertical = 10.dp),
