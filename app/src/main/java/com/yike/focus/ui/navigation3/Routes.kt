@@ -71,4 +71,8 @@ sealed interface Route : NavKey, Parcelable {
     @Serializable
     data object FocusSettings : Route
 
+    @Parcelize
+    @Serializable
+    data object Breathe : Route
+
 }

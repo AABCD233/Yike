@@ -73,7 +73,7 @@ fun LockScreen(navController: Navigator, bottomPadding: Dp) {
                     container = colorScheme.primaryContainer,
                     titleColor = colorScheme.onPrimaryContainer,
                     subtitleColor = colorScheme.onSurfaceVariantSummary,
-                    onClick = { tip = "小憩（呼吸引导）还没有做，下一步接。" },
+                    onClick = { navController.push(Route.Breathe) },
                 )
             }
             item {
