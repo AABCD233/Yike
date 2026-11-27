@@ -97,13 +97,67 @@ fun LockScreen(navController: Navigator, bottomPadding: Dp) {
                 )
             }
             item {
-                Card(onClick = { pickDuration = true }, showIndication = true) {
+                val sched = com.yike.focus.data.ScheduledLock
+                var schedOn by remember { mutableStateOf(sched.enabled) }
+                var sh by remember { mutableIntStateOf(sched.startHour) }
+                var sm by remember { mutableIntStateOf(sched.startMinute) }
+                var eh by remember { mutableIntStateOf(sched.endHour) }
+                var em by remember { mutableIntStateOf(sched.endMinute) }
+
+                fun pushSchedule() {
+                    sched.startHour = sh
+                    sched.startMinute = sm
+                    sched.endHour = eh
+                    sched.endMinute = em
+                    sched.enabled = schedOn
+                    sched.schedule(context)
+                }
+
+                fun pickTime(hour: Int, minute: Int, onPicked: (Int, Int) -> Unit) {
+                    android.app.TimePickerDialog(
+                        context,
+                        { _, h, m -> onPicked(h, m); pushSchedule() },
+                        hour,
+                        minute,
+                        true,
+                    ).show()
+                }
+
+                Card(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-                        Text("还没有设置定时锁机", fontSize = 16.sp, color = colorScheme.onSurface)
-                        Spacer(Modifier.height(4.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text("定时锁机", fontSize = 16.sp, color = colorScheme.onSurface)
+                                Text(
+                                    if (schedOn) "每天 ${sched.label(sh, sm)} - ${sched.label(eh, em)}" else "到点自动进入锁机，期间无法退出",
+                                    fontSize = 12.sp,
+                                    color = colorScheme.onSurfaceVariantSummary,
+                                )
+                            }
+                            Switch(checked = schedOn, onCheckedChange = {
+                                schedOn = it
+                                pushSchedule()
+                                if (it) tip = "已开启：到点会自动锁定屏幕，请确认时间是否正确"
+                            })
+                        }
+                        Spacer(Modifier.height(10.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text("开始", fontSize = 13.sp, color = colorScheme.onSurface)
+                            Spacer(Modifier.width(10.dp))
+                            Card(onClick = { pickTime(sh, sm) { h, m -> sh = h; sm = m } }, showIndication = true) {
+                                Text(sched.label(sh, sm), fontSize = 13.sp, color = colorScheme.onSurface, modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp))
+                            }
+                            Spacer(Modifier.width(16.dp))
+                            Text("结束", fontSize = 13.sp, color = colorScheme.onSurface)
+                            Spacer(Modifier.width(10.dp))
+                            Card(onClick = { pickTime(eh, em) { h, m -> eh = h; em = m } }, showIndication = true) {
+                                Text(sched.label(eh, em), fontSize = 13.sp, color = colorScheme.onSurface, modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp))
+                            }
+                        }
+                        Spacer(Modifier.height(8.dp))
                         Text(
-                            "锁机是比学霸模式更严格的自控功能",
-                            fontSize = 13.sp,
+                            "⚠️ 开启后到点会自动跳到锁机页，不完成后无法退出；只建议在睡前设置。",
+                            fontSize = 11.sp,
                             color = colorScheme.onSurfaceVariantSummary,
                         )
                     }
