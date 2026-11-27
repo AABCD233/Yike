@@ -1,3 +1,5 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+
 package com.yike.focus.ui.screen.todo
 
 import androidx.compose.foundation.background
@@ -64,6 +66,10 @@ fun AddTodoDialog(
     var reminderHour by remember { mutableStateOf(initial?.reminderHour ?: 8) }
     var reminderMinute by remember { mutableStateOf(initial?.reminderMinute ?: 0) }
     var totalRounds by remember { mutableStateOf(initial?.totalRounds ?: 0) }
+    var habitPerWeek by remember { mutableStateOf(initial?.habitPerWeek ?: 0) }
+    var goalDate by remember { mutableStateOf(initial?.endDate) }
+    var showDatePicker by remember { mutableStateOf(false) }
+    var showFreqPicker by remember { mutableStateOf(false) }
 
     OverlayDialog(
         show = true,
@@ -102,6 +108,26 @@ fun AddTodoDialog(
             if (kind == TodoKind.GOAL) {
                 Spacer(Modifier.height(10.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("我想在", fontSize = 13.sp, color = colorScheme.onSurface)
+                    Spacer(Modifier.width(8.dp))
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(colorScheme.primaryContainer)
+                            .clickable { showDatePicker = true }
+                            .padding(horizontal = 12.dp, vertical = 6.dp),
+                    ) {
+                        Text(
+                            goalDate ?: "设定目标日期",
+                            fontSize = 13.sp,
+                            color = colorScheme.onPrimaryContainer,
+                        )
+                    }
+                    Spacer(Modifier.width(8.dp))
+                    Text("之前完成", fontSize = 13.sp, color = colorScheme.onSurface)
+                }
+                Spacer(Modifier.height(10.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Text("目标总时长", fontSize = 13.sp, color = colorScheme.onSurface)
                     Spacer(Modifier.width(10.dp))
                     TextField(
@@ -115,6 +141,26 @@ fun AddTodoDialog(
             }
 
             if (kind == TodoKind.HABIT) {
+                Spacer(Modifier.height(10.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("我想", fontSize = 13.sp, color = colorScheme.onSurface)
+                    Spacer(Modifier.width(8.dp))
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(colorScheme.primaryContainer)
+                            .clickable { showFreqPicker = true }
+                            .padding(horizontal = 12.dp, vertical = 6.dp),
+                    ) {
+                        Text(
+                            if (habitPerWeek == 0) "每天" else "每周 $habitPerWeek 次",
+                            fontSize = 13.sp,
+                            color = colorScheme.onPrimaryContainer,
+                        )
+                    }
+                    Spacer(Modifier.width(8.dp))
+                    Text("完成", fontSize = 13.sp, color = colorScheme.onSurface)
+                }
                 Spacer(Modifier.height(10.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text("每天目标", fontSize = 13.sp, color = colorScheme.onSurface)
@@ -259,6 +305,8 @@ fun AddTodoDialog(
                                 reminderHour = reminderHour,
                                 reminderMinute = reminderMinute,
                                 totalRounds = totalRounds,
+                                habitPerWeek = habitPerWeek,
+                                endDate = if (kind == TodoKind.GOAL) goalDate else initial?.endDate,
                             )
                         )
                     }
@@ -266,6 +314,62 @@ fun AddTodoDialog(
                 modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.textButtonColorsPrimary(),
             )
+        }
+    }
+
+    if (showDatePicker) {
+        val pickerState = androidx.compose.material3.rememberDatePickerState()
+        androidx.compose.material3.DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                androidx.compose.material3.TextButton(onClick = {
+                    val millis = pickerState.selectedDateMillis
+                    if (millis != null) {
+                        goalDate = java.time.Instant.ofEpochMilli(millis)
+                            .atZone(java.time.ZoneId.systemDefault())
+                            .toLocalDate()
+                            .toString()
+                    }
+                    showDatePicker = false
+                }) { androidx.compose.material3.Text("确定") }
+            },
+            dismissButton = {
+                androidx.compose.material3.TextButton(onClick = { showDatePicker = false }) {
+                    androidx.compose.material3.Text("取消")
+                }
+            },
+        ) {
+            androidx.compose.material3.DatePicker(state = pickerState)
+        }
+    }
+
+    if (showFreqPicker) {
+        top.yukonga.miuix.kmp.overlay.OverlayDialog(
+            show = true,
+            title = "频率",
+            onDismissRequest = { showFreqPicker = false },
+        ) {
+            Column {
+                listOf(0 to "每天", 1 to "每周 1 次", 2 to "每周 2 次", 3 to "每周 3 次",
+                    4 to "每周 4 次", 5 to "每周 5 次", 6 to "每周 6 次", 7 to "每周 7 次").forEach { (value, label) ->
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(
+                                if (habitPerWeek == value) colorScheme.primaryContainer
+                                else androidx.compose.ui.graphics.Color.Transparent
+                            )
+                            .clickable {
+                                habitPerWeek = value
+                                showFreqPicker = false
+                            }
+                            .padding(horizontal = 12.dp, vertical = 10.dp),
+                    ) {
+                        Text(label, fontSize = 14.sp, color = colorScheme.onSurface)
+                    }
+                }
+            }
         }
     }
 }

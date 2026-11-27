@@ -503,11 +503,15 @@ private fun rememberBitmap(path: String?): ImageBitmap? {
 internal fun subtitleOf(todo: Todo, todaySeconds: Int): String = when (todo.kind) {
     TodoKind.GOAL -> {
         val hours = todaySeconds / 3600f
-        "定目标 · 已完成 %.1f 小时 · 目标 %.1f 小时".format(hours, todo.targetHours)
+        val deadline = todo.endDate?.substringAfter('-')?.replace("-", "/") ?: ""
+        "定目标 · %.1f/%.1f 小时%s".format(
+            hours, todo.targetHours, if (deadline.isNotEmpty()) " · 截止 $deadline" else "",
+        )
     }
     TodoKind.HABIT -> {
         val min = todaySeconds / 60
-        "养习惯 · 今日 $min/${todo.dailyMin} 分钟"
+        val freq = if (todo.habitPerWeek == 0) "每天" else "每周 ${todo.habitPerWeek} 次"
+        "养习惯 · $freq · 今日 $min/${todo.dailyMin} 分钟"
     }
     TodoKind.NORMAL -> when (todo.timerMode) {
         TimerMode.COUNTDOWN -> "${todo.durationMin} 分钟"

@@ -39,6 +39,8 @@ data class Todo(
     val reminderEnabled: Boolean = false,
     /** 完成多少轮算完成，0 = 不限 */
     val totalRounds: Int = 0,
+    /** 养习惯频率：0 = 每天，1..7 = 每周几次 */
+    val habitPerWeek: Int = 0,
     val reminderHour: Int = 8,
     val reminderMinute: Int = 0,
 )
