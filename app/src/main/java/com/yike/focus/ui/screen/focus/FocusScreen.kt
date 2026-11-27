@@ -86,8 +86,21 @@ fun FocusScreen(navController: Navigator) {
     var aodMode by remember { mutableStateOf(false) }
     var celebrate by remember { mutableStateOf<String?>(null) }
     var aodOffset by remember { mutableStateOf(androidx.compose.ui.unit.IntOffset(0, 0)) }
-    var incX by remember { mutableStateOf(1) }
-    var incY by remember { mutableStateOf(1) }
+    var immersive by remember { mutableStateOf(false) }
+    var targetX by remember { mutableStateOf(0f) }
+    var targetY by remember { mutableStateOf(0f) }
+    val screenPx = androidx.compose.ui.platform.LocalWindowInfo.current.containerSize
+    val density = androidx.compose.ui.platform.LocalDensity.current
+    val animX by androidx.compose.animation.core.animateFloatAsState(
+        targetValue = targetX,
+        animationSpec = androidx.compose.animation.core.tween(1800),
+        label = "aodX",
+    )
+    val animY by androidx.compose.animation.core.animateFloatAsState(
+        targetValue = targetY,
+        animationSpec = androidx.compose.animation.core.tween(1800),
+        label = "aodY",
+    )
     var bgPreset by remember { mutableStateOf(FocusLook.backgroundPreset) }
     var bgImage by remember { mutableStateOf(FocusLook.backgroundImage) }
     val bgBitmap = remember(bgImage) {
@@ -140,6 +153,18 @@ fun FocusScreen(navController: Navigator) {
         }
     }
 
+    LaunchedEffect(immersive) {
+        val activity = viewForBars.context as? android.app.Activity ?: return@LaunchedEffect
+        val controller = androidx.core.view.WindowCompat.getInsetsController(activity.window, viewForBars)
+        if (immersive) {
+            controller.hide(androidx.core.view.WindowInsetsCompat.Type.systemBars())
+            controller.systemBarsBehavior =
+                androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        } else {
+            controller.show(androidx.core.view.WindowInsetsCompat.Type.systemBars())
+        }
+    }
+
     // 熄屏时钟：窗口常亮 + 锁屏上也能显示；防烧屏按设置间隔斜向挪动
     LaunchedEffect(aodMode) {
         val activity = viewForBars.context as? android.app.Activity ?: return@LaunchedEffect
@@ -165,16 +190,13 @@ fun FocusScreen(navController: Navigator) {
 
     LaunchedEffect(aodMode) {
         if (!aodMode || !com.yike.focus.data.AodSettings.antiBurn) return@LaunchedEffect
-        val step = 3
-        val range = 60
         while (aodMode) {
             delay(com.yike.focus.data.AodSettings.shiftMinutes * 60_000L)
-            if (aodOffset.x + incX * step > range || aodOffset.x + incX * step < -range) incX = -incX
-            if (aodOffset.y + incY * step > range || aodOffset.y + incY * step < -range) incY = -incY
-            aodOffset = androidx.compose.ui.unit.IntOffset(
-                aodOffset.x + incX * step,
-                aodOffset.y + incY * step,
-            )
+            // 留出数字自身占的空间，保证整块数字都不出屏
+            val maxX = with(density) { (screenPx.width / 2 - 150.dp.toPx()).coerceAtLeast(0f) }
+            val maxY = with(density) { (screenPx.height / 2 - 90.dp.toPx()).coerceAtLeast(0f) }
+            targetX = (kotlin.random.Random.nextFloat() * 2f - 1f) * maxX
+            targetY = (kotlin.random.Random.nextFloat() * 2f - 1f) * maxY
         }
     }
 
@@ -355,6 +377,14 @@ fun FocusScreen(navController: Navigator) {
                 IconButton(onClick = { navController.push(com.yike.focus.ui.navigation3.Route.Music) }) {
                     Icon(Icons.Rounded.MusicNote, contentDescription = "背景音乐", tint = onBackground.copy(alpha = 0.9f))
                 }
+                IconButton(onClick = { immersive = !immersive }) {
+                    Icon(
+                        if (immersive) androidx.compose.material.icons.Icons.Rounded.FullscreenExit
+                        else androidx.compose.material.icons.Icons.Rounded.Fullscreen,
+                        contentDescription = "全屏",
+                        tint = onBackground.copy(alpha = 0.9f),
+                    )
+                }
                 IconButton(onClick = { navController.push(com.yike.focus.ui.navigation3.Route.WhitelistOpen) }) {
                     Icon(Icons.Rounded.Apps, contentDescription = "白名单", tint = onBackground.copy(alpha = 0.9f))
                 }
@@ -483,7 +513,7 @@ fun FocusScreen(navController: Navigator) {
                     else -> FontWeight.SemiBold
                 },
                 modifier = Modifier
-                    .offset { aodOffset }
+                    .offset { androidx.compose.ui.unit.IntOffset(animX.toInt(), animY.toInt()) }
                     .graphicsLayer {
                         alpha = enter.value
                         scaleX = 0.82f + 0.18f * enter.value
