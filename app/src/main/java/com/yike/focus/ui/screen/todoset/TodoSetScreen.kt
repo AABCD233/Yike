@@ -217,7 +217,6 @@ fun TodoSetScreen(navController: Navigator, bottomPadding: Dp) {
             Column {
                 listOf(
                     "重命名" to { renaming = set; menuSet = null },
-                    "添加待办" to { addTo = set; menuSet = null },
                     "子待办排序" to { sorting = set; menuSet = null },
                     "删除待办集" to { deleting = set; menuSet = null },
                 ).forEach { (label, action) ->

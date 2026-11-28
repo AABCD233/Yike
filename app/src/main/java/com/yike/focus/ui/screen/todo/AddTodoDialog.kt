@@ -67,6 +67,7 @@ fun AddTodoDialog(
     var reminderMinute by remember { mutableStateOf(initial?.reminderMinute ?: 0) }
     var totalRounds by remember { mutableStateOf(initial?.totalRounds ?: 0) }
     var habitPerWeek by remember { mutableStateOf(initial?.habitPerWeek ?: 0) }
+    val ctx = androidx.compose.ui.platform.LocalContext.current
     var goalDate by remember { mutableStateOf(initial?.endDate) }
     var showDatePicker by remember { mutableStateOf(false) }
     var showFreqPicker by remember { mutableStateOf(false) }
@@ -288,7 +289,9 @@ fun AddTodoDialog(
             TextButton(
                 text = if (initial == null) "添加" else "保存",
                 onClick = {
-                    if (title.isNotBlank()) {
+                    if (title.isBlank()) {
+                        android.widget.Toast.makeText(ctx, "先给待办起个名字吧", android.widget.Toast.LENGTH_SHORT).show()
+                    } else {
                         onCreate(
                             Todo(
                                 id = initial?.id ?: 0L,

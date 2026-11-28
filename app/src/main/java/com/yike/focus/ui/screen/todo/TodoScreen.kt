@@ -467,7 +467,11 @@ internal fun TodoCard(
     val today = java.time.LocalDate.now().toString()
     val count = remember(todo.id, todo.title, today, refreshKey) { TodoStore.todayCount(todo.id) }
     val todaySec = remember(todo.id, todo.title, today, refreshKey) { TodoStore.todaySeconds(todo.id) }
-    val finished = todo.totalRounds > 0 && count >= todo.totalRounds
+    val finished = if (todo.timerMode == TimerMode.NONE) {
+        count >= 1
+    } else {
+        todo.totalRounds > 0 && count >= todo.totalRounds
+    }
     val bitmap = rememberBitmap(todo.bgPath)
 
     Card(
