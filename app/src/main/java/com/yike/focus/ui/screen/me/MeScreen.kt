@@ -146,6 +146,12 @@ fun MeScreen(navController: Navigator, bottomPadding: Dp) {
                     onClick = { navController.push(Route.FocusSettings) },
                 )
                 ArrowPreference(
+                    title = "锁机设置",
+                    summary = "白名单入口、锁机背景与音乐",
+                    startAction = { PrefIcon(Icons.Rounded.Lock) },
+                    onClick = { navController.push(Route.LockSettingsRoute) },
+                )
+                ArrowPreference(
                     title = "专注记录",
                     summary = "每一次专注都会存档",
                     startAction = { PrefIcon(Icons.Rounded.History) },

@@ -69,6 +69,7 @@ import com.yike.focus.ui.screen.about.AboutScreen
 import com.yike.focus.ui.screen.colorpalette.ColorPaletteScreen
 import com.yike.focus.ui.screen.boost.BoostScreen
 import com.yike.focus.ui.screen.breathe.BreatheScreen
+import com.yike.focus.ui.screen.locksettings.LockSettingsScreen
 import com.yike.focus.ui.screen.finish.FinishScreen
 import com.yike.focus.ui.screen.focussettings.FocusSettingsScreen
 import com.yike.focus.ui.screen.focus.FocusScreen
@@ -256,6 +257,7 @@ class MainActivity : ComponentActivity() {
                             entry<Route.Finish>(swipeDismiss = NavSwipeDirection.None) { FinishScreen(navigator) }
                             entry<Route.FocusSettings>(swipeDismiss = swipeDismiss) { FocusSettingsScreen() }
                             entry<Route.Breathe>(swipeDismiss = swipeDismiss) { BreatheScreen(navigator) }
+                            entry<Route.LockSettingsRoute>(swipeDismiss = swipeDismiss) { LockSettingsScreen() }
                         }
                     }
 

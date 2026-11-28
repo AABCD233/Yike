@@ -34,7 +34,9 @@ class LockAccessibilityService : AccessibilityService() {
 
         val pkg = event.packageName?.toString() ?: return
         if (pkg == packageName) return
-        if (com.yike.focus.data.AppGuard.whitelist().contains(pkg)) return
+        if (com.yike.focus.data.AppGuard.whitelist().contains(pkg) &&
+            com.yike.focus.data.LockSettings.allowWhitelist
+        ) return
         if (com.yike.focus.data.AppGuard.isExempt(pkg)) return
 
         if (locking) bringBackLock() else bringBackTimer()
