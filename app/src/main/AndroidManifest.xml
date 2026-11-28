@@ -70,6 +70,15 @@
         </service>
 
         <service
+            android:name=".service.LockOverlayService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="lock_overlay" />
+        </service>
+
+        <service
             android:name=".service.ReminderService"
             android:exported="false"
             android:foregroundServiceType="specialUse">

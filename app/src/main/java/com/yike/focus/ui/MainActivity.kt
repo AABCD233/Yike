@@ -196,6 +196,11 @@ class MainActivity : ComponentActivity() {
                         ?.setExcludeFromRecents(active && com.yike.focus.data.BoostSettings.hideRecents)
                 }
                 val locking = running?.kind == "lock"
+                if (locking) {
+                    com.yike.focus.service.LockOverlayService.start(context)
+                } else {
+                    com.yike.focus.service.LockOverlayService.stop(context)
+                }
                 if (locking || (active && (com.yike.focus.data.BoostSettings.hardcore || com.yike.focus.data.BoostSettings.blockDesktop))) {
                     com.yike.focus.service.GuardService.start(context)
                 } else {
