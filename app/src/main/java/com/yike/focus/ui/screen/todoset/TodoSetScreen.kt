@@ -17,6 +17,9 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -69,7 +72,8 @@ fun TodoSetScreen(navController: Navigator, bottomPadding: Dp) {
     var sets by remember { mutableStateOf(TodoStore.todoSets()) }
     var refresh by remember { mutableIntStateOf(0) }
     var expandedId by remember { mutableStateOf<Long?>(null) }
-    var menuFor by remember { mutableStateOf<Long?>(null) }
+    var menuSet by remember { mutableStateOf<TodoSet?>(null) }
+    var sorting by remember { mutableStateOf<TodoSet?>(null) }
     var renaming by remember { mutableStateOf<TodoSet?>(null) }
     var deleting by remember { mutableStateOf<TodoSet?>(null) }
     var editing by remember { mutableStateOf<TodoSet?>(null) }
@@ -139,20 +143,8 @@ fun TodoSetScreen(navController: Navigator, bottomPadding: Dp) {
                                 androidx.compose.material3.IconButton(onClick = { addTo = set }, modifier = Modifier.size(36.dp)) {
                                     Icon(Icons.Rounded.Add, contentDescription = "添加待办", tint = colorScheme.onSurfaceVariantSummary)
                                 }
-                                Box {
-                                    androidx.compose.material3.IconButton(onClick = { menuFor = set.id }, modifier = Modifier.size(36.dp)) {
-                                        Icon(Icons.Rounded.MoreVert, contentDescription = "更多操作", tint = colorScheme.onSurfaceVariantSummary)
-                                    }
-                                    DropdownMenu(expanded = menuFor == set.id, onDismissRequest = { menuFor = null }) {
-                                        DropdownMenuItem(
-                                            text = { androidx.compose.material3.Text("重命名") },
-                                            onClick = { menuFor = null; renaming = set },
-                                        )
-                                        DropdownMenuItem(
-                                            text = { androidx.compose.material3.Text("删除") },
-                                            onClick = { menuFor = null; deleting = set },
-                                        )
-                                    }
+                                androidx.compose.material3.IconButton(onClick = { menuSet = set }, modifier = Modifier.size(36.dp)) {
+                                    Icon(Icons.Rounded.MoreVert, contentDescription = "更多操作", tint = colorScheme.onSurfaceVariantSummary)
                                 }
                                 Icon(Icons.Rounded.ChevronRight, contentDescription = null, tint = colorScheme.onSurfaceVariantSummary)
                                 Spacer(Modifier.width(8.dp))
@@ -213,6 +205,78 @@ fun TodoSetScreen(navController: Navigator, bottomPadding: Dp) {
                 editing = null
             },
         )
+    }
+
+    menuSet?.let { set ->
+        OverlayDialog(
+            show = true,
+            title = set.name,
+            summary = "选择要做的操作",
+            onDismissRequest = { menuSet = null },
+        ) {
+            Column {
+                listOf(
+                    "重命名" to { renaming = set; menuSet = null },
+                    "添加待办" to { addTo = set; menuSet = null },
+                    "子待办排序" to { sorting = set; menuSet = null },
+                    "删除待办集" to { deleting = set; menuSet = null },
+                ).forEach { (label, action) ->
+                    Text(
+                        label,
+                        fontSize = 14.sp,
+                        color = colorScheme.onSurface,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable(action)
+                            .padding(vertical = 12.dp),
+                    )
+                }
+            }
+        }
+    }
+
+    sorting?.let { set ->
+        val list = remember(set.id, refresh) { TodoStore.todos(set.id) }
+        OverlayDialog(
+            show = true,
+            title = "子待办排序",
+            summary = "调整「${set.name}」里的顺序",
+            onDismissRequest = { sorting = null },
+        ) {
+            Column {
+                if (list.isEmpty()) {
+                    Text("这个集里还没有待办", fontSize = 13.sp, color = colorScheme.onSurfaceVariantSummary)
+                }
+                list.forEachIndexed { index, todo ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            "${index + 1}. ${todo.title}",
+                            fontSize = 14.sp,
+                            color = colorScheme.onSurface,
+                            modifier = Modifier.weight(1f),
+                        )
+                        TextButton(
+                            text = "上移",
+                            onClick = { TodoStore.moveTodo(todo, up = true); refresh++ },
+                        )
+                        TextButton(
+                            text = "下移",
+                            onClick = { TodoStore.moveTodo(todo, up = false); refresh++ },
+                        )
+                    }
+                }
+                Spacer(Modifier.height(8.dp))
+                TextButton(
+                    text = "完成",
+                    onClick = { sorting = null },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = top.yukonga.miuix.kmp.basic.ButtonDefaults.textButtonColorsPrimary(),
+                )
+            }
+        }
     }
 
     addTo?.let { set ->
@@ -322,7 +386,11 @@ private fun SetEditorDialog(
         title = if (initial == null) "添加待办集" else "待办集设置",
         onDismissRequest = onDismiss,
     ) {
-        Column {
+        Column(
+            modifier = Modifier
+                .heightIn(max = 520.dp)
+                .verticalScroll(rememberScrollState()),
+        ) {
             TextField(
                 value = name,
                 onValueChange = { name = it },

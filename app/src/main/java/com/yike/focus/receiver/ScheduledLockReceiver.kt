@@ -10,13 +10,14 @@ import java.util.Calendar
 
 class ScheduledLockReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        if (!ScheduledLock.enabled) return
-        // 已经在专注/锁机里就不重复拉起
         if (FocusTimer.state.value != null) return
         val cal = Calendar.getInstance()
         val now = cal.get(Calendar.HOUR_OF_DAY) * 60 + cal.get(Calendar.MINUTE)
-        if (!ScheduledLock.inWindow(now)) return
-        val left = ScheduledLock.remainingMinutes(now).coerceAtLeast(1)
+        // Calendar 周日=1，统一成 周一=1 … 周日=7
+        val jsDay = cal.get(Calendar.DAY_OF_WEEK)
+        val day = if (jsDay == Calendar.SUNDAY) 7 else jsDay - 1
+        val period = ScheduledLock.activePeriod(now, day) ?: return
+        val left = ScheduledLock.remainingMinutes(period, now).coerceAtLeast(1)
         FocusTimer.startLock(left)
         runCatching {
             context.startActivity(
