@@ -148,7 +148,7 @@ fun MeScreen(navController: Navigator, bottomPadding: Dp) {
                 ArrowPreference(
                     title = "锁机设置",
                     summary = "白名单入口、锁机背景与音乐",
-                    startAction = { PrefIcon(Icons.Rounded.Bolt) },
+                    startAction = { PrefIcon(Icons.Rounded.Security) },
                     onClick = { navController.push(Route.LockSettingsRoute) },
                 )
                 ArrowPreference(
