@@ -6,6 +6,11 @@ import android.media.AudioFocusRequest
 import android.media.AudioManager
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.material.icons.rounded.Palette
+import androidx.compose.material.icons.rounded.MusicNote
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.Apps
+import androidx.compose.material.icons.Icons
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
