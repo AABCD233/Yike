@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -31,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
@@ -66,7 +68,23 @@ fun LockActiveScreen(onExit: () -> Unit) {
     var tick by remember { mutableIntStateOf(0) }
     var done by remember { mutableStateOf(false) }
     var showApps by remember { mutableStateOf(false) }
+    var showMusic by remember { mutableStateOf(false) }
+    var showBg by remember { mutableStateOf(false) }
     var musicOn by remember { mutableStateOf(LockSettings.musicOn) }
+    var bgIndex by remember { mutableIntStateOf(LockSettings.bgPreset) }
+    var bgImage by remember { mutableStateOf(LockSettings.imagePath) }
+    val pickImage = androidx.activity.compose.rememberLauncherForActivityResult(
+        contract = androidx.activity.result.contract.ActivityResultContracts.GetContent(),
+    ) { uri ->
+        uri ?: return@rememberLauncherForActivityResult
+        runCatching {
+            val bytes = context.contentResolver.openInputStream(uri)?.use { it.readBytes() } ?: return@runCatching
+            val file = java.io.File(context.filesDir, "lock_bg_${System.currentTimeMillis()}.jpg")
+            file.writeBytes(bytes)
+            LockSettings.imagePath = file.absolutePath
+            bgImage = file.absolutePath
+        }
+    }
 
     // 隐藏状态栏和导航栏 + 屏幕常亮
     DisposableEffect(Unit) {
@@ -168,10 +186,26 @@ fun LockActiveScreen(onExit: () -> Unit) {
         }
     }
 
-    val bgIndex = LockSettings.bgPreset
     val bg = Color(FocusLook.backgroundColors.getOrElse(bgIndex) { 0xFF10161E })
+    val bgBitmap = remember(bgImage) {
+        bgImage?.let { path ->
+            runCatching {
+                android.graphics.BitmapFactory.decodeFile(path, android.graphics.BitmapFactory.Options().apply { inSampleSize = 2 })
+                    ?.asImageBitmap()
+            }.getOrNull()
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize().background(bg)) {
+        bgBitmap?.let {
+            androidx.compose.foundation.Image(
+                bitmap = it,
+                contentDescription = null,
+                contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                modifier = Modifier.matchParentSize(),
+            )
+            Box(modifier = Modifier.matchParentSize().background(Color.Black.copy(alpha = 0.35f)))
+        }
         Column(modifier = Modifier.fillMaxSize().padding(24.dp)) {
             Spacer(Modifier.height(12.dp))
             Text("锁机中", fontSize = 15.sp, color = Color.White.copy(alpha = 0.75f))
@@ -208,13 +242,12 @@ fun LockActiveScreen(onExit: () -> Unit) {
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 RoundAction(
-                    label = if (musicOn) "音乐开" else "音乐关",
+                    label = "音乐",
                     active = musicOn,
-                    onClick = {
-                        musicOn = !musicOn
-                        LockSettings.musicOn = musicOn
-                    },
+                    onClick = { showMusic = true },
                 )
+                Spacer(Modifier.width(16.dp))
+                RoundAction(label = "背景", active = false, onClick = { showBg = true })
                 if (LockSettings.allowWhitelist) {
                     Spacer(Modifier.width(16.dp))
                     RoundAction(label = "白名单", active = false, onClick = { showApps = true })
@@ -269,6 +302,88 @@ fun LockActiveScreen(onExit: () -> Unit) {
                             .padding(vertical = 10.dp),
                     )
                 }
+            }
+        }
+    }
+
+    if (showMusic) {
+        val track = MusicPlaylist.current()
+        OverlayDialog(
+            show = true,
+            title = "音乐",
+            summary = if (track == null) "还没有歌单，去「音乐」页选一个文件夹" else track.name,
+            onDismissRequest = { showMusic = false },
+        ) {
+            Column {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    top.yukonga.miuix.kmp.basic.TextButton(
+                        text = "上一首",
+                        onClick = { MusicPlaylist.previous() },
+                    )
+                    top.yukonga.miuix.kmp.basic.TextButton(
+                        text = if (MusicPlaylist.isPlaying) "暂停" else "播放",
+                        onClick = {
+                            if (MusicPlaylist.tracks.isEmpty()) {
+                                showMusic = false
+                            } else if (MusicPlaylist.isPlaying) {
+                                MusicPlaylist.toggle()
+                                musicOn = false
+                                LockSettings.musicOn = false
+                            } else {
+                                if (MusicPlaylist.index >= 0) MusicPlaylist.toggle()
+                                else MusicPlaylist.playAt(0)
+                                musicOn = true
+                                LockSettings.musicOn = true
+                            }
+                        },
+                        colors = top.yukonga.miuix.kmp.basic.ButtonDefaults.textButtonColorsPrimary(),
+                    )
+                    top.yukonga.miuix.kmp.basic.TextButton(
+                        text = "下一首",
+                        onClick = { MusicPlaylist.next() },
+                    )
+                }
+            }
+        }
+    }
+
+    if (showBg) {
+        OverlayDialog(
+            show = true,
+            title = "锁机背景",
+            summary = "选一个纯色，或者用自己的图片",
+            onDismissRequest = { showBg = false },
+        ) {
+            Column {
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    FocusLook.backgroundColors.forEachIndexed { index, value ->
+                        Box(
+                            modifier = Modifier
+                                .size(if (index == bgIndex) 36.dp else 30.dp)
+                                .clip(androidx.compose.foundation.shape.CircleShape)
+                                .background(Color(value))
+                                .clickable {
+                                    bgIndex = index
+                                    LockSettings.bgPreset = index
+                                    LockSettings.imagePath = null
+                                    bgImage = null
+                                },
+                        )
+                    }
+                }
+                Spacer(Modifier.height(14.dp))
+                top.yukonga.miuix.kmp.basic.TextButton(
+                    text = "从相册选图",
+                    onClick = {
+                        showBg = false
+                        pickImage.launch("image/*")
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                )
             }
         }
     }

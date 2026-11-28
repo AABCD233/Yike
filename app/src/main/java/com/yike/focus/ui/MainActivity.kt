@@ -195,7 +195,8 @@ class MainActivity : ComponentActivity() {
                     am?.appTasks?.firstOrNull()
                         ?.setExcludeFromRecents(active && com.yike.focus.data.BoostSettings.hideRecents)
                 }
-                if (active && (com.yike.focus.data.BoostSettings.hardcore || com.yike.focus.data.BoostSettings.blockDesktop)) {
+                val locking = running?.kind == "lock"
+                if (locking || (active && (com.yike.focus.data.BoostSettings.hardcore || com.yike.focus.data.BoostSettings.blockDesktop))) {
                     com.yike.focus.service.GuardService.start(context)
                 } else {
                     com.yike.focus.service.GuardService.stop(context)

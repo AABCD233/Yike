@@ -50,11 +50,21 @@ class GuardService : Service() {
                 while (isActive) {
                     delay(1200)
                     val running = FocusTimer.state.value
-                    if (running == null || running.kind != "focus" || running.isPaused) continue
+                    if (running == null || running.isPaused) continue
+                    if (running.kind != "focus" && running.kind != "lock") continue
                     if (!BoostSettings.hardcore && !BoostSettings.blockDesktop) continue
                     val foreground = AppGuard.foregroundApp() ?: continue
                     val pkg = foreground.first
-                    if (pkg == packageName) continue
+                    if (pkg == packageName) {
+                        hideShield()
+                        continue
+                    }
+                    if (running.kind == "lock") {
+                        // 锁机：先用遮罩盖住桌面，再把锁机页拉回来，避免看到桌面
+                        showShield()
+                        launchLockBack()
+                        continue
+                    }
 
                     // 开了「禁止桌面和多任务」：不管它是桌面、最近任务还是别的，
                     // 只要不是我们、也不在白名单里，就拉回来
@@ -71,6 +81,55 @@ class GuardService : Service() {
             }
         }
         return START_STICKY
+    }
+
+    private var shield: android.view.View? = null
+
+    private fun showShield() {
+        if (shield != null) return
+        runCatching {
+            val wm = getSystemService(Context.WINDOW_SERVICE) as android.view.WindowManager
+            val view = android.widget.TextView(this).apply {
+                text = "锁机中\n正在返回…"
+                setTextColor(android.graphics.Color.WHITE)
+                textSize = 18f
+                gravity = android.view.Gravity.CENTER
+                setBackgroundColor(android.graphics.Color.BLACK)
+            }
+            val params = android.view.WindowManager.LayoutParams(
+                android.view.WindowManager.LayoutParams.MATCH_PARENT,
+                android.view.WindowManager.LayoutParams.MATCH_PARENT,
+                android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                    android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                android.graphics.PixelFormat.OPAQUE,
+            )
+            wm.addView(view, params)
+            shield = view
+        }
+    }
+
+    private fun hideShield() {
+        val view = shield ?: return
+        runCatching {
+            val wm = getSystemService(Context.WINDOW_SERVICE) as android.view.WindowManager
+            wm.removeView(view)
+        }
+        shield = null
+    }
+
+    private fun launchLockBack() {
+        runCatching {
+            startActivity(
+                Intent(this, com.yike.focus.ui.screen.lock.LockActivity::class.java).apply {
+                    addFlags(
+                        Intent.FLAG_ACTIVITY_NEW_TASK or
+                            Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or
+                            Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    )
+                }
+            )
+        }
     }
 
     private fun launchGuard(desktop: Boolean) {
@@ -110,6 +169,7 @@ class GuardService : Service() {
     }
 
     override fun onDestroy() {
+        hideShield()
         job?.cancel()
         scope.cancel()
         super.onDestroy()

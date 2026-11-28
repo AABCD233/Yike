@@ -18,6 +18,11 @@ object LockSettings {
         get() = prefs().getInt("lock_bg", 3)
         set(value) = prefs().edit().putInt("lock_bg", value.coerceIn(0, 4)).apply()
 
+    /** 锁机页自定义背景图（绝对路径） */
+    var imagePath: String?
+        get() = prefs().getString("lock_bg_image", null)
+        set(value) = prefs().edit().putString("lock_bg_image", value).apply()
+
     /** 锁机时播放音乐 */
     var musicOn: Boolean
         get() = prefs().getBoolean("lock_music", false)
