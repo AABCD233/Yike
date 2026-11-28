@@ -85,8 +85,27 @@ class LockAccessibilityService : AccessibilityService() {
     override fun onKeyEvent(event: KeyEvent): Boolean {
         if (!isLocking()) return false
         return when (event.keyCode) {
-            KeyEvent.KEYCODE_HOME, KeyEvent.KEYCODE_BACK, KeyEvent.KEYCODE_APP_SWITCH -> true
+            KeyEvent.KEYCODE_HOME -> {
+                // 跟番茄ToDo 一致：锁机时按 HOME 直接跳到白名单应用，而不是回桌面
+                openFirstWhitelistApp()
+                true
+            }
+            KeyEvent.KEYCODE_BACK, KeyEvent.KEYCODE_APP_SWITCH -> true
             else -> false
+        }
+    }
+
+    private fun openFirstWhitelistApp() {
+        if (!com.yike.focus.data.LockSettings.allowWhitelist) return
+        val target = com.yike.focus.data.AppGuard.whitelist()
+            .firstOrNull { it != packageName && packageManager.getLaunchIntentForPackage(it) != null }
+            ?: return
+        runCatching {
+            startActivity(
+                packageManager.getLaunchIntentForPackage(target)!!.apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+            )
         }
     }
 

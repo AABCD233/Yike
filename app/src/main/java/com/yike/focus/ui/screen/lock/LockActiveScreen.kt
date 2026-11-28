@@ -71,6 +71,7 @@ fun LockActiveScreen(onExit: () -> Unit) {
     var showApps by remember { mutableStateOf(false) }
     var showMusic by remember { mutableStateOf(false) }
     var showBg by remember { mutableStateOf(false) }
+    var confirmQuit by remember { mutableStateOf(false) }
     var musicOn by remember { mutableStateOf(LockSettings.musicOn) }
     var bgIndex by remember { mutableIntStateOf(LockSettings.bgPreset) }
     var bgImage by remember { mutableStateOf(LockSettings.imagePath) }
@@ -278,6 +279,16 @@ fun LockActiveScreen(onExit: () -> Unit) {
                     Spacer(Modifier.width(16.dp))
                     RoundAction(label = "白名单", active = false, onClick = { showApps = true })
                 }
+                Spacer(Modifier.width(16.dp))
+                RoundAction(label = "提前结束", active = false, onClick = {
+                    if (com.yike.focus.data.LockLimit.remaining() > 0) {
+                        confirmQuit = true
+                    } else {
+                        android.widget.Toast.makeText(
+                            context, "本月主动退出次数已用完", android.widget.Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                })
             }
             Spacer(Modifier.height(28.dp))
             Text(
@@ -330,6 +341,23 @@ fun LockActiveScreen(onExit: () -> Unit) {
                 }
             }
         }
+    }
+
+    if (confirmQuit) {
+        com.yike.focus.ui.component.miuix.ConfirmDialog(
+            show = true,
+            title = "提前结束锁机",
+            summary = "本月还可以主动退出 ${com.yike.focus.data.LockLimit.remaining()} 次，用掉这次就少一次。",
+            confirmText = "确认退出",
+            dismissText = "继续锁机",
+            onConfirm = {
+                com.yike.focus.data.LockLimit.consume()
+                confirmQuit = false
+                FocusTimer.stop(abandoned = true)
+                onExit()
+            },
+            onDismiss = { confirmQuit = false },
+        )
     }
 
     if (showMusic) {
