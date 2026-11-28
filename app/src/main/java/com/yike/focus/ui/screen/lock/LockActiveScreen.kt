@@ -189,7 +189,7 @@ fun LockActiveScreen(onExit: () -> Unit) {
 
     val bg = Color(
         FocusLook.backgroundColors.getOrElse(bgIndex) { 0xFF15171C }
-            .let { if ((it ushr 24) == 0) 0xFF15171C else it }
+            .let { if ((it ushr 24) == 0L) 0xFF15171C else it }
     )
     val bgBitmap = remember(bgImage) {
         bgImage?.let { path ->

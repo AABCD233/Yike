@@ -88,7 +88,7 @@ fun LockSettingsScreen() {
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     FocusLook.backgroundColors.forEachIndexed { index, value ->
-                        val shown = if ((value ushr 24) == 0) 0xFF3A3A42 else value
+                        val shown = if ((value ushr 24) == 0L) 0xFF3A3A42 else value
                         Box(
                             modifier = Modifier
                                 .size(if (index == bg) 38.dp else 32.dp)
