@@ -23,6 +23,11 @@ object LockSettings {
         get() = prefs().getString("lock_bg_image", null)
         set(value) = prefs().edit().putString("lock_bg_image", value).apply()
 
+    /** 锁机页显示「提前结束」按钮 */
+    var allowQuit: Boolean
+        get() = prefs().getBoolean("lock_allow_quit", false)
+        set(value) = prefs().edit().putBoolean("lock_allow_quit", value).apply()
+
     /** 锁机时播放音乐 */
     var musicOn: Boolean
         get() = prefs().getBoolean("lock_music", false)

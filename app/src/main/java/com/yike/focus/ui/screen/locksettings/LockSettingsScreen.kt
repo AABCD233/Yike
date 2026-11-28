@@ -39,6 +39,7 @@ fun LockSettingsScreen() {
     var allowWhite by remember { mutableStateOf(LockSettings.allowWhitelist) }
     var bg by remember { mutableIntStateOf(LockSettings.bgPreset) }
     var music by remember { mutableStateOf(LockSettings.musicOn) }
+    var allowQuit by remember { mutableStateOf(LockSettings.allowQuit) }
 
     Column(modifier = Modifier.fillMaxSize().background(colorScheme.background)) {
         Row(
@@ -65,6 +66,25 @@ fun LockSettingsScreen() {
                     Switch(checked = allowWhite, onCheckedChange = {
                         allowWhite = it
                         LockSettings.allowWhitelist = it
+                    })
+                }
+            }
+        }
+
+        Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp)) {
+            Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("显示「提前结束」按钮", fontSize = 15.sp, color = colorScheme.onSurface)
+                        Text(
+                            "开启后锁机页右上方会出现提前结束，每月最多用 3 次；关闭则完全无退路",
+                            fontSize = 12.sp,
+                            color = colorScheme.onSurfaceVariantSummary,
+                        )
+                    }
+                    Switch(checked = allowQuit, onCheckedChange = {
+                        allowQuit = it
+                        LockSettings.allowQuit = it
                     })
                 }
             }

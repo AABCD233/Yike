@@ -234,7 +234,53 @@ fun LockActiveScreen(onExit: () -> Unit) {
                 .verticalScroll(androidx.compose.foundation.rememberScrollState())
                 .padding(horizontal = 24.dp, vertical = if (compact) 8.dp else 16.dp),
         ) {
-            Spacer(Modifier.height(12.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                if (LockSettings.allowQuit) {
+                    androidx.compose.material3.IconButton(onClick = {
+                        if (com.yike.focus.data.LockLimit.remaining() > 0) {
+                            confirmQuit = true
+                        } else {
+                            android.widget.Toast.makeText(
+                                context, "本月主动退出次数已用完", android.widget.Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }) {
+                        androidx.compose.material3.Icon(
+                            androidx.compose.material.icons.Icons.Rounded.Close,
+                            contentDescription = "提前结束",
+                            tint = Color.White.copy(alpha = 0.85f),
+                        )
+                    }
+                }
+                androidx.compose.material3.IconButton(onClick = { showMusic = true }) {
+                    androidx.compose.material3.Icon(
+                        androidx.compose.material.icons.Icons.Rounded.MusicNote,
+                        contentDescription = "音乐",
+                        tint = if (musicOn) Color(0xFF7FD1E8) else Color.White.copy(alpha = 0.85f),
+                    )
+                }
+                androidx.compose.material3.IconButton(onClick = { showBg = true }) {
+                    androidx.compose.material3.Icon(
+                        androidx.compose.material.icons.Icons.Rounded.Palette,
+                        contentDescription = "背景",
+                        tint = Color.White.copy(alpha = 0.85f),
+                    )
+                }
+                if (LockSettings.allowWhitelist) {
+                    androidx.compose.material3.IconButton(onClick = { showApps = true }) {
+                        androidx.compose.material3.Icon(
+                            androidx.compose.material.icons.Icons.Rounded.Apps,
+                            contentDescription = "白名单应用",
+                            tint = Color.White.copy(alpha = 0.85f),
+                        )
+                    }
+                }
+            }
+            Spacer(Modifier.height(4.dp))
             Text("锁机中", fontSize = 15.sp, color = Color.White.copy(alpha = 0.75f))
             Spacer(Modifier.height(6.dp))
             Text(
@@ -263,33 +309,6 @@ fun LockActiveScreen(onExit: () -> Unit) {
             }
             Spacer(Modifier.height(if (compact) 18.dp else 40.dp))
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                RoundAction(
-                    label = "音乐",
-                    active = musicOn,
-                    onClick = { showMusic = true },
-                )
-                Spacer(Modifier.width(16.dp))
-                RoundAction(label = "背景", active = false, onClick = { showBg = true })
-                if (LockSettings.allowWhitelist) {
-                    Spacer(Modifier.width(16.dp))
-                    RoundAction(label = "白名单", active = false, onClick = { showApps = true })
-                }
-                Spacer(Modifier.width(16.dp))
-                RoundAction(label = "提前结束", active = false, onClick = {
-                    if (com.yike.focus.data.LockLimit.remaining() > 0) {
-                        confirmQuit = true
-                    } else {
-                        android.widget.Toast.makeText(
-                            context, "本月主动退出次数已用完", android.widget.Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                })
-            }
             Spacer(Modifier.height(28.dp))
             Text(
                 "放下手机，做点别的事；这期间退出会回到这里",

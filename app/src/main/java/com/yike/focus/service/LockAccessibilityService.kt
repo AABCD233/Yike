@@ -48,6 +48,7 @@ class LockAccessibilityService : AccessibilityService() {
                 LockShield.hide()
                 return
             }
+            LockShield.show(this)
             bringBackLock()
         } else {
             bringBackTimer()
