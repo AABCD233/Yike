@@ -31,10 +31,6 @@ class ReminderReceiver : BroadcastReceiver() {
             }
         }
         Reminders.rescheduleAll(context)
-        if (AppGuard.hasUsageAccess() && BoostSettings.hardcore) {
-            // 硬核模式在跑的话顺手把守护服务叫起来（服务自己会判断要不要干活）
-            com.yike.focus.service.GuardService.start(context)
-        }
     }
 
     private fun notify(context: Context, todoId: Long, title: String) {

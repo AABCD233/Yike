@@ -50,8 +50,13 @@ class GuardService : Service() {
                 while (isActive) {
                     delay(1200)
                     val running = FocusTimer.state.value
-                    if (running == null || running.isPaused) continue
-                    if (running.kind != "focus") continue
+                    // 没在专注就自己退掉，别挂着一条“专注模式开启”的通知
+                    if (running == null || running.kind != "focus") {
+                        hideShield()
+                        stopSelf()
+                        break
+                    }
+                    if (running.isPaused) continue
                     if (!BoostSettings.hardcore && !BoostSettings.blockDesktop) continue
                     val foreground = AppGuard.foregroundApp() ?: continue
                     val pkg = foreground.first
