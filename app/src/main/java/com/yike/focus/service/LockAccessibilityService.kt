@@ -33,13 +33,21 @@ class LockAccessibilityService : AccessibilityService() {
         if (!locking && !focusGuard) return
 
         val pkg = event.packageName?.toString() ?: return
-        if (pkg == packageName) return
+        if (pkg == packageName) {
+            if (locking) LockShield.hide()
+            return
+        }
         if (com.yike.focus.data.AppGuard.whitelist().contains(pkg) &&
             com.yike.focus.data.LockSettings.allowWhitelist
         ) return
         if (com.yike.focus.data.AppGuard.isExempt(pkg)) return
 
-        if (locking) bringBackLock() else bringBackTimer()
+        if (locking) {
+            LockShield.show(this)
+            bringBackLock()
+        } else {
+            bringBackTimer()
+        }
     }
 
     private fun bringBackTimer() {

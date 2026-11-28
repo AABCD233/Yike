@@ -74,13 +74,26 @@ fun LockSettingsScreen() {
             Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
                 Text("锁机背景", fontSize = 15.sp, color = colorScheme.onSurface)
                 Spacer(Modifier.height(10.dp))
+                val ctx = androidx.compose.ui.platform.LocalContext.current
+                val picker = androidx.activity.compose.rememberLauncherForActivityResult(
+                    contract = androidx.activity.result.contract.ActivityResultContracts.GetContent(),
+                ) { uri ->
+                    uri ?: return@rememberLauncherForActivityResult
+                    runCatching {
+                        val bytes = ctx.contentResolver.openInputStream(uri)?.use { it.readBytes() } ?: return@runCatching
+                        val file = java.io.File(ctx.filesDir, "lock_bg_${System.currentTimeMillis()}.jpg")
+                        file.writeBytes(bytes)
+                        LockSettings.imagePath = file.absolutePath
+                    }
+                }
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     FocusLook.backgroundColors.forEachIndexed { index, value ->
+                        val shown = if ((value ushr 24) == 0) 0xFF3A3A42 else value
                         Box(
                             modifier = Modifier
                                 .size(if (index == bg) 38.dp else 32.dp)
                                 .clip(CircleShape)
-                                .background(Color(value))
+                                .background(Color(shown))
                                 .clickable {
                                     bg = index
                                     LockSettings.bgPreset = index
@@ -88,6 +101,11 @@ fun LockSettingsScreen() {
                         )
                     }
                 }
+                Spacer(Modifier.height(10.dp))
+                top.yukonga.miuix.kmp.basic.TextButton(
+                    text = "从相册选图",
+                    onClick = { picker.launch("image/*") },
+                )
             }
         }
 

@@ -51,18 +51,12 @@ class GuardService : Service() {
                     delay(1200)
                     val running = FocusTimer.state.value
                     if (running == null || running.isPaused) continue
-                    if (running.kind != "focus" && running.kind != "lock") continue
+                    if (running.kind != "focus") continue
                     if (!BoostSettings.hardcore && !BoostSettings.blockDesktop) continue
                     val foreground = AppGuard.foregroundApp() ?: continue
                     val pkg = foreground.first
                     if (pkg == packageName) {
                         hideShield()
-                        continue
-                    }
-                    if (running.kind == "lock") {
-                        // 锁机：先用遮罩盖住桌面，再把锁机页拉回来，避免看到桌面
-                        showShield()
-                        launchLockBack()
                         continue
                     }
 
