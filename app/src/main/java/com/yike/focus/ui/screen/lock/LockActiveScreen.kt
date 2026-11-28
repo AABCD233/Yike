@@ -214,7 +214,10 @@ fun LockActiveScreen(onExit: () -> Unit) {
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize().background(bg)) {
+    androidx.compose.foundation.layout.BoxWithConstraints(
+        modifier = Modifier.fillMaxSize().background(bg),
+    ) {
+        val compact = maxHeight < 560.dp
         bgBitmap?.let {
             androidx.compose.foundation.Image(
                 bitmap = it,
@@ -228,7 +231,7 @@ fun LockActiveScreen(onExit: () -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(androidx.compose.foundation.rememberScrollState())
-                .padding(horizontal = 24.dp, vertical = 16.dp),
+                .padding(horizontal = 24.dp, vertical = if (compact) 8.dp else 16.dp),
         ) {
             Spacer(Modifier.height(12.dp))
             Text("锁机中", fontSize = 15.sp, color = Color.White.copy(alpha = 0.75f))
@@ -239,17 +242,17 @@ fun LockActiveScreen(onExit: () -> Unit) {
                 color = Color.White.copy(alpha = 0.55f),
             )
 
-            Spacer(Modifier.height(36.dp))
+            Spacer(Modifier.height(if (compact) 16.dp else 36.dp))
             Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     nowClock,
-                    fontSize = 56.sp,
+                    fontSize = if (compact) 40.sp else 56.sp,
                     fontWeight = FontWeight.Light,
                     color = Color.White,
                 )
                 Spacer(Modifier.height(8.dp))
                 Text(nowDate, fontSize = 15.sp, color = Color.White.copy(alpha = 0.8f))
-                Spacer(Modifier.height(28.dp))
+                Spacer(Modifier.height(if (compact) 12.dp else 28.dp))
                 Text("本次锁机时间", fontSize = 13.sp, color = Color.White.copy(alpha = 0.6f))
                 Text(
                     "$startLabel - $endLabel",
@@ -257,7 +260,7 @@ fun LockActiveScreen(onExit: () -> Unit) {
                     color = Color.White.copy(alpha = 0.9f),
                 )
             }
-            Spacer(Modifier.height(40.dp))
+            Spacer(Modifier.height(if (compact) 18.dp else 40.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
