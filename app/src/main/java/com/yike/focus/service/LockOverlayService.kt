@@ -153,9 +153,9 @@ class LockOverlayService : Service() {
 
     private fun applyBackground(container: LinearLayout) {
         val idx = LockSettings.bgPreset
-        val color = FocusLook.backgroundColors.getOrElse(idx) { 0xFF15171C }
-            .let { if ((it ushr 24) == 0L) 0xFF15171C.toInt() else it }
-        container.setBackgroundColor(color)
+        val raw: Long = FocusLook.backgroundColors.getOrElse(idx) { 0xFF15171C }
+        val safe = if ((raw ushr 24) == 0L) 0xFF15171CL else raw
+        container.setBackgroundColor(safe.toInt())
     }
 
     private fun action(label: String, onClick: () -> Unit): TextView =
