@@ -43,6 +43,11 @@ class LockAccessibilityService : AccessibilityService() {
         if (com.yike.focus.data.AppGuard.isExempt(pkg)) return
 
         if (locking) {
+            // 一刻自己在前台时不要挂遮罩，否则会盖住锁机页的按钮
+            if (com.yike.focus.data.AppState.foreground) {
+                LockShield.hide()
+                return
+            }
             LockShield.show(this)
             bringBackLock()
         } else {
