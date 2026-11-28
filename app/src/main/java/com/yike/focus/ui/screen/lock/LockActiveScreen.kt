@@ -86,6 +86,19 @@ fun LockActiveScreen(onExit: () -> Unit) {
         }
     }
 
+    // 锁机页在前台时必须撤掉遮罩，否则按钮会被盖住点不了
+    val lifecycle = androidx.compose.ui.platform.LocalLifecycleOwner.current.lifecycle
+    DisposableEffect(lifecycle) {
+        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
+            if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
+                com.yike.focus.service.LockShield.hide()
+            }
+        }
+        lifecycle.addObserver(observer)
+        com.yike.focus.service.LockShield.hide()
+        onDispose { lifecycle.removeObserver(observer) }
+    }
+
     // 隐藏状态栏和导航栏 + 屏幕常亮
     DisposableEffect(Unit) {
         view.keepScreenOn = true
