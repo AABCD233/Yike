@@ -227,7 +227,7 @@ fun TodoSetScreen(navController: Navigator, bottomPadding: Dp) {
                         color = colorScheme.onSurface,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable(action)
+                            .clickable { action() }
                             .padding(vertical = 12.dp),
                     )
                 }
