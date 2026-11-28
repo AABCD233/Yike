@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -223,7 +224,12 @@ fun LockActiveScreen(onExit: () -> Unit) {
             )
             Box(modifier = Modifier.matchParentSize().background(Color.Black.copy(alpha = 0.35f)))
         }
-        Column(modifier = Modifier.fillMaxSize().padding(24.dp)) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(androidx.compose.foundation.rememberScrollState())
+                .padding(horizontal = 24.dp, vertical = 16.dp),
+        ) {
             Spacer(Modifier.height(12.dp))
             Text("锁机中", fontSize = 15.sp, color = Color.White.copy(alpha = 0.75f))
             Spacer(Modifier.height(6.dp))
@@ -233,11 +239,11 @@ fun LockActiveScreen(onExit: () -> Unit) {
                 color = Color.White.copy(alpha = 0.55f),
             )
 
-            Spacer(Modifier.weight(1f))
+            Spacer(Modifier.height(36.dp))
             Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     nowClock,
-                    fontSize = 64.sp,
+                    fontSize = 56.sp,
                     fontWeight = FontWeight.Light,
                     color = Color.White,
                 )
@@ -251,7 +257,7 @@ fun LockActiveScreen(onExit: () -> Unit) {
                     color = Color.White.copy(alpha = 0.9f),
                 )
             }
-            Spacer(Modifier.weight(1f))
+            Spacer(Modifier.height(40.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
