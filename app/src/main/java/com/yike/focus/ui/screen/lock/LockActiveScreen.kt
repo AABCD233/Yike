@@ -311,7 +311,7 @@ fun LockActiveScreen(onExit: () -> Unit) {
         OverlayDialog(
             show = true,
             title = "音乐",
-            summary = if (track == null) "还没有歌单，去「音乐」页选一个文件夹" else track.name,
+            summary = if (track == null) "还没有歌单，去「音乐」页选一个文件夹" else track.title,
             onDismissRequest = { showMusic = false },
         ) {
             Column {
